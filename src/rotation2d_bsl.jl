@@ -1,15 +1,4 @@
-module Splittings
-
-export Mesh, RectMesh2D
-
-struct Mesh
-    nx   :: Int
-    ny   :: Int
-    xmin :: Float64
-    xmax :: Float64
-    ymin :: Float64
-    ymax :: Float64
-end
+using Plots
 
 """
 
@@ -34,6 +23,44 @@ struct RectMesh2D
     end
     
 end
+
+"""
+
+   Exact solution of f after rotation during time tf
+
+"""
+function exact(tf::Float64, nt::Int, mesh::RectMesh2D)
+
+    dt = tf/nt
+    
+    nx = mesh.nx
+    xmin, xmax = mesh.xmin, mesh.xmax
+    x  = linspace(xmin, xmax, nx+1)[1:end-1]
+
+    ny = mesh.ny
+    ymin, ymax = mesh.ymin, mesh.ymax
+    y  = linspace(ymin, ymax, ny+1)[1:end-1]
+
+    f = zeros(Float64,(nx,ny))
+    for (i, xx) in enumerate(x), (j, yy) in enumerate(y)
+        xn=cos(tf)*xx-sin(tf)*yy
+        yn=sin(tf)*xx+cos(tf)*yy
+        f[i,j] = exp(-(xn-1)*(xn-1)/0.1)*exp(-(yn-1)*(yn-1)/0.1)
+    end
+
+    f
+
+end
+
+"""
+ 
+   Compute L1 error
+
+"""
+function error1(f, f_exact)
+    maximum(abs.(f - f_exact))
+end
+
 
 """
 
@@ -100,49 +127,52 @@ function advection_y!(mesh::RectMesh2D, f::Array{Float64,2},
     end
 end
 
-struct UniformMesh
-    left::Float64
-    right::Float64
-    ncells::Int32
-end
-delta(mesh::UniformMesh) = (mesh.right - mesh.left) / mesh.ncells
-getpoints(mesh::UniformMesh) = range(mesh.left, stop=mesh.right,length=mesh.ncells+1)[1:end-1]
+function with_bsl(tf::Float64, nt::Int, mesh::RectMesh2D)
 
+   dt = tf/nt
+   nx = mesh.nx
+   xmin, xmax = mesh.xmin, mesh.xmax
+   x  = linspace(xmin, xmax, nx+1)[1:end-1]
 
-"""
-Advection in υ
-∂ f / ∂ t − E(x) ∂ f / ∂ υ  = 0 
-"""
-function advection_v!( fᵀ, meshx::UniformMesh, meshv::UniformMesh, E, dt)
-    
-    n = meshv.ncells
-    L = meshv.right - meshv.left
-    k = 2π/L*[0:n÷2-1;-n÷2:-1]
-    ek = exp.(-1im * dt * k * transpose(E))
+   ny = mesh.ny
+   ymin, ymax = mesh.ymin, mesh.ymax
+   y  = linspace(ymin, ymax, ny+1)[1:end-1]
 
-    fft!(fᵀ, 1)
-    fᵀ .= fᵀ .* ek
-    ifft!(fᵀ, 1)
-    
-end
+   f   = exact(0.0, 1, mesh)
+   fs  = exact(0.0, 1, mesh)
+   
+   for n=1:nt
+       
+      advection_x!(mesh, f,  y, tan(0.5*dt))
+      advection_y!(mesh, f, -x, sin(dt))
+      advection_x!(mesh, f,  y, tan(0.5*dt))
 
-function advection_x!( f, meshx, meshv, dt)
-    
-    L = meshx.right - meshx.left
-    m = div(meshx.ncells,2)
-    k = 2*π/L * [0:1:m-1;-m:1:-1]
-    k̃ = 2*π/L * [1;1:1:m-1;-m:1:-1]
-    v = getpoints(meshv)
-    ev = exp.(-1im*dt * k * transpose(v))    
-    
-    fft!(f,1)
-    f .= f .* ev 
-    Ek  = -1im * delta(meshv) * sum(f,dims=2) ./ k̃
-    Ek[1] = 0.0
-    ifft!(f,1)
-    real(ifft(Ek))
-    
+      advection_x!(mesh, fs,  y, 0.5*dt)
+      advection_y!(mesh, fs, -x, dt)
+      advection_x!(mesh, fs,  y, 0.5*dt)
+
+   end
+
+   f, fs
+
 end
 
+tf, nt = 200 * π, 1000
+tf, nt = 2 * pi, 10
 
-end # module
+mesh = RectMesh2D(-π, π, 256, -π, π, 256)
+
+fe = exact(tf, nt, mesh)
+@time fc, fs = with_bsl(tf, nt, mesh)
+println( " errors = ", error1(fc, fe), "\t", error1(fs, fe))
+x = linspace(mesh.xmin, mesh.xmax, mesh.nx+1)[1:end-1]
+y = linspace(mesh.ymin, mesh.ymax, mesh.ny+1)[1:end-1]
+
+fgnu = open("fc.dat", "w")
+for i = 1:mesh.nx
+   for j = 1:mesh.ny
+      @printf(fgnu, "%f %f %f %f\n", x[i], y[j], fc[i,j], fe[i,j])
+   end
+   @printf(fgnu, "\n")
+end
+close(fgnu)
