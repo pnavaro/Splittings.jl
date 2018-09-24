@@ -93,7 +93,7 @@ function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
     dt = tf / nt
 
     for i in 1:nt
-        push!(nrj, log10(sqrt((sum(E.^2))*meshx.dx)))
+        push!(nrj, 0.5*log(sum(E.^2)*meshx.dx))
         advection_v!(fᵀ, meshx, meshv, E,  0.5dt)
         transpose!(f,fᵀ)
         E = advection_x!( f, meshx, meshv, dt)
