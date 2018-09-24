@@ -3,7 +3,7 @@ module Splittings
 using Statistics, FFTW, LinearAlgebra
 
 export Mesh, RectMesh2D, UniformMesh
-export advection, advection_v!, advection_x!
+export advection!, advection_v!, advection_x!
 export compute_rho, compute_e
 
 include("meshes.jl")
