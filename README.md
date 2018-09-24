@@ -1,5 +1,7 @@
 # Splittings
 
+Julia package for testing purpose.
+
 [![Build Status](https://travis-ci.org/pnavaro/Splittings.jl.svg?branch=master)](https://travis-ci.org/pnavaro/Splittings.jl)
 
 [![Coverage Status](https://coveralls.io/repos/pnavaro/Splittings.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/pnavaro/Splittings.jl?branch=master)
