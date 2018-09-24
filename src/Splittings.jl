@@ -1,5 +1,7 @@
 module Splittings
 
+using Statistics, FFTW
+
 export Mesh, RectMesh2D, bspline, compute_rho, compute_e
 
 struct Mesh
@@ -171,6 +173,58 @@ function compute_e(meshx, rho)
 end
 
 
+"""
+1D uniform mesh data
+"""
+struct UniformMesh
+   xmin  :: Float64
+   xmax  :: Float64
+   nx    :: Int
+   dx    :: Float64
+   x     :: Vector{Float64}
+   function UniformMesh(xmin, xmax, nx)
+      dx = (xmax - xmin) / nx
+      x  = range(xmin, stop=xmax, length=nx+1)[1:end-1]
+      new( xmin, xmax, nx, dx, x)
+   end
+end
+
+function advection!(f, p, mesh, v, nv, dt)
+
+   nx = mesh.nx
+   dx = mesh.dx
+   modes = [2π * i / nx for i in 0:nx-1]
+   # compute eigenvalues of degree p b-spline matrix
+   eig_bspl = zeros(Float64, nx)
+   eig_bspl .= Splittings.bspline(p, -div(p+1,2), 0.0)
+   for i in 1:div(p+1,2)-1
+      eig_bspl .+= Splittings.bspline(p, i - div(p+1,2), 0.0) * 2 .* cos.(i * modes)
+   end
+   eigalpha = zeros(Complex{Float64}, nx)
+
+   fft!(f,1)
+
+   for j in 1:nv
+      alpha = dt * v[j] / dx
+
+      # compute eigenvalues of cubic splines evaluated at displaced points
+      ishift = floor(-alpha)
+      beta   = -ishift - alpha
+      fill!(eigalpha,0.0im)
+      for i in -div(p-1,2):div(p+1,2)
+         eigalpha .+= (Splittings.bspline(p, i-div(p+1,2), beta)
+                        .* exp.((ishift+i) * 1im .* modes))
+      end
+
+      # compute interpolating spline using fft and properties of circulant matrices
+
+      f[:,j] .*= eigalpha ./ eig_bspl
+
+   end
+
+   ifft!(f,1)
+
+end
 
 
 end # module
