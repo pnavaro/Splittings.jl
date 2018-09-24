@@ -42,8 +42,7 @@
 =#
 
 
-using Plots, LinearAlgebra
-import Splittings
+using Plots, LinearAlgebra, Splittings
 
 
 """

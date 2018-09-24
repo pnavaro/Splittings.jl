@@ -1,0 +1,11 @@
+name = "Splittings"
+uuid = "9b4a8de6-bfe0-11e8-0cdf-0188efa37b25"
+authors = ["Pierre Navaro <pierre.navaro@math.cnrs.fr>"]
+version = "0.1.0"
+
+[deps]
+FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+PkgDev = "149e707d-584d-56d3-88ec-740c18e106ff"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
