@@ -1,5 +1,6 @@
 using Plots, LinearAlgebra
 using Splittings
+pyplot()
 
 """
 
@@ -111,4 +112,5 @@ nt = 600
 
 t =  range(0,stop=tf,length=nt)
 plot(t, vm1d(nx, nv, xmin, xmax, vmin, vmax, tf, nt) )
-plot!(t, log10.(2.6e-3*exp.(-0.1533*t)))
+#plot!(t, log10.(2.6e-3*exp.(-0.1533*t)))
+plot!(t, -0.1533*t.-5.50)
