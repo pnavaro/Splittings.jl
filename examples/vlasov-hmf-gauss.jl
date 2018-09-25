@@ -57,7 +57,6 @@ function Norm(f, meshx::UniformMesh, meshv::UniformMesh)
     return i2
 end
 
-
 """
 
     Compute the electric field from a 2D distribution function
@@ -90,7 +89,7 @@ function hmf_poisson(f, meshx::UniformMesh, meshv::UniformMesh)
 end
 
 
-function vlasov-hmf-gauss()
+function vlasov_hmf_gauss()
 
     meshv = UniformMesh(-8., 8., 64)
     meshx = UniformMesh((-1) * π, π, 64)
