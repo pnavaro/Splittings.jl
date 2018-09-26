@@ -3,3 +3,5 @@
 *.jl.mem
 *.swp
 notebooks/.ipynb_checkpoints
+docs/build/
+docs/site/
