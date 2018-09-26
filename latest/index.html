@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Splitings methods implemented to solve Vlasov equation.">
+  <meta name="author" content="pnavaro">
+  <link rel="shortcut icon" href="img/favicon.ico">
+  <title>Home - Splittings.jl</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  <link href="assets/Documenter.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Home";
+    var mkdocs_page_input_path = "index.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="js/jquery-2.1.1.min.js" defer></script>
+  <script src="js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="." class="icon icon-home"> Splittings.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href=".">Home</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#semi-lagrangian-method">Semi-Lagrangian method</a></li>
+    
+
+    <li class="toctree-l2"><a href="#splittingsjl-documentation">Splittings.jl Documentation</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#functions">Functions</a></li>
+        
+            <li><a class="toctree-l3" href="#index">Index</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href=".">Splittings.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/pnavaro/Splittings.jl/edit/master/docs/index.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><a id='Semi-Lagrangian-method-1'></a></p>
+<h1 id="semi-lagrangian-method">Semi-Lagrangian method</h1>
+<p>Let us consider an abstract scalar advection equation of the form</p>
+<p>$\frac{∂f}{∂t}+ a(x, t) ⋅ ∇f = 0.$</p>
+<p>The characteristic curves associated to this equation are the solutions of  the ordinary differential equations</p>
+<p>$\frac{dX}{dt} = a(X(t), t)$</p>
+<p>We shall denote by $X(t, x, s)$ the unique solution of this equation  associated to the initial condition $X(s) = x$.</p>
+<p>The classical semi-Lagrangian method is based on a backtracking of  characteristics. Two steps are needed to update the distribution function  $f^{n+1}$ at $t^{n+1}$ from its value $f^n$ at time $t^n$ :</p>
+<ol>
+<li>For each grid point $x_i$ compute $X(t^n; x_i, t^{n+1})$ the value  of the characteristic at $t^n$ which takes the value $x_i$ at  $t^{n+1}$.</li>
+<li>As the distribution solution of first equation verifies $f^{n+1}(x_i) = f^n(X(t^n; x_i, t^{n+1})),$ we obtain the desired value of $f^{n+1}(x_i)$ by computing  $f^n(X(t^n;x_i,t^{n+1})$ by interpolation as $X(t^n; x_i, t^{n+1})$  is in general not a grid point.</li>
+</ol>
+<p><em><a href="http://www-m16.ma.tum.de/foswiki/pub/M16/Allgemeines/NumMethVlasov/Num-Meth-Vlasov-Notes.pdf">Eric Sonnendrücker - Numerical methods for the Vlasov equations</a></em></p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Vlasov_equation">Vlasov Equation - Wikipedia</a></li>
+</ul>
+<p><a id='Splittings.jl-Documentation-1'></a></p>
+<h1 id="splittingsjl-documentation">Splittings.jl Documentation</h1>
+<ul>
+<li><a href=".#Semi-Lagrangian-method-1">Semi-Lagrangian method</a></li>
+<li><a href=".#Splittings.jl-Documentation-1">Splittings.jl Documentation</a><ul>
+<li><a href=".#Functions-1">Functions</a></li>
+<li><a href=".#Index-1">Index</a></li>
+</ul>
+</li>
+</ul>
+<p><a id='Functions-1'></a></p>
+<h2 id="functions">Functions</h2>
+<p><a id='Splittings.compute_rho-Tuple{Any,Any}' href='#Splittings.compute_rho-Tuple{Any,Any}'>#</a>
+<strong><code>Splittings.compute_rho</code></strong> &mdash; <em>Method</em>.</p>
+<p>Compute charge density    ρ(x,t) = ∫ f(x,v,t) dv</p>
+<p><a target='_blank' href='https://github.com/pnavaro/Splittings.jl/blob/3803993af531b10b010695952ee1d9e239970c2f/src/Splittings.jl#L12-L17' class='documenter-source'>source</a><br></p>
+<p><a id='Splittings.compute_e-Tuple{Any,Any}' href='#Splittings.compute_e-Tuple{Any,Any}'>#</a>
+<strong><code>Splittings.compute_e</code></strong> &mdash; <em>Method</em>.</p>
+<p>Compute Ex using that -ik*Ex = rho</p>
+<p><a target='_blank' href='https://github.com/pnavaro/Splittings.jl/blob/3803993af531b10b010695952ee1d9e239970c2f/src/Splittings.jl#L24-L28' class='documenter-source'>source</a><br></p>
+<p><a id='Index-1'></a></p>
+<h2 id="index">Index</h2>
+<ul>
+<li><a href=".#Splittings.compute_e-Tuple{Any,Any}"><code>Splittings.compute_e</code></a></li>
+<li><a href=".#Splittings.compute_rho-Tuple{Any,Any}"><code>Splittings.compute_rho</code></a></li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/pnavaro/Splittings.jl/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+      
+    </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme.js" defer></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML" defer></script>
+      <script src="assets/mathjaxhelper.js" defer></script>
+      <script src="search/main.js" defer></script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.0.4
+Build Date UTC : 2018-09-26 12:42:27
+-->
