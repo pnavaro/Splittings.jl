@@ -46,6 +46,10 @@ CurrentModule = Splittings
 compute_rho( meshv, f)
 ```
 
+```@docs
+compute_e(meshx, rho)
+```
+
 ## Index
 
 ```@index
