@@ -161,29 +161,27 @@ function naive_from_matlab(tf, nt, mesh::Mesh)
 
     f = exact(0.0, 1, mesh)
 
-    fnx = zeros(Complex{Float64},(1,nx))
-    ffx = zeros(Complex{Float64},(1,nx))
-    fny = zeros(Complex{Float64},(1,ny))
-    ffy = zeros(Complex{Float64},(1,ny))
+    ffx = zeros(Complex{Float64},nx)
+    ffy = zeros(Complex{Float64},ny)
 
     for n=1:nt
        
-       for (i, xx) in enumerate(x)
+       for i in 1:nx
+           xx      = xmin+(i-1)*dx
            ffy    .= fft(f[i,:])
-           fny    .= real(ifft(exp.(1im*xx*ky*tan(dt/2)) .* ffy))
-           f[i,:] .= fny
+           f[i,:] .= real(ifft(exp.(1im*xx*ky*tan(dt/2)) .* ffy))
        end
        
-       for (j, yy) in enumerate(y)
+       for j in 1:ny
+           yy      = ymin+(j-1)*dy
            ffx    .= fft(f[:,j])
-           fnx    .= real(ifft(exp.(-1im*yy*kx*sin(dt)) .* ffx'))
-           f[:,j] .= fnx
+           f[:,j] .= real(ifft(exp.(-1im*yy*kx*sin(dt)) .*  ffx))
        end
        
-       for (i, xx) in enumerate(x)
+       for i in 1:nx
+           xx      = xmin+(i-1)*dx
            ffy    .= fft(f[i,:])
-           fny    .= real(ifft(exp.(1im*xx*ky*tan(dt/2)) .* ffy))
-           f[i,:] .= fny
+           f[i,:] .= real(ifft(exp.(1im*xx*ky*tan(dt/2)) .* ffy))
        end
    end
 
@@ -465,7 +463,7 @@ d["with_fft_plans_inplace"] = minimum(with_fft_plans_inplace_bench.times) / 1e6
 d["with_fft_transposed"] = minimum(with_fft_transposed_bench.times) / 1e6;
 
 for (key, value) in sort(collect(d), by=last)
-    println(rpad(key, 25, "."), lpad(round(value, 1), 6, "."))
+    println(rpad(key, 25, "."), lpad(round(value; digits=1), 6, "."))
 end
 
 # ## Conclusion
