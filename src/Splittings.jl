@@ -4,7 +4,7 @@ using Statistics, FFTW, LinearAlgebra
 
 export Mesh, RectMesh2D, UniformMesh
 export advection!, advection_v!, advection_x!, advection_y!
-export compute_rho, compute_e, interpolatefunction compute_e(mesh
+export compute_rho, compute_e, interpolate
 
 include("meshes.jl")
 include("advections.jl")
