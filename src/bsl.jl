@@ -1,10 +1,11 @@
 using FFTW, LinearAlgebra
 
 """
+    bspline(p, j, x)
 
-   Return the value at x in [0,1[ of the B-spline with
-   integer nodes of degree p with support starting at j.
-   Implemented recursively using the de Boor's recursion formula
+    Return the value at x in [0,1[ of the B-spline with
+    integer nodes of degree p with support starting at j.
+    Implemented recursively using the de Boor's recursion formula
 
 """
 function bspline(p::Int, j::Int, x::Float64)
@@ -23,13 +24,15 @@ function bspline(p::Int, j::Int, x::Float64)
 end
 
 """
+    interpolate( p, f, delta, alpha)
 
-   Compute the interpolating spline of degree p of odd
-   degree of a function f on a periodic uniform mesh, at
-   all points xi-alpha
+    Compute the interpolating spline of degree p of odd
+    degree of a 1D function f on a periodic uniform mesh, at
+    all points x-alpha
 
 """
-function interpolate(p::Int, f::Vector{Float64}, delta::Float64, alpha::Float64)
+function interpolate(p::Int, f::Vector{Float64}, delta::Float64, 
+			     alpha::Float64)
 
    n = size(f)[1]
    modes = 2 * pi * (0:n-1) / n
@@ -51,6 +54,13 @@ function interpolate(p::Int, f::Vector{Float64}, delta::Float64, alpha::Float64)
 
 end
 
+"""
+    advection_x!( mesh, f, v, dt)
+
+    Advection of a 2d function `f` discretized on a 2d `mesh`
+    along its first dimension with velocity `v`
+
+"""
 function advection_x!(mesh::RectMesh2D, f::Array{Float64,2},
                       v::Any, dt::Float64)
     for j in 1:mesh.ny
@@ -59,6 +69,12 @@ function advection_x!(mesh::RectMesh2D, f::Array{Float64,2},
     end
 end
 
+"""
+    advection_y!( mesh, f, v, dt)
+
+    Advection of a 2d function `f` discretized on a 2d `mesh`
+    along its second  dimension with velocity `v`
+"""
 function advection_y!(mesh::RectMesh2D, f::Array{Float64,2},
                       v::Any, dt::Float64)
     for i in 1:mesh.nx
@@ -68,43 +84,15 @@ function advection_y!(mesh::RectMesh2D, f::Array{Float64,2},
 end
 
 """
+    advection!(f, p, mesh, v, nv, dt)
 
-   Advection in υ
-   ∂ f / ∂ t − E(x) ∂ f / ∂ υ  = 0
+    Advection of a 2d function `f` along its first dimension with
+    velocity `v`i. Since the fft are computed inplace, the function 
+    must be represented by a Complex{Float64} array.
 
 """
-function advection_v!( fᵀ, meshx::UniformMesh, meshv::UniformMesh, E, dt)
-
-    n = meshv.nx
-    L = meshv.xmax - meshv.xmin
-    k = 2π/L*[0:n÷2-1;-n÷2:-1]
-    ek = exp.(-1im * dt * k * transpose(E))
-
-    fft!(fᵀ, 1)
-    fᵀ .= fᵀ .* ek
-    ifft!(fᵀ, 1)
-
-end
-
-function advection_x!( f, meshx::UniformMesh, meshv::UniformMesh, dt)
-
-    L = meshx.xmax - meshx.xmin
-    m = div(meshx.nx,2)
-    k = 2*π/L * [0:1:m-1;-m:1:-1]
-    k̃ = 2*π/L * [1;1:1:m-1;-m:1:-1]
-    v = meshv.x
-    ev = exp.(-1im*dt * k * transpose(v))
-
-    fft!(f,1)
-    f .= f .* ev
-    Ek  = -1im * meshv.dx * sum(f,dims=2) ./ k̃
-    Ek[1] = 0.0
-    ifft!(f,1)
-    real(ifft(Ek))
-
-end
-
-function advection!(f, p, mesh, v, nv, dt)
+function advection!(f::Array{Complex{Float64},2}, p, 
+                    mesh::RectMesh2D, v, nv, dt)
 
    nx = mesh.nx
    dx = mesh.dx
