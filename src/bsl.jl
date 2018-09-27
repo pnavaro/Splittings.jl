@@ -87,12 +87,12 @@ end
     advection!(f, p, mesh, v, nv, dt)
 
     Advection of a 2d function `f` along its first dimension with
-    velocity `v`i. Since the fft are computed inplace, the function 
-    must be represented by a Complex{Float64} array.
+    velocity `v`. Since the fft are computed inplace, the function 
+    must be represented by a Complex{Float64} 2d array.
 
 """
-function advection!(f::Array{Complex{Float64},2}, p, 
-                    mesh::RectMesh2D, v, nv, dt)
+function advection!(f::Array{Complex{Float64},2}, p::Int, 
+                    mesh::RectMesh2D, v::Array{Float64,1}, nv::Int, dt::Float64)
 
    nx = mesh.nx
    dx = mesh.dx

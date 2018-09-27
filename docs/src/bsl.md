@@ -2,12 +2,12 @@
 
 Let us consider an abstract scalar advection equation of the form
 
-``\\frac{∂f}{∂t}+ a(x, t) ⋅ ∇f = 0.``
+$ \frac{∂f}{∂t}+ a(x, t) ⋅ ∇f = 0. $
 
 The characteristic curves associated to this equation are the solutions of 
 the ordinary differential equations
 
-``\\frac{dX}{dt} = a(X(t), t)``
+$ \frac{dX}{dt} = a(X(t), t) $
 
 We shall denote by ``X(t, x, s)`` the unique solution of this equation 
 associated to the initial condition ``X(s) = x``.
