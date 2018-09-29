@@ -110,8 +110,5 @@ mesh = Mesh(128, 256, -π, π, -π, π)
 
 fe = exact(tf, nt, mesh);
 
-@time rotation_2d_fft(tf, nt, mesh)
-@time rotation_2d_fft(tf, nt, mesh)
-@time rotation_2d_fft(tf, nt, mesh)
-@time rotation_2d_fft(tf, nt, mesh)
 println( " error = ", error1(rotation_2d_fft(tf, nt, mesh), fe))
+@btime rotation_2d_fft(tf, nt, mesh)
