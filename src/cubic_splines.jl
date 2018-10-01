@@ -42,18 +42,20 @@ function compute_interpolants( n::Int, f::Array{Float64})
     coeffs
 end
 
+
 function interpolate( coeffs::Array{Float64,1}, nx::Int,
-        xmin::Float64, xmax::Float64, x::Float64 ) 
-    
-      rh        = nx / (xmax - xmin)
+        xmin::Float64, xmax::Float64, x::Float64 )
+
+      rh        = (nx-1) / (xmax - xmin)
       t0        = (x-xmin)*rh
-      cell      = floor(Int,t0) + 1
-      dx        = t0 - (cell-1)
+      cell      = floor(t0)
+      dx        = t0 - cell
       cdx       = 1.0 - dx
-      cim1      = coeffs[cell]
-      ci        = coeffs[cell+1]
-      cip1      = coeffs[cell+2]
-      cip2      = coeffs[cell+3]
+      icell     = trunc(Int, cell+1)
+      cim1      = coeffs[icell]
+      ci        = coeffs[icell+1]
+      cip1      = coeffs[icell+2]
+      cip2      = coeffs[icell+3]
       t1        = 3.0*ci
       t3        = 3.0*cip1
       t2        = cdx*(cdx*(cdx*(cim1 - t1) + t1) + t1) + ci
