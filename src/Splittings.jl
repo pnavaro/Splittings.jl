@@ -16,8 +16,14 @@ include("bsl.jl")
    ρ(x,t) = ∫ f(x,v,t) dv
 
 """
-function compute_rho(meshv, f)
+function compute_rho(meshv::UniformMesh, f)
    dv = meshv.dx
+   rho = dv * sum(f, dims=2)
+   rho .- mean(rho)
+end
+
+function compute_rho(mesh::Mesh2D, f)
+   dv = mesh.dv
    rho = dv * sum(f, dims=2)
    rho .- mean(rho)
 end

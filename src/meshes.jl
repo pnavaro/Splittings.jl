@@ -14,6 +14,33 @@ end
 
 """
 
+   Regular cartesian 2D mesh for 1D1V simulation
+
+"""
+struct Mesh2D
+    
+    xmin :: Float64
+    xmax :: Float64
+    nx   :: Int
+    vmin :: Float64
+    vmax :: Float64
+    nv   :: Int
+    x    :: Vector{Float64}
+    v    :: Vector{Float64}
+    dx   :: Float64
+    dv   :: Float64
+    
+    function Mesh2D(xmin, xmax, nx, vmin, vmax, nv)
+        x = range(xmin, stop=xmax, length=nx)
+        v = range(vmin, stop=vmax, length=nv)
+        dx = (xmax - xmin) / (nx-1)
+        dv = (vmax - vmin) / (nv-1)
+        new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv)
+    end
+end
+
+"""
+
    2D rectangular cartesian mesh parameters
 
 """
