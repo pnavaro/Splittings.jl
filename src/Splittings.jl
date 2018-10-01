@@ -9,6 +9,7 @@ export bonjour
 
 bonjour() = println("bonjour")
 
+include("cubic_splines.jl")
 include("meshes.jl")
 include("fft.jl")
 include("bsl.jl")

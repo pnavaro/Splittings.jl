@@ -128,3 +128,29 @@ function advection!(f::Array{Complex{Float64},2}, p::Int,
    ifft!(f,1)
 
 end
+
+function advection_x!( f, mesh::Mesh1D1V, dt)
+    
+    for j in 1:mesh.nv
+        coeffs = compute_interpolants(mesh.nx, f[:,j])        
+        for i in 1:mesh.nx
+            x_new = mesh.x[i] - dt * mesh.v[j]
+            x_new = mesh.xmin + mod(x_new - mesh.xmin,mesh.xmax - mesh.xmin)
+            f[i,j] = interpolate(coeffs, mesh.nx, mesh.xmin, mesh.xmax, x_new)
+        end
+    end
+    
+end
+
+function advection_v!( f,  mesh::Mesh1D1V, e, dt)
+    
+    for i in 1:mesh.nx
+        coeffs = compute_interpolants(mesh.nv, f[i,:] )       
+        for j in 1:mesh.nv
+            v_new = mesh.v[j] - dt * e[i] 
+            v_new = mesh.vmin + mod(v_new - mesh.vmin,mesh.vmax-mesh.vmin)
+            f[i,j] = interpolate(coeffs, mesh.nv, mesh.vmin, mesh.vmax, v_new)
+        end
+    end
+    
+end            
