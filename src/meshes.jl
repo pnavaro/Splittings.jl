@@ -31,10 +31,10 @@ struct Mesh1D1V
     dv   :: Float64
     
     function Mesh1D1V(xmin, xmax, nx, vmin, vmax, nv)
-        x = range(xmin, stop=xmax, length=nx+1)[1:end-1]
-        v = range(vmin, stop=vmax, length=nv+1)[1:end-1]
-        dx = (xmax - xmin) / nx
-        dv = (vmax - vmin) / nv
+        x = range(xmin, stop=xmax, length=nx)
+        v = range(vmin, stop=vmax, length=nv)
+	dx = (xmax - xmin) / (nx-1)
+	dv = (vmax - vmin) / (nv-1)
         new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv)
     end
 end
