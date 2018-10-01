@@ -25,14 +25,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#Splittings.compute_rho-Tuple{Any,Any}",
-    "page": "Introduction",
-    "title": "Splittings.compute_rho",
-    "category": "method",
-    "text": "Compute charge density    ρ(x,t) = ∫ f(x,v,t) dv\n\n\n\n\n\n"
-},
-
-{
     "location": "index.html#Splittings.compute_e-Tuple{Any,Any}",
     "page": "Introduction",
     "title": "Splittings.compute_e",
