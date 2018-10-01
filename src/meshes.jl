@@ -17,7 +17,7 @@ end
    Regular cartesian 2D mesh for 1D1V simulation
 
 """
-struct Mesh2D
+struct Mesh1D1V
     
     xmin :: Float64
     xmax :: Float64
@@ -30,7 +30,7 @@ struct Mesh2D
     dx   :: Float64
     dv   :: Float64
     
-    function Mesh2D(xmin, xmax, nx, vmin, vmax, nv)
+    function Mesh1D1V(xmin, xmax, nx, vmin, vmax, nv)
         x = range(xmin, stop=xmax, length=nx)
         v = range(vmin, stop=vmax, length=nv)
         dx = (xmax - xmin) / (nx-1)

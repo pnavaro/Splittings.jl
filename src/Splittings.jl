@@ -2,9 +2,12 @@ module Splittings
 
 using Statistics, FFTW, LinearAlgebra
 
-export Mesh, RectMesh2D, UniformMesh
+export Mesh, RectMesh2D, UniformMesh, Mesh1D1V
 export advection!, advection_v!, advection_x!, advection_y!
 export compute_rho, compute_e, interpolate
+export bonjour
+
+bonjour() = println("bonjour")
 
 include("meshes.jl")
 include("fft.jl")
@@ -22,7 +25,7 @@ function compute_rho(meshv::UniformMesh, f)
    rho .- mean(rho)
 end
 
-function compute_rho(mesh::Mesh2D, f)
+function compute_rho(mesh::Mesh1D1V, f)
    dv = mesh.dv
    rho = dv * sum(f, dims=2)
    rho .- mean(rho)
