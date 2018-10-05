@@ -1,35 +1,51 @@
+using IntervalSets
+
 export PeriodicDomain
 
 
 """
 
-    RectMesh1D1V( xmin, xmax, nx, vmin, vmax, nv)
-    RectMesh1D1V( x, v)
+    PeriodicDomain( left, right, ncells)
+    PeriodicDomain( left..right, ncells)
+    PeriodicDomain( points )
 
     Regular cartesian 2D mesh for 1D1V simulation
 
 """
-struct PeriodicDomain
+mutable struct PeriodicDomain
     
     left   :: Float64
     right  :: Float64
     ncells :: Int
     points :: Vector{Float64}
     delta  :: Float64
+    bc     :: Symbol
+    axis   :: Int
     
     function PeriodicDomain(points::Vector{Float64})
 
         left, right, ncells = points[1], points[end], size(x)-1
-	  delta = (right - left) / ncells
+	delta = (right - left) / ncells
         new(left, right, ncells, points, delta)
+	bc = :periodic
 
     end
 
     function PeriodicDomain(left, right, ncells::Int)
 
         points = range(left, stop=right, length=ncells)[1:end-1]
-	  delta  = (right - left) / ncells
-        new(left, right, ncells, points, delta)
+	delta  = (right - left) / ncells
+	new(left, right, ncells, points, delta, :periodic, 1)
+
+    end
+
+    function PeriodicDomain(interval::Interval{:closed,:closed}, ncells::Int)
+
+	left  = interval.left
+	right = interval.right
+        points = range(left, stop=right, length=ncells)[1:end-1]
+	delta  = (right - left) / ncells
+        new(left, right, ncells, points, delta, :periodic, 1)
 
     end
 
@@ -40,6 +56,19 @@ import Base.*
 
 Base.:*(x::PeriodicDomain, y::PeriodicDomain) = begin
 
-    RectMesh1D1V( x.points, y.points )
+    if ( x.axis >= y.axis )
+        RectMesh1D1V( y.points, x.points )
+    else
+        RectMesh1D1V( x.points, y.points )
+    end
+
+end
+
+import LinearAlgebra.transpose
+
+LinearAlgebra.:transpose(d::PeriodicDomain) = begin
+    
+    d.axis = (d.axis+2)%2+1
+    d
 
 end

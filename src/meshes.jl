@@ -18,6 +18,7 @@ struct RectMesh1D1V
     v    :: Vector{Float64}
     dx   :: Float64
     dv   :: Float64
+    bc   :: Dict{Symbol, Symbol}
     
     function RectMesh1D1V(x::Vector{Float64}, v::Vector{Float64})
 
@@ -25,20 +26,39 @@ struct RectMesh1D1V
         nv = size(v)[1]
         xmin, xmax = x[1], x[end]
         vmin, vmax = v[1], v[end]
-	  dx = (xmax - xmin) / (nx-1)
-	  dv = (vmax - vmin) / (nv-1)
-        new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv)
+	dx = (xmax - xmin) / (nx-1)
+	dv = (vmax - vmin) / (nv-1)
+	bc = Dict(:x=>:periodic,:v=>:periodic)
+        new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv, bc)
 
     end
 
     function RectMesh1D1V(xmin, xmax, nx::Int,  
                           vmin, vmax, nv::Int)
 
-        x = range(xmin, stop=xmax, length=nx)
-        v = range(vmin, stop=vmax, length=nv)
-	  dx = (xmax - xmin) / (nx-1)
-	  dv = (vmax - vmin) / (nv-1)
-        new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv)
+        x  = range(xmin, stop=xmax, length=nx)
+        v  = range(vmin, stop=vmax, length=nv)
+	dx = (xmax - xmin) / (nx-1)
+	dv = (vmax - vmin) / (nv-1)
+	bc = Dict(:x=>:periodic,:v=>:periodic)
+        new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv, bc)
+
+    end
+
+    function RectMesh1D1V(x::StepRangeLen, v::StepRangeLen)
+
+	xmin = x.offset
+	nx   = x.len
+	dx   = x.step
+	xmax = xmin + (nx-1) * dx 
+
+	vmin = v.offset
+	nv   = v.len
+	dv   = v.step
+	vmax = vmin + (nv-1) * dv 
+
+	bc = Dict(:x=>:periodic,:v=>:periodic)
+        new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv, bc)
 
     end
 
