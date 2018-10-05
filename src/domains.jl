@@ -33,7 +33,7 @@ mutable struct PeriodicDomain
 
     function PeriodicDomain(left, right, ncells::Int)
 
-        points = range(left, stop=right, length=ncells)[1:end-1]
+        points = range(left, stop=right, length=ncells+1)[1:end-1]
 	delta  = (right - left) / ncells
 	new(left, right, ncells, points, delta, :periodic, 1)
 
@@ -43,8 +43,19 @@ mutable struct PeriodicDomain
 
 	left  = interval.left
 	right = interval.right
-        points = range(left, stop=right, length=ncells)[1:end-1]
+        points = range(left, stop=right, length=ncells+1)[1:end-1]
 	delta  = (right - left) / ncells
+        new(left, right, ncells, points, delta, :periodic, 1)
+
+    end
+
+    function PeriodicDomain(s::StepRangeLen)
+
+	left   = s.offset
+	ncells = s.len-1
+	delta  = s.step
+	right  = left + ncells * delta 
+	points = collect(s)
         new(left, right, ncells, points, delta, :periodic, 1)
 
     end

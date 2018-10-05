@@ -1,3 +1,4 @@
+export RectMesh1D1V
 """
 
     RectMesh1D1V( xmin, xmax, nx, vmin, vmax, nv)
@@ -64,6 +65,7 @@ struct RectMesh1D1V
 
 end
 
+export RectMesh1D
 """
 
     RectMesh1D(xmin, xmax, nx)

@@ -2,7 +2,6 @@ module Splittings
 
 using Statistics, FFTW, LinearAlgebra
 
-export RectMesh1D, RectMesh1D1V
 export advection!
 export compute_rho, compute_e, interpolate
 
