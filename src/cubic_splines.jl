@@ -1,112 +1,10 @@
+module CubicSplines
+
 """
     This function is a julia version of a Fortran code written by
    
     Edwin Chacon Golcher
    
-    Fast spline algorithm description:
-   
-    - data: the array whose data must be fit with the cubic spline.
-    - np: (number of points, length of the data array that must be fit with
-      the spline.
-    - bc_type: an integer flag describing the type of boundary conditions
-      desired.
-    - spline_obj: the spline object to be initialized.
-    This version assumes that the data are uniformly spaced.
-   
-    The idea behind this spline implementation is the factorization of the
-    array:
-   
-             + 4  1              1 +
-             | 1  4  1             |
-             |    .  .  .          |
-             |       .  .  .       |
-             |          .  .  .    |
-             |             1  4  1 |
-             + 1              1  4 +
-   
-    in the form:
-   
-               A = L*L^t
-   
-    where:
-   
-             + a                 b +
-             | b  a                |
-             |    .  .             |
-      L =    |       .  .          |    (zeros not shown)
-             |          .  .       |
-             |             b  a    |
-             +                b  a +
-   
-    This factorization is achieved for the values:
-    a² = (2+sqrt(3))/6, b² = (2-sqrt(3))/6.
-   
-    The spline coefficients C are thus the solution of:
-   
-                     L*L^t*C = F.
-   
-    Hence, we solve first for D in:
-   
-                     L*D = F
-   
-    This solution is achieved in a two-step process. First we compute the
-    first term d1, which is given by:
-   
-    d1 =
-   
-    1           b           b  2                   i  b  i
-   ---(f(x1) - ---f(xN) + (---)*f(xN-1) + ... + (-1)(---) (f(xN-i+1)-bd(N-i)))
-    a           a           a                         a
-   
-    The series converges (since a > b) and we can approximate the series
-    by a partial sum:
-   
-          1                            b
-    d1 = ---(f(x1) + SUM(i=1,M)(-1)^i(---)^i*f(xN-i+1))
-          a                            a
-   
-    The rest of the terms can be found by:
-   
-    d(i) = 1/a*(f(x i) - b*d(i-1))
-   
-    Once D is known, the same procedure can be used to compute C in
-   
-                      L^t*C = D
-   
-    The same process is carried out. First, the last coefficient is
-    calculated by:
-   
-         c(N) = 1/a*(d(N) + SUM(i=1,M) (-1)^i*(b/a)^i*d(i))
-   
-    And the rest of the terms, starting with C(N-1) and working backwards:
-   
-     c(i) = 1/a*(d(i) - b*c(i+1))
-
-    The algorithm above is not implemented whenever the number of points is
-    smaller than 28. In such cases we fall back to a more straightforward but
-    also more costly implementation using a standard tridiagonal system
-    solver.
-   
-    In the periodic case, we are solving the problem A*C=F, where
-   
-                   + 4  1              1 +         1
-                   | 1  4  1             |
-                1  |    .  .  .          |         .
-          A =  --- |       .  .  .       |         .
-                6  |          .  .  .    |         .
-                   |             1  4  1 |
-                   + 1              1  4 +      num_points
-   
-    In the Hermite BC case, the problem is modified as follows:
-   
-       + 4  2                + + c_0    +   + 6*f_0+2*delta*f_0´          +  0
-       | 1  4  1             | |        |   | 6*f_1                       |  1
-       |    .  .  .          | |    .   |   |    .                        |  .
-    A =|       .  .  .       |*|    .   | = |    .                        |  .
-       |          .  .  .    | |    .   |   |    .                        |  .
-       |             1  4  1 | |        |   | 6*f_np                      |  np
-       +                2  4 + +c_(np+1)+   + 6*f_(np+1)+2*delta*f_(np+1)'+ np+1
-
 """
 function compute_interpolants( n::Int, f::Array{Float64})
         
@@ -171,4 +69,34 @@ function interpolate( coeffs::Array{Float64,1}, nx::Int,
       t2        = cdx*(cdx*(cdx*(cim1 - t1) + t1) + t1) + ci
       t4        =  dx*( dx*( dx*(cip2 - t3) + t3) + t3) + cip1
       return (1.0/6.0)*(t2 + t4)
+end
+
+function advection!( f::Array{Float64,2}, mesh::RectMesh1D1V, dt)
+    
+    lx = mesh.xmax - mesh.xmin
+    for j in 1:mesh.nv
+        coeffs = compute_interpolants(mesh.nx, f[:,j])        
+        for i in 1:mesh.nx
+            x_new = mesh.x[i] - dt * mesh.v[j]
+            x_new = mesh.xmin + mod(x_new - mesh.xmin, lx)
+            f[i,j] = interpolate(coeffs, mesh.nx, mesh.xmin, mesh.xmax, x_new)
+        end
+    end
+    
+end
+
+function advection!( f::Array{Float64,2}, mesh::RectMesh1D1V, e, dt)
+    
+    lv = mesh.vmax - mesh.vmin
+    for i in 1:mesh.nx
+        coeffs = compute_interpolants(mesh.nv, f[i,:])       
+        for j in 1:mesh.nv
+            v_new = mesh.v[j] - dt * e[i] 
+            v_new = mesh.vmin + mod(v_new - mesh.vmin, lv)
+            f[i,j] = interpolate(coeffs, mesh.nv, mesh.vmin, mesh.vmax, v_new)
+        end
+    end
+    
+end            
+
 end
