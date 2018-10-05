@@ -1,5 +1,5 @@
 
-using Plots, LinearAlgebra, Splittings
+using Plots, LinearAlgebra
 
 
 """
@@ -70,8 +70,8 @@ function landau(tf, nt)
   nx, nv = 64, 128
   xmin, xmax = 0.0, 4π
   vmin, vmax = -6., 6.
-  meshx = UniformMesh(xmin, xmax, nx)
-  meshv = UniformMesh(vmin, vmax, nv)
+  meshx = Splittings.RectMesh1D(xmin, xmax, nx; endpoint=false)
+  meshv = Splittings.RectMesh1D(vmin, vmax, nv; endpoint=false)
   x = meshx.x
   v = meshv.x
   dx = meshx.dx
@@ -90,13 +90,13 @@ function landau(tf, nt)
   nrj = Float64[]
 
   for it in 1:nt
-     advection!(f, p, meshx, v, nv, 0.5*dt)
-     rho = compute_rho(meshv, f)
-     e   = compute_e(meshx, rho)
+     Splittings.advection!(f, p, meshx, v, nv, 0.5*dt)
+     rho = Splittings.compute_rho(meshv, f)
+     e   = Splittings.compute_e(meshx, rho)
      transpose!(fᵗ, f)
-     advection!(fᵗ, p, meshv, e, nx, dt)
+     Splittings.advection!(fᵗ, p, meshv, e, nx, dt)
      transpose!(f, fᵗ)
-     advection!(f, p, meshx, v, nv, 0.5*dt)
+     Splittings.advection!(f, p, meshx, v, nv, 0.5*dt)
      push!(nrj, 0.5*log(sum(e.*e)*dx))
   end
 
@@ -105,7 +105,6 @@ function landau(tf, nt)
 end
 
 using Plots, LinearAlgebra
-using Splittings
 pyplot()
 
 nt = 600

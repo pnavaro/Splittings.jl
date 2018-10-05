@@ -32,7 +32,7 @@ end
 
 """
 function interpolate(p::Int, f::Vector{Float64}, delta::Float64, 
-			     alpha::Float64)
+			   alpha::Float64)
 
    n = size(f)[1]
    modes = 2 * pi * (0:n-1) / n
@@ -55,32 +55,29 @@ function interpolate(p::Int, f::Vector{Float64}, delta::Float64,
 end
 
 """
-    advection_x!( mesh, f, v, dt)
+    advection!( mesh, f, v, dt, axis)
 
     Advection of a 2d function `f` discretized on a 2d `mesh`
-    along its first dimension with velocity `v`
+    along the input axis at velocity `v`
 
 """
-function advection_x!(mesh::RectMesh2D, f::Array{Float64,2},
-                      v::Any, dt::Float64)
-    for j in 1:mesh.ny
-        alpha = v[j] * dt
-        f[:,j] .= interpolate(3, f[:,j], mesh.dx, alpha)
+function advection!(f::Array{Float64,2}, mesh::RectMesh1D1V,
+                    v::Any, dt::Float64; axis=0)
+
+    @assert ( axis > 0 )
+
+    if (axis == 1)
+        for j in 1:mesh.nv
+            alpha = v[j] * dt
+            f[:,j] .= interpolate(3, f[:,j], mesh.dx, alpha)
+        end
+    else
+        for i in 1:mesh.nx
+            alpha = v[i] * dt
+            f[i,:] .= interpolate(3, f[i,:], mesh.dv, alpha)
+        end
     end
-end
 
-"""
-    advection_y!( mesh, f, v, dt)
-
-    Advection of a 2d function `f` discretized on a 2d `mesh`
-    along its second  dimension with velocity `v`
-"""
-function advection_y!(mesh::RectMesh2D, f::Array{Float64,2},
-                      v::Any, dt::Float64)
-    for i in 1:mesh.nx
-        alpha = v[i] * dt
-        f[i,:] .= interpolate(3, f[i,:], mesh.dy,  alpha)
-    end
 end
 
 """
@@ -92,7 +89,8 @@ end
 
 """
 function advection!(f::Array{Complex{Float64},2}, p::Int, 
-                    mesh::RectMesh2D, v::Array{Float64,1}, nv::Int, dt::Float64)
+                    mesh::RectMesh1D, v::Array{Float64,1}, 
+                    nv::Int, dt::Float64)
 
    nx = mesh.nx
    dx = mesh.dx
@@ -129,26 +127,28 @@ function advection!(f::Array{Complex{Float64},2}, p::Int,
 
 end
 
-function advection_x!( f, mesh::Mesh1D1V, dt)
+function advection!( mesh::RectMesh1D1V, f::Array{Float64,2}, dt)
     
+    lx = mesh.xmax - mesh.xmin
     for j in 1:mesh.nv
         coeffs = compute_interpolants(mesh.nx, f[:,j])        
         for i in 1:mesh.nx
             x_new = mesh.x[i] - dt * mesh.v[j]
-            x_new = mesh.xmin + mod(x_new - mesh.xmin,mesh.xmax - mesh.xmin)
+            x_new = mesh.xmin + mod(x_new - mesh.xmin, lx)
             f[i,j] = interpolate(coeffs, mesh.nx, mesh.xmin, mesh.xmax, x_new)
         end
     end
     
 end
 
-function advection_v!( f,  mesh::Mesh1D1V, e, dt)
+function advection!( mesh::RectMesh1D1V, f::Array{Float64,2}, e, dt)
     
+    lv = mesh.vmax-mesh.vmin
     for i in 1:mesh.nx
-        coeffs = compute_interpolants(mesh.nv, f[i,:] )       
+        coeffs = compute_interpolants(mesh.nv, f[i,:])       
         for j in 1:mesh.nv
             v_new = mesh.v[j] - dt * e[i] 
-            v_new = mesh.vmin + mod(v_new - mesh.vmin,mesh.vmax-mesh.vmin)
+            v_new = mesh.vmin + mod(v_new - mesh.vmin, lv)
             f[i,j] = interpolate(coeffs, mesh.nv, mesh.vmin, mesh.vmax, v_new)
         end
     end

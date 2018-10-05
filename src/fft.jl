@@ -1,18 +1,18 @@
 using FFTW, LinearAlgebra
 
 """
-    advection_v!( f, meshx, meshv, E, dt) 
+    advection!( f, meshx, meshv, E, dt) 
 
     Advection in υ
     ∂ f / ∂ t − E(x) ∂ f / ∂ υ  = 0
 
 """
-function advection_v!( fᵀ, meshx::UniformMesh, meshv::UniformMesh, E, dt)
+function advection!( fᵀ, meshx::RectMesh1D, meshv::RectMesh1D, e, dt::Float64)
 
     n = meshv.nx
     L = meshv.xmax - meshv.xmin
     k = 2π/L*[0:n÷2-1;-n÷2:-1]
-    ek = exp.(-1im * dt * k * transpose(E))
+    ek = exp.(-1im * dt * k * transpose(e))
 
     fft!(fᵀ, 1)
     fᵀ .= fᵀ .* ek
@@ -20,12 +20,19 @@ function advection_v!( fᵀ, meshx::UniformMesh, meshv::UniformMesh, E, dt)
 
 end
 
-function advection_x!( f, meshx::UniformMesh, meshv::UniformMesh, dt)
+"""
+    advection!( f, meshx, meshv, dt) 
+
+    Advection in x
+    ∂ f / ∂ t − υ ∂ f / ∂ x  = 0
+
+"""
+function advection!( f, meshx::RectMesh1D, meshv::RectMesh1D, dt::Float64)
 
     L = meshx.xmax - meshx.xmin
     m = div(meshx.nx,2)
-    k = 2*π/L * [0:1:m-1;-m:1:-1]
-    k̃ = 2*π/L * [1;1:1:m-1;-m:1:-1]
+    k = 2π/L * [0:1:m-1;-m:1:-1]
+    k̃ = 2π/L * [1;1:1:m-1;-m:1:-1]
     v = meshv.x
     ev = exp.(-1im*dt * k * transpose(v))
 

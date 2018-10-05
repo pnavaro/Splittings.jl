@@ -1,4 +1,4 @@
-using Plots, Splittings
+using Printf
 
 """
 
@@ -7,22 +7,12 @@ using Plots, Splittings
     Exact solution of f after rotation during time tf
 
 """
-function exact(tf::Float64, nt::Int, mesh::RectMesh2D)
+function exact(tf::Float64, mesh::Splittings.RectMesh1D1V)
 
-    dt = tf/nt
-    
-    nx = mesh.nx
-    xmin, xmax = mesh.xmin, mesh.xmax
-    x  = linspace(xmin, xmax, nx+1)[1:end-1]
-
-    ny = mesh.ny
-    ymin, ymax = mesh.ymin, mesh.ymax
-    y  = linspace(ymin, ymax, ny+1)[1:end-1]
-
-    f = zeros(Float64,(nx,ny))
-    for (i, xx) in enumerate(x), (j, yy) in enumerate(y)
-        xn=cos(tf)*xx-sin(tf)*yy
-        yn=sin(tf)*xx+cos(tf)*yy
+    f = zeros(Float64,(mesh.nx,mesh.nv))
+    for (i, x) in enumerate(mesh.x), (j, v) in enumerate(mesh.v)
+        xn=cos(tf)*x-sin(tf)*v
+        yn=sin(tf)*x+cos(tf)*v
         f[i,j] = exp(-(xn-1)*(xn-1)/0.1)*exp(-(yn-1)*(yn-1)/0.1)
     end
 
@@ -38,33 +28,26 @@ end
 
 """
 function error1(f, f_exact)
-    maximum(abs.(f - f_exact))
+    maximum(abs.(f .- f_exact))
 end
 
 
-function with_bsl(tf::Float64, nt::Int, mesh::RectMesh2D)
+function with_bsl(tf::Float64, nt::Int, mesh::Splittings.RectMesh1D1V)
 
    dt = tf/nt
-   nx = mesh.nx
-   xmin, xmax = mesh.xmin, mesh.xmax
-   x  = linspace(xmin, xmax, nx+1)[1:end-1]
 
-   ny = mesh.ny
-   ymin, ymax = mesh.ymin, mesh.ymax
-   y  = linspace(ymin, ymax, ny+1)[1:end-1]
-
-   f   = exact(0.0, 1, mesh)
-   fs  = exact(0.0, 1, mesh)
+   f   = exact(0.0, mesh)
+   fs  = exact(0.0, mesh)
    
    for n=1:nt
        
-      advection_x!(mesh, f,  y, tan(0.5*dt))
-      advection_y!(mesh, f, -x, sin(dt))
-      advection_x!(mesh, f,  y, tan(0.5*dt))
-
-      advection_x!(mesh, fs,  y, 0.5*dt)
-      advection_y!(mesh, fs, -x, dt)
-      advection_x!(mesh, fs,  y, 0.5*dt)
+      Splittings.advection!( f,  mesh,  mesh.v, tan(0.5*dt), axis=1)
+      Splittings.advection!( f,  mesh, -mesh.x, sin(dt),     axis=2)
+      Splittings.advection!( f,  mesh,  mesh.v, tan(0.5*dt), axis=1)
+                                      
+      Splittings.advection!( fs, mesh,  mesh.v, 0.5*dt, axis=1)
+      Splittings.advection!( fs, mesh, -mesh.x,     dt, axis=2)
+      Splittings.advection!( fs, mesh,  mesh.v, 0.5*dt, axis=1)
 
    end
 
@@ -74,18 +57,16 @@ end
 
 tf, nt = 200π, 1000
 
-mesh = RectMesh2D(-π, π, 256, -π, π, 256)
+mesh = Splittings.RectMesh1D1V(-π, π, 256, -π, π, 256)
 
-fe = exact(tf, nt, mesh)
+fe = exact(tf, mesh)
 @time fc, fs = with_bsl(tf, nt, mesh)
 println( " errors = ", error1(fc, fe), "\t", error1(fs, fe))
-x = range(mesh.xmin, stop=mesh.xmax, length=mesh.nx+1)[1:end-1]
-y = range(mesh.ymin, stop=mesh.ymax, length=mesh.ny+1)[1:end-1]
 
 fgnu = open("fc.dat", "w")
 for i = 1:mesh.nx
    for j = 1:mesh.ny
-      @printf(fgnu, "%f %f %f %f\n", x[i], y[j], fc[i,j], fe[i,j])
+      @printf(fgnu, "%f %f %f %f\n", mesh.x[i], mesh.v[j], fc[i,j], fe[i,j])
    end
    @printf(fgnu, "\n")
 end

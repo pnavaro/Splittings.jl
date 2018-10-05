@@ -1,5 +1,4 @@
 using Plots, LinearAlgebra
-using Splittings
 pyplot()
 
 """
@@ -65,16 +64,15 @@ vmin, vmax = -6., 6.
 tf, nt = 60, 600
 t =  range(0,stop=tf,length=nt)
 plot(t, vm1d(nx, nv, xmin, xmax, vmin, vmax, tf, nt) )
-plot!(t, log10.(2.6e-3*exp.(-0.1533*t)))
+plot!(t, -0.1533*t.-5.50)
 ```
 
 """
 function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
 
-    meshx = UniformMesh(xmin, xmax, nx)
-    meshv = UniformMesh(vmin, vmax, nv)
+    meshx = Splittings.RectMesh1D(xmin, xmax, nx, endpoint=false)
+    meshv = Splittings.RectMesh1D(vmin, vmax, nv, endpoint=false)
 
-    # Initialize distribution function
     x = meshx.x
     v = meshv.x
     ϵ, kx = 0.001, 0.5
@@ -85,24 +83,23 @@ function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
     f .= (1.0.+ϵ*cos.(kx*x))/sqrt(2π) .* transpose(exp.(-0.5*v.*v))
     transpose!(fᵀ,f)
 
-    ρ = compute_rho(meshv, f)
-    E = compute_e(meshx, ρ)
+    ρ = Splittings.compute_rho(meshv, f)
+    e = Splittings.compute_e(meshx, ρ)
 
     nrj = Float64[]
 
     dt = tf / nt
 
     for i in 1:nt
-        push!(nrj, 0.5*log(sum(E.^2)*meshx.dx))
-        advection_v!(fᵀ, meshx, meshv, E,  0.5dt)
+        push!(nrj, 0.5*log(sum(e.^2)*meshx.dx))
+        Splittings.advection!(fᵀ, meshx, meshv, e,  0.5dt)
         transpose!(f,fᵀ)
-        E = advection_x!( f, meshx, meshv, dt)
-        transpose!(fᵀ,f)
-        advection_v!(fᵀ, meshx, meshv, E,  0.5dt)
+        e = Splittings.advection!( f, meshx, meshv, dt)
+        Splittings.transpose!(fᵀ,f)
+        Splittings.advection!(fᵀ, meshx, meshv, e,  0.5dt)
     end
     nrj
 end
-
 
 nx, nv = 64, 128
 xmin, xmax =  0., 4π
@@ -110,7 +107,6 @@ vmin, vmax = -6., 6.
 tf = 80
 nt = 600
 
-t =  range(0,stop=tf,length=nt)
+t = range(0,stop=tf,length=nt)
 plot(t, vm1d(nx, nv, xmin, xmax, vmin, vmax, tf, nt) )
-#plot!(t, log10.(2.6e-3*exp.(-0.1533*t)))
 plot!(t, -0.1533*t.-5.50)

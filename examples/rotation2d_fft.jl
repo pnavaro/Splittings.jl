@@ -4,37 +4,25 @@
 # \frac{d f}{dt} +  (v \frac{d f}{dx} - x \frac{d f}{dv}) = 0
 # $$
 
-using  FFTW, LinearAlgebra, BenchmarkTools
-
-import Splittings:Mesh
+using FFTW, LinearAlgebra, BenchmarkTools
 
 " Julia function to compute exact solution "
-function exact(tf, nt, mesh::Mesh)
+function exact(tf, mesh::Splittings.RectMesh1D1V)
 
-    dt = tf/nt
-    nx = mesh.nx
-    xmin, xmax = mesh.xmin, mesh.xmax
-    dx = (xmax - xmin) / nx
-    x = range(xmin, stop=xmax-dx, length=nx )
-
-    ny = mesh.ny
-    ymin, ymax = mesh.ymin, mesh.ymax
-    dy = (ymax -ymin) / ny
-    y  = range(ymin, stop=ymax-dy, length=ny)
-
-    f = zeros(Float64,(nx,ny))
-    for (i, xx) in enumerate(x), (j, yy) in enumerate(y)
-        xn=cos(tf)*xx-sin(tf)*yy
-        yn=sin(tf)*xx+cos(tf)*yy
-        f[i,j] = exp(-(xn-1)*(xn-1)/0.1)*exp(-(yn-1)*(yn-1)/0.1)
+    f = zeros(Float64,(mesh.nx,mesh.nv))
+    for (i, x) in enumerate(mesh.x), (j, v) in enumerate(mesh.v)
+        xn=cos(tf)*x-sin(tf)*v
+        vn=sin(tf)*x+cos(tf)*v
+        f[i,j] = exp(-(xn-1)*(xn-1)/0.1)*exp(-(vn-1)*(vn-1)/0.1)
     end
 
     f
+
 end
 
 " Function to compute error "
 function error1(f, f_exact)
-    maximum(abs.(f - f_exact))
+    maximum(abs.(f .- f_exact))
 end
 
 import FFTW: FFTWPlan
@@ -46,7 +34,7 @@ struct Advector
     p2 :: FFTWPlan
 
     function Advector( f  :: Array{Complex{Float64},2},
-	               fᵗ :: Array{Complex{Float64},2})
+	                 fᵗ :: Array{Complex{Float64},2})
 
         p1 = plan_fft(f,  1)
         p2 = plan_fft(fᵗ, 1)
@@ -54,61 +42,59 @@ struct Advector
     end
 end
 
-function rotation_2d_fft(tf, nt, mesh::Mesh)
+function rotation_2d_fft(tf, nt, mesh::Splittings.RectMesh1D1V)
 
     dt = tf/nt
+
     nx = mesh.nx
     xmin, xmax = mesh.xmin, mesh.xmax
-    dx = (xmax - xmin) / nx
-    x = range(xmin, stop=xmax-dx, length=nx)
+    dx = mesh.dx
 
-    ny = mesh.ny
-    ymin, ymax = mesh.ymin, mesh.ymax
-    dy = (ymax -ymin) / ny
-    y  = range(ymin, stop=ymax-dy, length=ny)
+    nv = mesh.nv
+    vmin, vmax = mesh.vmin, mesh.vmax
+    dv = mesh.dv
 
-    kx = 2π/(xmax-xmin)*[0:nx/2-1;nx/2-nx:-1]
-    ky = 2π/(ymax-ymin)*[0:ny/2-1;ny/2-ny:-1]
+    kx = 2π/(xmax-xmin)*[0:nx÷2-1;nx÷2-nx:-1]
+    kv = 2π/(vmax-vmin)*[0:nv÷2-1;nv÷2-nv:-1]
 
-    f  = zeros(Complex{Float64},(nx,ny))
+    f  = zeros(Complex{Float64},(nx,nv))
     f̂  = similar(f)
-    fᵗ = zeros(Complex{Float64},(ny,nx))
+    fᵗ = zeros(Complex{Float64},(nv,nx))
     f̂ᵗ = similar(fᵗ)
     
-    exky = exp.( 1im * tan(dt/2) * ky * transpose(x))
-    ekxy = exp.(-1im * sin(dt)   * kx * transpose(y))
+    exkv = exp.( 1im * tan(dt/2) * kv .* transpose(mesh.x))
+    ekxv = exp.(-1im * sin(dt)   * kx .* transpose(mesh.v))
     
     Px = plan_fft(f,  1)
-    Py = plan_fft(fᵗ, 1)
+    Pv = plan_fft(fᵗ, 1)
     
-    f .= exact(0.0, 1, mesh)
+    f .= exact(0.0, mesh)
     
     for n=1:nt
+
         transpose!(fᵗ,f)
-        mul!(f̂ᵗ, Py, fᵗ)
-        f̂ᵗ .= f̂ᵗ .* exky
-        ldiv!(fᵗ, Py, f̂ᵗ)
+        mul!(f̂ᵗ, Pv, fᵗ)
+        f̂ᵗ .= f̂ᵗ .* exkv
+        ldiv!(fᵗ, Pv, f̂ᵗ)
         transpose!(f,fᵗ)
         
         mul!(f̂, Px, f)
-        f̂ .= f̂ .* ekxy 
+        f̂ .= f̂ .* ekxv 
         ldiv!(f, Px, f̂)
         
         transpose!(fᵗ,f)
-        mul!(f̂ᵗ, Py, fᵗ)
-        f̂ᵗ .= f̂ᵗ .* exky
-        ldiv!(fᵗ, Py, f̂ᵗ)
+        mul!(f̂ᵗ, Pv, fᵗ)
+        f̂ᵗ .= f̂ᵗ .* exkv
+        ldiv!(fᵗ, Pv, f̂ᵗ)
         transpose!(f,fᵗ)
+
     end
     real(f)
 end
 
-const tf = 200 * π
-const nt = 1000
+tf, nt = 200π, 1000
 
-mesh = Mesh(128, 256, -π, π, -π, π)
+mesh = Splittings.RectMesh1D1V(-π, π, 128, -π, π, 256)
 
-fe = exact(tf, nt, mesh);
-
+fe = exact(tf, mesh)
 println( " error = ", error1(rotation_2d_fft(tf, nt, mesh), fe))
-@btime rotation_2d_fft(tf, nt, mesh)
