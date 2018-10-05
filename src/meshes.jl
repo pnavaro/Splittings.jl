@@ -21,8 +21,10 @@ struct RectMesh1D1V
     
     function RectMesh1D1V(x::Vector{Float64}, v::Vector{Float64})
 
-        xmin, xmax, nx = x[1], x[end], size(x)
-        vmin, vmax, nx = v[1], v[end], size(x)
+        nx = size(x)[1]
+        nv = size(v)[1]
+        xmin, xmax = x[1], x[end]
+        vmin, vmax = v[1], v[end]
 	  dx = (xmax - xmin) / (nx-1)
 	  dv = (vmax - vmin) / (nv-1)
         new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv)

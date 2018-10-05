@@ -1,5 +1,6 @@
 using FFTW, LinearAlgebra
 
+
 """
     bspline(p, j, x)
 
@@ -22,6 +23,7 @@ function bspline(p::Int, j::Int, x::Float64)
    ( w       * bspline(p - 1, j    , x) +
     (1 - w1) * bspline(p - 1, j + 1, x))
 end
+
 
 """
     interpolate( p, f, delta, alpha)
@@ -61,20 +63,23 @@ end
     along the input axis at velocity `v`
 
 """
-function advection!(f::Array{Float64,2}, mesh::RectMesh1D1V,
-                    v::Any, dt::Float64; axis=0)
+function advection!(f    :: Array{Float64,2}, 
+                    p    :: Int, 
+                    mesh :: RectMesh1D1V,
+                    v    :: Any, 
+                    dt   :: Float64; axis=0)
 
     @assert ( axis > 0 )
 
     if (axis == 1)
         for j in 1:mesh.nv
             alpha = v[j] * dt
-            f[:,j] .= interpolate(3, f[:,j], mesh.dx, alpha)
+            f[:,j] .= interpolate(p, f[:,j], mesh.dx, alpha)
         end
     else
         for i in 1:mesh.nx
             alpha = v[i] * dt
-            f[i,:] .= interpolate(3, f[i,:], mesh.dv, alpha)
+            f[i,:] .= interpolate(p, f[i,:], mesh.dv, alpha)
         end
     end
 
@@ -126,31 +131,3 @@ function advection!(f::Array{Complex{Float64},2}, p::Int,
    ifft!(f,1)
 
 end
-
-function advection!( f::Array{Float64,2}, mesh::RectMesh1D1V, dt)
-    
-    lx = mesh.xmax - mesh.xmin
-    for j in 1:mesh.nv
-        coeffs = compute_interpolants(mesh.nx, f[:,j])        
-        for i in 1:mesh.nx
-            x_new = mesh.x[i] - dt * mesh.v[j]
-            x_new = mesh.xmin + mod(x_new - mesh.xmin, lx)
-            f[i,j] = interpolate(coeffs, mesh.nx, mesh.xmin, mesh.xmax, x_new)
-        end
-    end
-    
-end
-
-function advection!( f::Array{Float64,2}, mesh::RectMesh1D1V, e, dt)
-    
-    lv = mesh.vmax - mesh.vmin
-    for i in 1:mesh.nx
-        coeffs = compute_interpolants(mesh.nv, f[i,:])       
-        for j in 1:mesh.nv
-            v_new = mesh.v[j] - dt * e[i] 
-            v_new = mesh.vmin + mod(v_new - mesh.vmin, lv)
-            f[i,j] = interpolate(coeffs, mesh.nv, mesh.vmin, mesh.vmax, v_new)
-        end
-    end
-    
-end            

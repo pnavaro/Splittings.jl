@@ -1,9 +1,7 @@
-module CubicSplines
-
 """
-    This function is a julia version of a Fortran code written by
+    These functions are a julia version of a Fortran code written by
    
-    Edwin Chacon Golcher
+    Edwin Chacon Golcher (Institute of Physics of the Czech Academy of Sciences)
    
 """
 function compute_interpolants( n::Int, f::Array{Float64})
@@ -98,5 +96,3 @@ function advection!( f::Array{Float64,2}, mesh::RectMesh1D1V, e, dt)
     end
     
 end            
-
-end

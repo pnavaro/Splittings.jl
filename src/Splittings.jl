@@ -6,10 +6,11 @@ export RectMesh1D, RectMesh1D1V
 export advection!
 export compute_rho, compute_e, interpolate
 
-include("cubic_splines.jl")
 include("meshes.jl")
+include("domains.jl")
 include("fft.jl")
 include("bsl.jl")
+include("cubic_splines.jl")
 
 """
 

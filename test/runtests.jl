@@ -4,6 +4,7 @@ else
     using Test
 end
 
+
 import Splittings:compute_interpolants, interpolate
 
 function interpolation_test(nx = 128)
@@ -23,3 +24,20 @@ end
 
 # write your own tests here
 @test isapprox(interpolation_test(),  0.0, atol=1e-7)
+
+@testset "Domains" begin
+
+      import Splittings:PeriodicDomain
+	x = PeriodicDomain( -1, 1, 21 )
+	y = PeriodicDomain( -2, 2, 41 )
+
+      m = x * y
+
+      @test m.xmin == -1.
+      @test m.xmax ==  0.9
+      @test m.vmin == -2.
+      @test m.vmax ==  1.9
+
+end
+      
+      
