@@ -2,7 +2,6 @@ using IntervalSets
 
 export PeriodicDomain
 
-
 """
 
     PeriodicDomain( left, right, ncells)
