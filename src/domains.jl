@@ -38,7 +38,7 @@ mutable struct PeriodicDomain
 
     end
 
-    function PeriodicDomain(interval::Interval{:closed,:closed}, ncells::Int)
+    function PeriodicDomain(interval::ClosedInterval{Any}, ncells::Int)
 
 	left  = interval.left
 	right = interval.right
