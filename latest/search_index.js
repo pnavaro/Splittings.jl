@@ -25,11 +25,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#Splittings.compute_rho-Tuple{Any,Any}",
+    "page": "Introduction",
+    "title": "Splittings.compute_rho",
+    "category": "method",
+    "text": "compute_rho( mesh, f)\n\nCompute charge density\n\nρ(x,t) = ∫ f(x,v,t) dv\n\nreturn ρ - ρ̄ if neutralized=true\n\n\n\n\n\n"
+},
+
+{
     "location": "index.html#Splittings.compute_e-Tuple{Any,Any}",
     "page": "Introduction",
     "title": "Splittings.compute_e",
     "category": "method",
-    "text": "Compute Ex using that -ik*Ex = rho\n\n\n\n\n\n"
+    "text": "compute_e( mesh, ρ)\n\nCompute 1d electric field using that -ik * e = ρ\n\n\n\n\n\n"
 },
 
 {
