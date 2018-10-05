@@ -127,7 +127,7 @@ function advection!(f::Array{Complex{Float64},2}, p::Int,
 
 end
 
-function advection!( mesh::RectMesh1D1V, f::Array{Float64,2}, dt)
+function advection!( f::Array{Float64,2}, mesh::RectMesh1D1V, dt)
     
     lx = mesh.xmax - mesh.xmin
     for j in 1:mesh.nv
@@ -141,9 +141,9 @@ function advection!( mesh::RectMesh1D1V, f::Array{Float64,2}, dt)
     
 end
 
-function advection!( mesh::RectMesh1D1V, f::Array{Float64,2}, e, dt)
+function advection!( f::Array{Float64,2}, mesh::RectMesh1D1V, e, dt)
     
-    lv = mesh.vmax-mesh.vmin
+    lv = mesh.vmax - mesh.vmin
     for i in 1:mesh.nx
         coeffs = compute_interpolants(mesh.nv, f[i,:])       
         for j in 1:mesh.nv
