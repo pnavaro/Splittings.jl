@@ -7,7 +7,7 @@ using FFTW, LinearAlgebra
     ∂ f / ∂ t − E(x) ∂ f / ∂ υ  = 0
 
 """
-function advection!( fᵀ, meshx::RectMesh1D, meshv::RectMesh1D, e, dt::Float64)
+function advection!( fᵀ, meshx::UniformMesh, meshv::UniformMesh, e, dt::Float64)
 
     n = meshv.nx
     L = meshv.xmax - meshv.xmin
@@ -27,7 +27,7 @@ end
     ∂ f / ∂ t − υ ∂ f / ∂ x  = 0
 
 """
-function advection!( f, meshx::RectMesh1D, meshv::RectMesh1D, dt::Float64)
+function advection!( f, meshx::UniformMesh, meshv::UniformMesh, dt::Float64)
 
     L = meshx.xmax - meshx.xmin
     m = div(meshx.nx,2)

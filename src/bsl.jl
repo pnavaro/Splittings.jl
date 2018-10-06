@@ -94,7 +94,7 @@ end
 
 """
 function advection!(f::Array{Complex{Float64},2}, p::Int, 
-                    mesh::RectMesh1D, v::Array{Float64,1}, 
+                    mesh::UniformMesh, v::Array{Float64,1}, 
                     nv::Int, dt::Float64)
 
    nx = mesh.nx

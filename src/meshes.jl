@@ -65,15 +65,16 @@ struct RectMesh1D1V
 
 end
 
-export RectMesh1D
+export UniformMesh
+
 """
 
-    RectMesh1D(xmin, xmax, nx)
+    UniformMesh(xmin, xmax, nx)
 
     1D uniform mesh data
 
 """
-struct RectMesh1D
+struct UniformMesh
 
    xmin     :: Float64
    xmax     :: Float64
@@ -82,7 +83,7 @@ struct RectMesh1D
    x        :: Vector{Float64}
    endpoint :: Bool
 
-   function RectMesh1D(xmin, xmax, nx::Int; endpoint=true)
+   function UniformMesh(xmin, xmax, nx::Int; endpoint=true)
 
        dx = (xmax - xmin) / nx
        if (endpoint)
@@ -90,6 +91,19 @@ struct RectMesh1D
        else
            x  = range(xmin, stop=xmax, length=nx+1)[1:end-1]
        end
+
+       new( xmin, xmax, nx, dx, x, endpoint)
+
+   end
+
+   function UniformMesh(xrange)
+
+       dx = xrange.step
+       xmin = xrange.offset
+       nx = xrange.len
+       xmax = xmin + (nx-1) * dx
+       x = collect(xrange)
+       endpoint = true
 
        new( xmin, xmax, nx, dx, x, endpoint)
 
