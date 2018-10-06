@@ -2,7 +2,7 @@ using FFTW, LinearAlgebra
 
 import Splittings:UniformMesh, compute_rho, compute_e
 
-meshx = UniformMesh( 0., 2π,  64, endpoint=false)
+meshx = UniformMesh( 0., 4π,  64, endpoint=false)
 meshv = UniformMesh(-6., 6., 128, endpoint=false)
 
 ϵ, kx = 0.001, 0.5

@@ -70,8 +70,8 @@ plot!(t, -0.1533*t.-5.50)
 """
 function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
 
-    meshx = Splittings.RectMesh1D(xmin, xmax, nx, endpoint=false)
-    meshv = Splittings.RectMesh1D(vmin, vmax, nv, endpoint=false)
+    meshx = Splittings.UniformMesh(xmin, xmax, nx, endpoint=false)
+    meshv = Splittings.UniformMesh(vmin, vmax, nv, endpoint=false)
 
     x = meshx.x
     v = meshv.x

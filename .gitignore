@@ -5,4 +5,5 @@
 notebooks/.ipynb_checkpoints
 docs/build/
 docs/site/
-.ipynb_checkpoints/Untitled-checkpoint.ipynb
+/.ipynb_checkpoints/
+examples/.ipynb_checkpoints/VlasovAmpere1D1V-checkpoint.ipynb

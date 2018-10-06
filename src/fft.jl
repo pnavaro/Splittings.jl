@@ -7,7 +7,11 @@ using FFTW, LinearAlgebra
     ∂ f / ∂ t − E(x) ∂ f / ∂ υ  = 0
 
 """
-function advection!( fᵀ, meshx::UniformMesh, meshv::UniformMesh, e, dt::Float64)
+function advection!( fᵀ::Array{Complex{Float64},2}, 
+		     meshx::UniformMesh, 
+		     meshv::UniformMesh, 
+		     e, 
+		     dt::Float64)
 
     n = meshv.nx
     L = meshv.xmax - meshv.xmin
@@ -23,14 +27,20 @@ end
 """
     advection!( f, meshx, meshv, dt) 
 
-    Advection in x
+    Advection in x and compute electric field
+
     ∂ f / ∂ t − υ ∂ f / ∂ x  = 0
 
+    ∂E / ∂t = −J = ∫ fυ dυ
+
 """
-function advection!( f, meshx::UniformMesh, meshv::UniformMesh, dt::Float64)
+function advection!( f::Array{Complex{Float64},2}, 
+		    meshx::UniformMesh, 
+		    meshv::UniformMesh, 
+		    dt::Float64)
 
     L = meshx.xmax - meshx.xmin
-    m = div(meshx.nx,2)
+    m = meshx.nx ÷ 2
     k = 2π/L * [0:1:m-1;-m:1:-1]
     k̃ = 2π/L * [1;1:1:m-1;-m:1:-1]
     v = meshv.x
