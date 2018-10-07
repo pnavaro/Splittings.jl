@@ -2,6 +2,9 @@ module Splittings
 
 using Statistics, FFTW, LinearAlgebra
 
+" Operator splitting "
+abstract type  OperatorSplitting end
+
 export advection!
 export compute_rho, compute_e, interpolate
 
