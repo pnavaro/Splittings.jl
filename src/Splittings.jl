@@ -53,4 +53,105 @@ function compute_e(mesh, ρ)
 
 end
 
+export RectMesh2D
+
+"""
+
+    mesh = RectMesh2D( meshx, meshy)
+
+    Data type that represents a 2D Rectangular Mesh 
+
+"""
+struct RectMesh2D
+
+    xmin :: Float64
+    xmax :: Float64
+    nx   :: Int64
+    dx   :: Float64
+    ymin :: Float64
+    ymax :: Float64
+    ny   :: Int64
+    dy   :: Float64
+
+    function RectMesh2D( meshx::UniformMesh, meshy::UniformMesh )
+
+        xmin = meshx.xmin    
+        xmax = meshx.xmax    
+        nx   = meshx.nx
+        dx   = meshx.dx
+
+        ymin = meshy.xmin    
+        ymax = meshy.xmax    
+        ny   = meshy.nx
+        dy   = meshy.dx
+
+        new( xmin, xmax, nx, dx, ymin, ymax, ny, dy)
+
+    end
+
+end
+
+export meshgrid
+"""
+
+    X, Y = meshgrid( x, y )
+    
+    Utility function to mimic the numpy function 
+
+"""
+function meshgrid( x, y )
+
+   nx, ny = size(x)[1], size(y)[1]
+   repeat(x,1,ny), repeat(y',nx,1)
+
+end
+
+
+export poisson!
+"""
+
+   poisson!(ρ, mesh, ex, ey)
+
+   Solve the equation Δ Φ = - ρ
+
+   ex = ∂ Φ / ∂ x
+   ey = ∂ Φ / ∂ y
+
+   Be careful the ρ array is destroyed
+
+"""
+function poisson!( ρ::Array{Complex{Float64},2}, 
+		   mesh::RectMesh2D, 
+		   ex::Array{Complex{Float64},2}, 
+		   ey::Array{Complex{Float64},2} )
+
+    kx0 =  2π / (mesh.xmax - mesh.xmin)
+    ky0 =  2π / (mesh.ymax - mesh.ymin)
+
+    fft!(ρ,[1,2])
+    
+    kx = kx0 * vcat(0:mesh.nx÷2-1,-mesh.nx÷2:-1)
+    kx[1] = 1.0
+    ky = ky0 * vcat(0:mesh.ny÷2-1,-mesh.ny÷2:-1)
+    kx[1] = 1.0
+
+    for i = 1:mesh.nx
+       kx2 = kx[i]*kx[i]
+       for j =  1:mesh.ny÷2+1
+          k2 = kx2 +ky[j]*ky[j]
+          ex[i,j] = -1im * kx[i]/k2 * ρ[i,j]
+	  ey[i,j] = -1im * ky[j]/k2 * ρ[i,j]
+       end 
+       for j = mesh.ny÷2+2:mesh.ny            
+          k2 = kx2 +ky[j]*ky[j]
+          ex[i,j] = -1im * kx[i]/k2 * ρ[i,j]
+          ey[i,j] = -1im * ky[j]/k2 * ρ[i,j]
+       end 
+    end
+
+    ifft!(ex,[1,2])
+    ifft!(ey,[1,2])
+
+end
+
 end
