@@ -15,87 +15,50 @@ and a specific implementation of the two operators
 """
 abstract type OperatorSplitting end
 
-struct LieTV <: OperatorSplitting
-
-    steps   :: Vector{Float64}
-    push_t! :: Function
-    push_v! :: Function
-    p       :: Any
-
-    function LieTV( push_t!, push_v! ; p=0.0)
-        steps = Float64[]
-        push!(steps, 1.)
-        push!(steps, 1.)
-        new( steps, push_t!, push_v!, p )
-    end
-
-end
-
-struct LieVT <: OperatorSplitting
-
-    steps   :: Vector{Float64}
-    push_t! :: Function
-    push_v! :: Function
-    p       :: Any
-
-    function LieTV( push_t!, push_v! ; p= 0.0)
-        steps = Float64[]
-        push!(steps, 1.)
-        push!(steps, 1.)
-        new( steps, push_t!, push_v!, p )
-    end
-
-end
-
-
 """
     Apply the composition method for given number of times steps.
     	split	: OperatorSplitting object
     	dt	: time step
     	number_time_steps	: number of time steps to be performed
 """
-function do_split_steps(split::LieTV, start::Tuple{Float64, Float64}, 
-    dt::Float64, number_time_steps)
-
-    x, v = start
-    for i = 1:number_time_steps
-        split.push_t!(x, v, dt, split.p)
-        split.push_v!(x, v, dt, split.p)
-    end
-    x, v
-
+macro LieTV(push_t, push_v)
+    return esc( quote
+        x = $push_t
+	v = $push_v
+    end)
 end
 
-function do_split_steps(split::LieVT, start::Tuple{Float64, Float64},
-    dt::Float64, number_time_steps)
-
-    x, v = start
-    for i = 1:number_time_steps
-        split.push_v!(x, v, dt, split.p)
-        split.push_t!(x, v, dt, split.p)
-    end
-    x, v
-
+macro LieVT(push_t, push_v)
+    return esc(quote
+       v = $push_v
+       x = $push_t
+    end)
 end
 
-#struct StrangTVT
-#    
-#       split%nb_split_step = 3
-#       split%split_begin_T = .true.
-#       push!(split_step, 0.5_f64
-#       push!(split_step, 1._f64
-#       push!(split_step, split%split_step(1)
-#end
-#
-#struct StrangVTV
-#    
-#       split%nb_split_step = 3
-#       split%split_begin_T = .false.
-#       push!(split_step(1) = 0.5_f64
-#       push!(split_step(2) = 1._f64
-#       push!(split_step(3) = split%split_step(1)
-#end
-#
+macro StrangTVT(push_t, push_v)
+    return esc(quote    
+        full_dt = dt
+	dt = Base.:*(0.5, full_dt)
+        x = $push_t
+	dt = full_dt
+        v = $push_v
+	dt = Base.:*(0.5, full_dt)
+        x = $push_t
+    end)
+end
+
+macro StrangVTV(push_t, push_v)
+    return esc(quote    
+        full_dt = dt
+	dt = Base.:*(0.5, full_dt)
+        v = $push_v
+	dt = full_dt
+        x = $push_t
+	dt = Base.:*(0.5, full_dt)
+        v = $push_v
+    end)
+end
+
 #struct TripleJumpTVT
 #
 #       split%nb_split_step = 7

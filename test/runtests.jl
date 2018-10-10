@@ -2,8 +2,8 @@ using Test
 using IntervalSets
 using LinearAlgebra
 
-#include("operator_splitting.jl")
-#include("linear_pendulum.jl")
+include("operator_splitting.jl")
+include("linear_pendulum.jl")
 include("test_meshes.jl")
 include("test_domains.jl")
 include("test_cubic_splines.jl")

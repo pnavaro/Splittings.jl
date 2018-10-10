@@ -19,19 +19,11 @@ function exact( t_final, ω, x0, v0 )
     return x, v
 end
 
-"""
+function check_order(do_split_steps::Function, 
+		     steps_fine::Int64, 
+		     expected_order::Int )
 
-    check_order( split, steps_fine, expected_order)
- 
-    checks the order of a splitting method on the linear pendulum."
-
-    method         : splitting method to be chosen from those 
-    steps_fine     : number of steps on fine grid
-    expected_order : expected_order of the method 
-
-"""
-function check_order(split::OperatorSplitting, steps_fine::Int64, expected_order::Int )
-
+    ω  = 2.0
     x0 = 1.0       # initial x for order checking
     v0 = 2.0       # initial v for order checking 
     t_final = 1.0  # final time for order checking 
@@ -42,7 +34,7 @@ function check_order(split::OperatorSplitting, steps_fine::Int64, expected_order
     dt = t_final/steps_fine
     number_time_steps = steps_fine
 
-    x, v = do_split_steps(split, (x0, v0), dt, number_time_steps)
+    x, v = do_split_steps((x0, v0), dt, number_time_steps, ω)
   
     # compute  mean square error
     error0 = sqrt( (x - x_exact)^2 + (v - v_exact)^2 )
@@ -51,7 +43,7 @@ function check_order(split::OperatorSplitting, steps_fine::Int64, expected_order
     dt = 2*dt
     number_time_steps = number_time_steps ÷ 2
 
-    x, v = do_split_steps(split, (x0, v0), dt, number_time_steps)
+    x, v = do_split_steps((x0, v0), dt, number_time_steps, ω)
  
     # compute mean square error
     error1 = sqrt( (x - x_exact)^2 + (v - v_exact)^2 )
@@ -60,7 +52,7 @@ function check_order(split::OperatorSplitting, steps_fine::Int64, expected_order
     dt = 2*dt
     number_time_steps = number_time_steps ÷ 2
 
-    x, v = do_split_steps(split, (x0, v0), dt, number_time_steps)
+    x, v = do_split_steps((x0, v0), dt, number_time_steps, ω)
   
     # compute  mean square error
     error2 = sqrt( (x - x_exact)^2 + (v - v_exact)^2 )
@@ -87,26 +79,59 @@ function check_order(split::OperatorSplitting, steps_fine::Int64, expected_order
 end 
 
 " First operator of splitting for linear pendulum"
-push_x = function ( x, v, dt )
-
-    x += v * dt
-
-end 
+push_x( x, v, dt ) = x + v * dt
 
 " Second operator of splitting for linear pendulum"
-push_v = function ( x, v, dt, ω)
-
-    v += - ω^2 * x * dt
+push_v( x, v, dt, ω) = v - ω^2 * x * dt
   
-end 
+@testset "Splitting Operators macros" begin
 
-const ω  = 2.0       # frequency
+    function do_steps( start::Tuple{Float64,Float64},
+    		   dt::Float64, nsteps::Int64, ω::Float64 )
+        x, v = start
+        for i = 1:nsteps
+            @LieTV push_x(x,v,dt) push_v(x,v,dt,ω)
+        end
+        x, v
+    end
+    
+    @test check_order(do_steps, 200, 1)
+    
+    function do_steps( start::Tuple{Float64,Float64},
+    		   dt::Float64, nsteps::Int64, ω::Float64 )
+        x, v = start
+        for i = 1:nsteps
+            @LieVT push_x(x,v,dt) push_v(x,v,dt,ω)
+        end
+        x, v
+    end
+    
+    @test check_order(do_steps, 200, 1)
+    
+    function do_steps( start::Tuple{Float64,Float64},
+    		   dt::Float64, nsteps::Int64, ω::Float64 )
+        x, v = start
+        for i = 1:nsteps
+            @StrangTVT push_x(x,v,dt) push_v(x,v,dt,ω)
+        end
+        x, v
+    
+    end
+    
+    @test check_order(do_steps, 100, 2)
+    
+    #function do_steps( start::Tuple{Float64,Float64},
+    #		   dt::Float64, nsteps::Int64, ω::Float64 )
+    #    x, v = start
+    #    for i = 1:nsteps
+    #        @StrangVTV push_x(x,v,dt) push_v(x,v,dt,ω)
+    #    end
+    #    x, v
+    #end
+    #
+    #@test check_order(do_steps, 100, 2)
 
-lie_tv = LieTV( push_x, push_v, ω)
-@test check_order(lie_tv, 200, 1)
-
-lie_vt = LieVT( push_x, push_v, ω)
-@test check_order(lie_vt, 200, 1)
+end
 
 #tests = [(lie_tv,200, 1), (lie_vt,200, 1), (strang_tvt,100, 2),
 #         (strang_vtv,100, 1), (triple_jump_tvt, 64, 4), 
