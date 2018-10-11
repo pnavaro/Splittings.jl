@@ -7,6 +7,7 @@ abstract type  OperatorSplitting end
 
 export advection!
 export compute_rho, compute_e, interpolate
+export compute_rho!, compute_e!
 
 include("meshes.jl")
 include("domains.jl")
@@ -28,13 +29,21 @@ include("operator_splitting.jl")
 """
 function compute_rho(mesh, f, neutralized=true)
 
-   dv  = mesh.dx
+   local dv  = mesh.dx
    ρ = dv * sum(f, dims=2)
    if (neutralized)
        ρ .- mean(ρ)
    else
        ρ
    end
+
+end
+
+function compute_rho!(rho::Array{Complex{Float64}}, mesh, f::Array{Complex{Float64},2})
+
+   local dv = mesh.dx
+   rho .= dv * sum(f, dims=2)
+   rho .= vec(rho .- mean(rho))
 
 end
 
@@ -54,6 +63,19 @@ function compute_e(mesh, ρ)
    modes[1] = 1.0
    ρ̂ = fft(ρ)./modes
    vec(real(ifft(-1im*ρ̂)))
+
+end
+
+function compute_e!(e::Array{Complex{Float64}}, mesh, ρ::Array{Complex{Float64}})
+
+   nx = mesh.nx
+   k =  2π / (mesh.xmax - mesh.xmin)
+   modes  = zeros(Float64, nx)
+   modes .= k * vcat(0:nx÷2-1,-nx÷2:-1)
+   modes[1] = 1.0
+   fft!(ρ)
+   e .= -1im * ρ ./ modes
+   ifft!(e)
 
 end
 
