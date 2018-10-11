@@ -127,8 +127,8 @@ end
     must be represented by a Array{Complex{Float64},2}.
 
 """
-function advection!(f::Array{Complex{Float64},2}, p::Int, 
-                    mesh::UniformMesh, v::Array{Float64,1}, 
+function advection!(f::Array{Complex{Float64},2}, p::Int64, 
+		    mesh::UniformMesh, v::Vector{Complex{Float64}}, 
                     nv::Int, dt::Float64)
 
    nx = mesh.nx
