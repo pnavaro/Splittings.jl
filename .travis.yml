@@ -9,5 +9,6 @@ notifications:
   email: false
 
 after_success:
-  - julia -e 'using Pkg; cd(Pkg.dir("Splittings")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder()); Codecov.submit(process_folder())'
-  - julia -e 'using Pkg; cd(Pkg.dir("Splittings")); Pkg.add("Documenter"); include(joinpath("docs", "make.jl"))';
+  - julia -e 'using Pkg; import Splittings; joinpath(dirname(pathof(Splittings)), "..", paths...); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder());'
+  - julia -e 'using Pkg; import Splittings; joinpath(dirname(pathof(Splittings)), "..", paths...); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+  - julia -e 'using Pkg; import Splittings; joinpath(dirname(pathof(Splittings)), "..", paths...); Pkg.add("Documenter"); include(joinpath("docs", "make.jl"))';
