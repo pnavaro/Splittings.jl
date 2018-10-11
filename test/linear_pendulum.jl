@@ -1,3 +1,4 @@
+import Splittings: @Lie, @Strang, @TripleJump, @Order6
 """
 
     Implements split operators for linear pendulum 
@@ -9,10 +10,6 @@
     ``v(t)= -x(0) ω sin(ωt) + v(0)cos(ωt) ``
 
 """
-abstract type LinearPendulum end
-
-
-" Exact solution of linear pendulum "
 function exact( t_final, ω, x0, v0 )
     x = x0 * cos( ω * t_final ) + (v0 / ω) * sin( ω * t_final )
     v = -x0 * ω * sin( ω* t_final ) + v0 * cos( ω * t_final )
@@ -24,8 +21,8 @@ function check_order(do_split_steps::Function,
 		     expected_order::Int )
 
     ω  = 2.0
-    x0 = 1.0       # initial x for order checking
-    v0 = 2.0       # initial v for order checking 
+    x0 = 1.0       # initial x  for order checking
+    v0 = 2.0       # initial v  for order checking 
     t_final = 1.0  # final time for order checking 
 
     x_exact, v_exact = exact( t_final, ω, x0, v0 )
@@ -40,7 +37,7 @@ function check_order(do_split_steps::Function,
     error0 = sqrt( (x - x_exact)^2 + (v - v_exact)^2 )
 
     # do iterations with middle time step
-    dt = 2*dt
+    dt = 2dt
     number_time_steps = number_time_steps ÷ 2
 
     x, v = do_split_steps((x0, v0), dt, number_time_steps, ω)
@@ -49,7 +46,7 @@ function check_order(do_split_steps::Function,
     error1 = sqrt( (x - x_exact)^2 + (v - v_exact)^2 )
   
     # do iterations with largest time step
-    dt = 2*dt
+    dt = 2dt
     number_time_steps = number_time_steps ÷ 2
 
     x, v = do_split_steps((x0, v0), dt, number_time_steps, ω)
@@ -79,73 +76,119 @@ function check_order(do_split_steps::Function,
 end 
 
 " First operator of splitting for linear pendulum"
-push_x( x, v, dt ) = x + v * dt
+function push_x!( x, v, dt ) 
+    x .= x .+ v * dt 
+end
 
 " Second operator of splitting for linear pendulum"
-push_v( x, v, dt, ω) = v - ω^2 * x * dt
+function push_v!( x, v, dt, ω) 
+    v .= v .- ω^2 * x * dt 
+end
   
 @testset "Splitting Operators macros" begin
 
-    function do_steps( start::Tuple{Float64,Float64},
+    function do_steps_lie_tv( start::Tuple{Float64,Float64},
     		   dt::Float64, nsteps::Int64, ω::Float64 )
-        x, v = start
+	x = zeros(Float64, 1)
+	v = zeros(Float64, 1)
+	x[1], v[1] = start
         for i = 1:nsteps
-            @LieTV push_x(x,v,dt) push_v(x,v,dt,ω)
+            @Lie push_x!(x,v,dt) push_v!(x,v,dt,ω)
         end
-        x, v
+	x[1], v[1]
     end
     
-    @test check_order(do_steps, 200, 1)
+    @test check_order(do_steps_lie_tv, 200, 1)
     
-    function do_steps( start::Tuple{Float64,Float64},
+    function do_steps_lie_vt( start::Tuple{Float64,Float64},
     		   dt::Float64, nsteps::Int64, ω::Float64 )
-        x, v = start
+	x = zeros(Float64, 1)
+	v = zeros(Float64, 1)
+	x[1], v[1] = start
         for i = 1:nsteps
-            @LieVT push_x(x,v,dt) push_v(x,v,dt,ω)
+	    @Lie push_v!(x,v,dt,ω) push_x!(x,v,dt)
         end
-        x, v
+	x[1], v[1]
     end
     
-    @test check_order(do_steps, 200, 1)
+    @test check_order(do_steps_lie_vt, 200, 1)
     
-    function do_steps( start::Tuple{Float64,Float64},
+    function do_steps_strang_tvt( start::Tuple{Float64,Float64},
     		   dt::Float64, nsteps::Int64, ω::Float64 )
-        x, v = start
+	x = zeros(Float64, 1)
+	v = zeros(Float64, 1)
+	x[1], v[1] = start
         for i = 1:nsteps
-            @StrangTVT push_x(x,v,dt) push_v(x,v,dt,ω)
+            @Strang push_x!(x,v,dt) push_v!(x,v,dt,ω)
         end
-        x, v
-    
+	x[1], v[1]
     end
     
-    @test check_order(do_steps, 100, 2)
+    @test check_order(do_steps_strang_tvt, 100, 2)
     
-    #function do_steps( start::Tuple{Float64,Float64},
-    #		   dt::Float64, nsteps::Int64, ω::Float64 )
-    #    x, v = start
-    #    for i = 1:nsteps
-    #        @StrangVTV push_x(x,v,dt) push_v(x,v,dt,ω)
-    #    end
-    #    x, v
-    #end
-    #
-    #@test check_order(do_steps, 100, 2)
+    function do_steps_strang_vtv( start::Tuple{Float64,Float64},
+    		   dt::Float64, nsteps::Int64, ω::Float64 )
+	x = zeros(Float64, 1)
+	v = zeros(Float64, 1)
+	x[1], v[1] = start
+        for i = 1:nsteps
+            @Strang push_v!(x,v,dt,ω) push_x!(x,v,dt) 
+        end
+	x[1], v[1]
+    end
+    
+    @test check_order(do_steps_strang_vtv, 100, 2)
+
+    function do_steps_triple_jump_tvt( start::Tuple{Float64,Float64},
+    		   dt::Float64, nsteps::Int64, ω::Float64 )
+	x = zeros(Float64, 1)
+	v = zeros(Float64, 1)
+	x[1], v[1] = start
+        for i = 1:nsteps
+            @TripleJump push_x!(x,v,dt) push_v!(x,v,dt,ω)
+        end
+	x[1], v[1]
+    end
+    
+    @test check_order(do_steps_triple_jump_tvt, 64, 4)
+
+    function do_steps_triple_jump_vtv( start::Tuple{Float64,Float64},
+    		   dt::Float64, nsteps::Int64, ω::Float64 )
+	x = zeros(Float64, 1)
+	v = zeros(Float64, 1)
+	x[1], v[1] = start
+        for i = 1:nsteps
+            @TripleJump push_v!(x,v,dt,ω) push_x!(x,v,dt) 
+        end
+	x[1], v[1]
+    end
+    
+    @test check_order(do_steps_triple_jump_vtv, 64, 4)
+
+    function do_steps_order6_tvt( start::Tuple{Float64,Float64},
+    		   dt::Float64, nsteps::Int64, ω::Float64 )
+	x = zeros(Float64, 1)
+	v = zeros(Float64, 1)
+	x[1], v[1] = start
+        for i = 1:nsteps
+            @Order6 push_x!(x,v,dt) push_v!(x,v,dt,ω)
+        end
+	x[1], v[1]
+    end
+    
+    @test check_order(do_steps_order6_tvt, 20, 6)
+
+    function do_steps_order6_vtv( start::Tuple{Float64,Float64},
+    		   dt::Float64, nsteps::Int64, ω::Float64 )
+	x = zeros(Float64, 1)
+	v = zeros(Float64, 1)
+	x[1], v[1] = start
+        for i = 1:nsteps
+            @Order6 push_v!(x,v,dt,ω) push_x!(x,v,dt) 
+        end
+	x[1], v[1]
+    end
+    
+    @test check_order(do_steps_order6_vtv, 20, 6)
 
 end
-
-#tests = [(lie_tv,200, 1), (lie_vt,200, 1), (strang_tvt,100, 2),
-#         (strang_vtv,100, 1), (triple_jump_tvt, 64, 4), 
-#         (triple_jump_vtv,64,4), (order6_tvt,20,4),
-#         (order6_vtv,20, 6)] 
-#
-#for (method, nsteps, expected_order) in test
-#
-#  if (check_order(method, nsteps, expected_order))
-#     println("Test with $method passed ")
-#  else
-#     println("Problem with order of $method ")
-#  end if
-#
-#
-#end 
-
