@@ -10,3 +10,4 @@ notifications:
 after_success:
   - julia -e 'cd(Pkg.dir("Splittings")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())';
   - julia -e 'cd(Pkg.dir("Splittings")); Pkg.add("Documenter"); include(joinpath("docs", "make.jl"))';
+  - julia -e 'cd(Pkg.dir("Splittings")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
