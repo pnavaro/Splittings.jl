@@ -1,6 +1,5 @@
 using FFTW, LinearAlgebra
 
-
 """
     bspline(p, j, x)
 
@@ -85,8 +84,7 @@ function interpolate(p::Int, f::Vector{Complex{Float64}}, delta::Float64,
          .* exp.((ishift + j) * 1im .* modes))
    end
 
-   f .= f .* eigalpha ./ eig_bspl
-   f
+   f .* eigalpha ./ eig_bspl
 
 end
 
@@ -128,7 +126,7 @@ end
 
 """
 function advection!(f::Array{Complex{Float64},2}, p::Int64, 
-		    mesh::UniformMesh, v::Vector{Complex{Float64}}, 
+		    mesh::UniformMesh, v::Vector{Float64}, 
                     nv::Int, dt::Float64)
 
    nx = mesh.nx

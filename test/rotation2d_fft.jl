@@ -4,8 +4,6 @@
 # \frac{d f}{dt} +  (v \frac{d f}{dx} - x \frac{d f}{dv}) = 0
 # $$
 
-using FFTW, LinearAlgebra, BenchmarkTools
-
 " Julia function to compute exact solution "
 function exact(tf, mesh::Splittings.RectMesh1D1V)
 
@@ -34,7 +32,7 @@ struct Advector
     p2 :: FFTWPlan
 
     function Advector( f  :: Array{Complex{Float64},2},
-	                 fᵗ :: Array{Complex{Float64},2})
+                       fᵗ :: Array{Complex{Float64},2})
 
         p1 = plan_fft(f,  1)
         p2 = plan_fft(fᵗ, 1)

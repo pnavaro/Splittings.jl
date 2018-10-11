@@ -51,6 +51,6 @@ function advection!( f::Array{Complex{Float64},2},
     Ek  = -1im * meshv.dx * sum(f,dims=2) ./ k̃
     Ek[1] = 0.0
     ifft!(f,1)
-    real(ifft(Ek))
+    vec(real(ifft(Ek)))
 
 end
