@@ -6,6 +6,11 @@ makedocs(modules=[Splittings],
          format = :html,
          sitename = "Splittings",
          pages = ["Introduction" => "index.md",
+                  "Examples" => [
+                      "Vlasov-Ampere" => "vlasov-ampere.md",
+                      "Vlasov-Poisson" => "vlasov-poisson.md",
+                      "Bump On Tail" => "bump_on_tail.md",
+                      "Rotation 2D" => "rotation2d_bsl.md"],
                   "User Documentation" => [
                     "Semi-Lagrangian" => "bsl.md",
                     "How to Contribute" => "contributing.md"]])
