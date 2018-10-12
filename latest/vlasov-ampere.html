@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Vlasov-Ampere · Splittings</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="index.html"><img class="logo" src="assets/logo.png" alt="Splittings logo"/></a><h1>Splittings</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search.html"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="index.html">Introduction</a></li><li><span class="toctext">Examples</span><ul><li class="current"><a class="toctext" href="vlasov-ampere.html">Vlasov-Ampere</a><ul class="internal"></ul></li><li><a class="toctext" href="vlasov-poisson.html">Vlasov-Poisson</a></li><li><a class="toctext" href="bump_on_tail.html">Bump On Tail</a></li><li><a class="toctext" href="rotation2d_bsl.html">Rotation 2D</a></li></ul></li><li><span class="toctext">User Documentation</span><ul><li><a class="toctext" href="bsl.html">Semi-Lagrangian</a></li><li><a class="toctext" href="contributing.html">How to Contribute</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Examples</li><li><a href="vlasov-ampere.html">Vlasov-Ampere</a></li></ul><a class="edit-page" href="https://github.com/pnavaro/Splittings.jl/blob/master/docs/src/vlasov-ampere.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Vlasov-Ampere</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Vlasov-Ampere-1" href="#Vlasov-Ampere-1">Vlasov-Ampere</a></h1><p>Compute Landau damping by solving Vlasov-Ampere system.</p><div>\[ \frac{∂f}{∂t} + υ \frac{∂f}{∂x}
+ - E(t,x) \frac{∂f}{∂υ} = 0
+ ```
+\]</div><p>math \frac{∂E}{∂t} = - J = ∫ fυ dυ</p><pre><code class="language-none">
+## Algorithm
+
+ - For each ``j`` compute discrete Fourier transform in ``x`` of
+   ``(x_i,υ_j)`` yielding ``f_k^n(υ_j)``,
+ - For `` k ≂̸ 0 ``
+
+     - Compute
+</code></pre><p>math f^{n+1}<em>k(υ</em>j) = e^{−2iπ k υ Δt/L} f<em>n^k(υ</em>j), </p><pre><code class="language-none">
+     - Compute
+</code></pre><p>math ρ<em>k^{n+1} = Δ υ ∑</em>j􏰄 f^{n+1}<em>k(υ</em>j), </p><pre><code class="language-none">
+     - Compute
+</code></pre><p>math E^{n+1}<em>k = ρ^{n+1}</em>k L/(2iπkϵ_0), </p><pre><code class="language-none">
+ - For ``k = 0`` do nothing:
+</code></pre><p>math f<em>{n+1}(υ</em>j) = f^n<em>k(υ</em>j), E^{n+1}<em>k = E^n</em>k. </p><pre><code class="language-none">
+ - Perform inverse discrete Fourier transform of ``E^{n+1}_k`` and for each
+   ``j`` of ``f^{n+1}_k (υ_j)``.
+
+## Variables
+
+- `nx::Integer`: the number of points along x axis.
+- `nv::Integer`: the number of points along ⁠υ axis.
+- `xmin::Float`: the origin of mesh along x axis.
+- `xmax::Float`: the end of mesh along x axis.
+- `vmin::Float`: the origin of mesh along υ axis.
+- `vmax::Float`: the end of mesh along υ axis.
+- `tf::Float`  : the final time of the simulation.
+- `nt::Integer`: the number of time steps.
+</code></pre><p>@example </p><p>import Splittings: advection<em>x!, advection</em>v!, UniformMesh import Splittings: @Strang, compute<em>rho, compute</em>e using Plots, LinearAlgebra pyplot()</p><p>function push<em>t!( f, fᵀ, meshx, meshv, e,  dt)     transpose!(f,fᵀ)     advection</em>x!( f, meshx, meshv, e,  dt)     transpose!(fᵀ,f) end</p><p>function push<em>v!(fᵀ, meshx, meshv, e, dt)     advection</em>v!(fᵀ, meshx, meshv, e, dt) end</p><p>function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)</p><pre><code class="language-none">meshx = UniformMesh(xmin, xmax, nx, endpoint=false)
+meshv = UniformMesh(vmin, vmax, nv, endpoint=false)
+
+x = meshx.x
+v = meshv.x
+ϵ, kx = 0.001, 0.5
+
+f = zeros(Complex{Float64},(nx,nv))
+fᵀ= zeros(Complex{Float64},(nv,nx))
+
+f .= (1.0.+ϵ*cos.(kx*x))/sqrt(2π) .* transpose(exp.(-0.5*v.*v))
+transpose!(fᵀ,f)
+
+e = zeros(Complex{Float64},nx)
+
+ρ  = compute_rho(meshv, f)
+e .= compute_e(meshx, ρ)
+
+nrj = Float64[]
+
+dt = tf / nt
+
+for i in 1:nt
+
+push!(nrj, 0.5*log(sum(real(e).^2)*meshx.dx))
+
+    @Strang(  push_v!(fᵀ, meshx, meshv, e,  dt),
+              push_t!(f, fᵀ, meshx, meshv, e,  dt)
+           )
+              
+end
+nrj</code></pre><p>end</p><p>nx, nv = 64, 128 xmin, xmax =  0., 4π vmin, vmax = -6., 6. tf = 80 nt = 600</p><p>t = range(0,stop=tf,length=nt) plot(t, vm1d(nx, nv, xmin, xmax, vmin, vmax, tf, nt) ) plot!(t, -0.1533*t.-5.50) savefig(&quot;va-plot.png&quot;); nothing # hide ```</p><p><img src="va-plot.png" alt/></p><footer><hr/><a class="previous" href="index.html"><span class="direction">Previous</span><span class="title">Introduction</span></a><a class="next" href="vlasov-poisson.html"><span class="direction">Next</span><span class="title">Vlasov-Poisson</span></a></footer></article></body></html>
