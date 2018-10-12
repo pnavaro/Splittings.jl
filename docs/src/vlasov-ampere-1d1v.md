@@ -1,25 +1,6 @@
-```@example 
-using Plots, LinearAlgebra
-pyplot()
-
-"""
-
-     vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
+# Vlasov-Ampere
 
 Compute Landau damping by solving Vlasov-Ampere system.
-
-# Arguments
-
-- `nx::Integer`: the number of points along x axis.
-- `nv::Integer`: the number of points along ⁠υ axis.
-- `xmin::Float`: the origin of mesh along x axis.
-- `xmax::Float`: the end of mesh along x axis.
-- `vmin::Float`: the origin of mesh along υ axis.
-- `vmax::Float`: the end of mesh along υ axis.
-- `tf::Float`  : the final time of the simulation.
-- `nt::Integer`: the number of time steps.
-
-# 1D Vlasov–Ampere system
 
  ``
  \\frac{∂f}{∂t} + υ \\frac{∂f}{∂x}
@@ -55,24 +36,38 @@ Compute Landau damping by solving Vlasov-Ampere system.
  - Perform inverse discrete Fourier transform of ``E^{n+1}_k`` and for each
    ``j`` of ``f^{n+1}_k (υ_j)``.
 
-# Examples
+## Variables
 
-```jl
-using Plots, Splittings
-nx, nv = 64, 128
-xmin, xmax =  0., 4π
-vmin, vmax = -6., 6.
-tf, nt = 60, 600
-t =  range(0,stop=tf,length=nt)
-plot(t, vm1d(nx, nv, xmin, xmax, vmin, vmax, tf, nt) )
-plot!(t, -0.1533*t.-5.50)
-```
+- `nx::Integer`: the number of points along x axis.
+- `nv::Integer`: the number of points along ⁠υ axis.
+- `xmin::Float`: the origin of mesh along x axis.
+- `xmax::Float`: the end of mesh along x axis.
+- `vmin::Float`: the origin of mesh along υ axis.
+- `vmax::Float`: the end of mesh along υ axis.
+- `tf::Float`  : the final time of the simulation.
+- `nt::Integer`: the number of time steps.
 
-"""
+```@example 
+
+using Splittings
+using Plots, LinearAlgebra
+pyplot()
+
+
+function push_t!( f, fᵀ, meshx, meshv, e,  dt)
+    transpose!(f,fᵀ)
+    advection_x!( f, meshx, meshv, e,  dt)
+    transpose!(fᵀ,f)
+end
+
+function push_v!(fᵀ, meshx, meshv, e, dt)
+    advection_v!(fᵀ, meshx, meshv, e, dt)
+end
+
 function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
 
-    meshx = Splittings.UniformMesh(xmin, xmax, nx, endpoint=false)
-    meshv = Splittings.UniformMesh(vmin, vmax, nv, endpoint=false)
+    meshx = UniformMesh(xmin, xmax, nx, endpoint=false)
+    meshv = UniformMesh(vmin, vmax, nv, endpoint=false)
 
     x = meshx.x
     v = meshv.x
@@ -84,20 +79,23 @@ function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
     f .= (1.0.+ϵ*cos.(kx*x))/sqrt(2π) .* transpose(exp.(-0.5*v.*v))
     transpose!(fᵀ,f)
 
-    ρ = Splittings.compute_rho(meshv, f)
-    e = Splittings.compute_e(meshx, ρ)
+    e = zeros(Complex{Float64},nx)
+
+    ρ  = compute_rho(meshv, f)
+    e .= compute_e(meshx, ρ)
 
     nrj = Float64[]
 
     dt = tf / nt
 
     for i in 1:nt
+
         push!(nrj, 0.5*log(sum(e.^2)*meshx.dx))
-        Splittings.advection!(fᵀ, meshx, meshv, e,  0.5dt)
-        transpose!(f,fᵀ)
-        e = Splittings.advection!( f, meshx, meshv, dt)
-        Splittings.transpose!(fᵀ,f)
-        Splittings.advection!(fᵀ, meshx, meshv, e,  0.5dt)
+
+        @Strang(  push_v!(fᵀ, meshx, meshv, e,  0.5dt),
+                  push_t!( f, fᵀ, meshx, meshv, e,  dt)
+               )
+                  
     end
     nrj
 end

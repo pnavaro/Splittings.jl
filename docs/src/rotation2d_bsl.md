@@ -1,15 +1,16 @@
+# Rotation of a gaussian distribution
+
+
+```math
+    \frac{df}{dt} +  (y \frac{df}{dx} - x \frac{df}{dy}) = 0
+```
+
+
 ```@example
-import Splittings
-using Printf
+using Splittings
 
-"""
-
-    exact( tf, nt, mesh)
-
-    Exact solution of f after rotation during time tf
-
-"""
-function exact(tf::Float64, mesh::Splittings.RectMesh1D1V)
+" Exact solution of f after rotation during time tf "
+function exact(tf::Float64, mesh::RectMesh1D1V)
 
     f = zeros(Float64,(mesh.nx,mesh.nv))
     for (i, x) in enumerate(mesh.x), (j, v) in enumerate(mesh.v)
@@ -22,46 +23,26 @@ function exact(tf::Float64, mesh::Splittings.RectMesh1D1V)
 
 end
 
-"""
-
-    error1(f, f_exact)
- 
-    Compute L1 error
-
-"""
-function error1(f, f_exact)
-    maximum(abs.(f .- f_exact))
-end
-
-
-function with_bsl(tf::Float64, nt::Int, mesh::Splittings.RectMesh1D1V)
+function with_bsl(tf::Float64, nt::Int, mesh::RectMesh1D1V)
 
    dt = tf/nt
 
-   f   = exact(0.0, mesh)
-   fs  = exact(0.0, mesh)
+   f  = exact(0.0, mesh)
    
    for n=1:nt
        
-      Splittings.advection!( f,  mesh,  mesh.v, tan(0.5*dt), axis=1)
-      Splittings.advection!( f,  mesh, -mesh.x, sin(dt),     axis=2)
-      Splittings.advection!( f,  mesh,  mesh.v, tan(0.5*dt), axis=1)
+      @Strang(advection!( f,  mesh,  mesh.v, tan(dt), axis=1),
+              advection!( f,  mesh, -mesh.x, sin(dt), axis=2))
                                       
-      Splittings.advection!( fs, mesh,  mesh.v, 0.5*dt, axis=1)
-      Splittings.advection!( fs, mesh, -mesh.x,     dt, axis=2)
-      Splittings.advection!( fs, mesh,  mesh.v, 0.5*dt, axis=1)
-
    end
 
-   f, fs
+   f
 
 end
 
-tf, nt = 200π, 1000
+tf, nt = 10π, 100
 
-mesh = Splittings.RectMesh1D1V(-π, π, 256, -π, π, 256)
+mesh = RectMesh1D1V(-π, π, 64, -π, π, 64)
 
-fe = exact(tf, mesh)
-@time fc, fs = with_bsl(tf, nt, mesh)
-println( " errors = ", error1(fc, fe), "\t", error1(fs, fe))
+@time f = with_bsl(tf, nt, mesh)
 ```

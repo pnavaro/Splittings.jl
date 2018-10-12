@@ -1,17 +1,22 @@
-using FFTW, LinearAlgebra
+import FFTW: fft!, ifft!
+import LinearAlgebra: transpose
 
+export advection_v!
 """
-    advection!( f, meshx, meshv, E, dt) 
+    advection_v!( fᵀ, meshx, meshv, E, dt) 
 
     Advection in υ
+
     ∂ f / ∂ t − E(x) ∂ f / ∂ υ  = 0
 
+    Apply this advection on transposed `f`
+
 """
-function advection!( fᵀ::Array{Complex{Float64},2}, 
-		     meshx::UniformMesh, 
-		     meshv::UniformMesh, 
-		     e, 
-		     dt::Float64)
+function advection_v!( fᵀ    :: Array{Complex{Float64},2}, 
+		       meshx :: UniformMesh, 
+		       meshv :: UniformMesh, 
+		       e     :: Vector{Complex{Float64}}, 
+		       dt    :: Float64)
 
     n = meshv.nx
     L = meshv.xmax - meshv.xmin
@@ -24,8 +29,9 @@ function advection!( fᵀ::Array{Complex{Float64},2},
 
 end
 
+export advection_x!
 """
-    advection!( f, meshx, meshv, dt) 
+    advection_x!( f, meshx, meshv, dt) 
 
     Advection in x and compute electric field
 
@@ -34,23 +40,24 @@ end
     ∂E / ∂t = −J = ∫ fυ dυ
 
 """
-function advection!( f::Array{Complex{Float64},2}, 
-		    meshx::UniformMesh, 
-		    meshv::UniformMesh, 
-		    dt::Float64)
+function advection_x!( f     :: Array{Complex{Float64},2}, 
+		       meshx :: UniformMesh, 
+		       meshv :: UniformMesh, 
+		       e     :: Vector{Complex{Float64}}, 
+		       dt    :: Float64)
 
     L = meshx.xmax - meshx.xmin
     m = meshx.nx ÷ 2
     k = 2π/L * [0:1:m-1;-m:1:-1]
-    k̃ = 2π/L * [1;1:1:m-1;-m:1:-1]
     v = meshv.x
     ev = exp.(-1im*dt * k * transpose(v))
 
     fft!(f,1)
-    f .= f .* ev
-    Ek  = -1im * meshv.dx * sum(f,dims=2) ./ k̃
-    Ek[1] = 0.0
+    f   .= f .* ev
+    k[1] = 1.0
+    e   .= -1im * meshv.dx * vec(sum(f,dims=2)) ./ k
+    e[1] = 0.0im
     ifft!(f,1)
-    vec(real(ifft(Ek)))
+    ifft!(e)
 
 end

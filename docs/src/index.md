@@ -2,17 +2,13 @@
 
 Operators splitting package to solve equations of the form 
 
-```\\frac{dU}{dt} = (T+V)U ``,
+`` dU/dt = (T+V)U ``,
 
 where ``T`` and  ``V`` are two differential operators by solving successively the simpler
 equations
 
-The abstract type `OperatorSplitting` implements the composition form of
-different kinds of composition methods defined by their coefficients.
-
 The application of an operator splitting method to a concrete problem is done
-by extending this type containing on the one hand the data on which the operators act
-and a specific implementation of the two operators
+by using Julia macros.
 
 ## Examples of applications are provided for
 
@@ -20,15 +16,15 @@ and a specific implementation of the two operators
  - The Vlasov equation with constant coefficients advection field.
  - The non linear Vlasov-Poisson equations in cartesian coordinates.
 
-<b> References </b>
+*References*
 
 E. Hairer, C. Lubich, G. Wanner, Geometrical numerical integration, Springer 2006
 
 This code is derived from Fortran and Python codes written by 
 
-    - Eric Sonnendrucker   (Max-Planck-Institut für Plasmaphysik).
-    - Michel Mehrenberger  (Aix-Marseille Université).
     - Edwin Chacon Golcher (Institute of Physics of the Czech Academy of Sciences).
+    - Michel Mehrenberger  (Aix-Marseille Université).
+    - Eric Sonnendrucker   (Max-Planck-Institut für Plasmaphysik).
 
 ```@contents
 ```
@@ -41,9 +37,9 @@ CurrentModule = Splittings
 
 ## Examples
 
-  * [Vlasov Poisson](@ref)
-  * [Landau Damping](@ref)
-  * [Bump on tail  ](@ref)
+  * [Vlasov-Poisson](@ref)
+  * [Vlasov-Ampere](@ref)
+  * [Bump On Tail](@ref)
 
 ## Functions
 
