@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "Examples of applications are provided for",
     "category": "section",
-    "text": "The linear pendulum problem.\nThe Vlasov equation with constant coefficients advection field.\nThe non linear Vlasov-Poisson equations in cartesian coordinates.<b> References </b>E. Hairer, C. Lubich, G. Wanner, Geometrical numerical integration, Springer 2006This code is translated from a Fortran code written by Eric Sonnendrucker (Max-Planck-Institut für Plasmaphysik) and Michel Mehrenberger (Aix-Marseille Université).CurrentModule = SplittingsSemi-Lagrangian method"
+    "text": "The linear pendulum problem.\nThe Vlasov equation with constant coefficients advection field.\nThe non linear Vlasov-Poisson equations in cartesian coordinates.<b> References </b>E. Hairer, C. Lubich, G. Wanner, Geometrical numerical integration, Springer 2006This code is derived from Fortran and Python codes written by - Eric Sonnendrucker   (Max-Planck-Institut für Plasmaphysik).\n- Michel Mehrenberger  (Aix-Marseille Université).\n- Edwin Chacon Golcher (Institute of Physics of the Czech Academy of Sciences).CurrentModule = SplittingsSemi-Lagrangian method"
 },
 
 {
@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "Examples",
     "category": "section",
-    "text": "Vlasov Poisson\nLandau Damping"
+    "text": "Vlasov Poisson\nLandau Damping\nBump on tail  "
 },
 
 {
@@ -53,7 +53,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "Functions",
     "category": "section",
-    "text": "compute_rho( meshv, f)compute_e( meshx, rho)"
+    "text": "Modules = [Splittings]\nOrder   = [:advection!, :UniformMesh]compute_rho( meshv, f)compute_e( meshx, rho)"
 },
 
 {
