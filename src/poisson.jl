@@ -1,6 +1,9 @@
 export compute_rho,  compute_e
 export compute_rho!, compute_e!
 
+import Statistics:mean
+import FFTW:fft, ifft, fft!, ifft!
+
 """
 
     compute_rho( mesh, f)

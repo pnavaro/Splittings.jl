@@ -1,4 +1,5 @@
 export RectMesh1D1V
+
 """
 
     RectMesh1D1V( xmin, xmax, nx, vmin, vmax, nv)
@@ -27,9 +28,9 @@ struct RectMesh1D1V
         nv = size(v)[1]
         xmin, xmax = x[1], x[end]
         vmin, vmax = v[1], v[end]
-	dx = (xmax - xmin) / (nx-1)
-	dv = (vmax - vmin) / (nv-1)
-	bc = Dict(:x=>:periodic,:v=>:periodic)
+        dx = (xmax - xmin) / (nx-1)
+        dv = (vmax - vmin) / (nv-1)
+        bc = Dict(:x=>:periodic,:v=>:periodic)
         new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv, bc)
 
     end
@@ -39,26 +40,26 @@ struct RectMesh1D1V
 
         x  = range(xmin, stop=xmax, length=nx)
         v  = range(vmin, stop=vmax, length=nv)
-	dx = (xmax - xmin) / (nx-1)
-	dv = (vmax - vmin) / (nv-1)
-	bc = Dict(:x=>:periodic,:v=>:periodic)
+        dx = (xmax - xmin) / (nx-1)
+        dv = (vmax - vmin) / (nv-1)
+        bc = Dict(:x=>:periodic,:v=>:periodic)
         new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv, bc)
 
     end
 
     function RectMesh1D1V(x::StepRangeLen, v::StepRangeLen)
 
-	xmin = x.offset
-	nx   = x.len
-	dx   = x.step
-	xmax = xmin + (nx-1) * dx 
+	  xmin = x.offset
+	  nx   = x.len
+	  dx   = x.step
+	  xmax = xmin + (nx-1) * dx 
 
-	vmin = v.offset
-	nv   = v.len
-	dv   = v.step
-	vmax = vmin + (nv-1) * dv 
+	  vmin = v.offset
+	  nv   = v.len
+	  dv   = v.step
+	  vmax = vmin + (nv-1) * dv 
 
-	bc = Dict(:x=>:periodic,:v=>:periodic)
+	  bc = Dict(:x=>:periodic,:v=>:periodic)
         new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv, bc)
 
     end

@@ -7,6 +7,9 @@ using FFTW, LinearAlgebra
     integer nodes of degree p with support starting at j.
     Implemented recursively using the de Boor's recursion formula
 
+    Derived from a Python program written by 
+    Eric Sonnendrucker Max-Planck-Institut fur Plasmaphysik
+
 """
 function bspline(p::Int, j::Int, x::Float64)
    if p == 0
@@ -31,8 +34,12 @@ end
     degree of a 1D function f on a periodic uniform mesh, at
     all points x-alpha. f type is Vector{Float64}.
 
+    Derived from a Python program written by 
+    Eric Sonnendrucker Max-Planck-Institut fur Plasmaphysik
+
 """
-function interpolate(p::Int, f::Vector{Float64}, delta::Float64, 
+function interpolate(p::Int, 
+                     f::Vector{Float64}, delta::Float64, 
 			   alpha::Float64)
 
    n = size(f)[1]
@@ -64,9 +71,14 @@ end
     input f is the Fourier transform and complex
     you have to inverse transform after return
 
+    Derived from a Python program written by 
+    Eric Sonnendrucker Max-Planck-Institut fur Plasmaphysik
+
 """
-function interpolate(p::Int, f::Vector{Complex{Float64}}, delta::Float64, 
-			   alpha::Float64)
+function interpolate(p     :: Int, 
+                     f     :: Vector{Complex{Float64}}, 
+                     delta :: Float64, 
+			   alpha :: Float64)
 
    n = size(f)[1]
    modes = 2 * pi * (0:n-1) / n
@@ -88,20 +100,23 @@ function interpolate(p::Int, f::Vector{Complex{Float64}}, delta::Float64,
 
 end
 
+import Splittings:RectMesh1D1V
+
 """
     advection!( mesh, f, v, dt, axis)
 
     Advection of a 2d function `f` discretized on a 2d `mesh`
     along the input axis at velocity `v`
 
-"""
-function advection!(f    :: Array{Float64,2}, 
-                    p    :: Int, 
-                    mesh :: RectMesh1D1V,
-                    v    :: Any, 
-                    dt   :: Float64; axis=0)
+    Derived from a Python program written by 
+    Eric Sonnendrucker Max-Planck-Institut fur Plasmaphysik
 
-    @assert ( axis > 0 )
+"""
+function advection!(f     :: Array{Float64,2}, 
+                    p     :: Int, 
+                    mesh  :: RectMesh1D1V,
+                    v     :: Any, 
+                    dt    :: Float64; axis=0)
 
     if (axis == 1)
         for j in 1:mesh.nv
@@ -124,10 +139,37 @@ end
     velocity `v`. Since the fft are computed inplace, the function 
     must be represented by a Array{Complex{Float64},2}.
 
+    Derived from a Python program written by 
+    Eric Sonnendrucker Max-Planck-Institut fur Plasmaphysik
+
+# Example:
+
+```jl
+
+meshx = UniformMesh(xmin, xmax, nx)
+meshv = UniformMesh(vmin, vmax, nv)
+
+eps, kx = 0.001, 0.5
+f  = zeros(Complex{Float64},(nx,nv))
+f .= (1.0.+eps*cos.(kx*x))/sqrt(2π) * transpose(exp.(-0.5*v.^2))
+fᵗ = zeros(Complex{Float64},(nv,nx))
+
+advection!(f, p, meshx, v, nv, 0.5*dt)
+rho = compute_rho(meshv, f)
+e   = compute_e(meshx, rho)
+transpose!(fᵗ, f)
+advection!(fᵗ, p, meshv, e, nx, dt)
+transpose!(f, fᵗ)
+advection!(f,  p, meshx, v, nv, dt)
+```
+
 """
-function advection!(f::Array{Complex{Float64},2}, p::Int64, 
-		    mesh::UniformMesh, v::Vector{Float64}, 
-                    nv::Int, dt::Float64)
+function advection!(f::Array{Complex{Float64},2}, 
+                    p::Int64, 
+		        mesh::UniformMesh, 
+                    v::Vector{Float64}, 
+                    nv::Int, 
+                    dt::Float64)
 
    nx = mesh.nx
    dx = mesh.dx

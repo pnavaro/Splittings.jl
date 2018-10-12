@@ -24,37 +24,37 @@ mutable struct PeriodicDomain
     function PeriodicDomain(points::Vector{Float64})
 
         left, right, ncells = points[1], points[end], size(x)-1
-	delta = (right - left) / ncells
+	  delta = (right - left) / ncells
         new(left, right, ncells, points, delta)
-	bc = :periodic
+	  bc = :periodic
 
     end
 
     function PeriodicDomain(left, right, ncells::Int)
 
         points = range(left, stop=right, length=ncells+1)[1:end-1]
-	delta  = (right - left) / ncells
-	new(left, right, ncells, points, delta, :periodic, 1)
+	  delta  = (right - left) / ncells
+	  new(left, right, ncells, points, delta, :periodic, 1)
 
     end
 
     function PeriodicDomain(interval::ClosedInterval{Int64}, ncells::Int)
 
-	left  = interval.left
-	right = interval.right
+	  left  = interval.left
+	  right = interval.right
         points = range(left, stop=right, length=ncells+1)[1:end-1]
-	delta  = (right - left) / ncells
+	  delta  = (right - left) / ncells
         new(left, right, ncells, points, delta, :periodic, 1)
 
     end
 
     function PeriodicDomain(s::StepRangeLen)
 
-	left   = s.offset
-	ncells = s.len-1
-	delta  = s.step
-	right  = left + ncells * delta 
-	points = collect(s)
+	  left   = s.offset
+	  ncells = s.len-1
+	  delta  = s.step
+	  right  = left + ncells * delta 
+	  points = collect(s)
         new(left, right, ncells, points, delta, :periodic, 1)
 
     end
@@ -74,7 +74,10 @@ Base.:*(x::PeriodicDomain, y::PeriodicDomain) = begin
 
 end
 
+import LinearAlgebra
+
 import LinearAlgebra.transpose
+
 
 LinearAlgebra.:transpose(d::PeriodicDomain) = begin
     
