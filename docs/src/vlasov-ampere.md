@@ -2,14 +2,14 @@
 
 Compute Landau damping by solving Vlasov-Ampere system.
 
- ``
- \\frac{∂f}{∂t} + υ \\frac{∂f}{∂x}
- - E(t,x) \\frac{∂f}{∂υ} = 0
- ``
+ ```math
+ \frac{∂f}{∂t} + υ \frac{∂f}{∂x}
+ - E(t,x) \frac{∂f}{∂υ} = 0
+ ```
 
- ``
- \\frac{∂E}{∂t} = - J = ∫ fυ dυ
- ``
+```math
+\frac{∂E}{∂t} = - J = ∫ fυ dυ
+```
 
 ## Algorithm
 
@@ -19,19 +19,27 @@ Compute Landau damping by solving Vlasov-Ampere system.
 
      - Compute
 
-     `` f^{n+1}_k(υ_j) = e^{−2iπ k υ Δt/L} f_n^k(υ_j), ``
+```math
+f^{n+1}_k(υ_j) = e^{−2iπ k υ Δt/L} f_n^k(υ_j), 
+```
 
      - Compute
 
-     `` ρ_k^{n+1} = Δ υ ∑_j􏰄 f^{n+1}_k(υ_j), ``
+```math
+ρ_k^{n+1} = Δ υ ∑_j􏰄 f^{n+1}_k(υ_j), 
+```
 
      - Compute
 
-     `` E^{n+1}_k = ρ^{n+1}_k L/(2iπkϵ_0), ``
+```math
+E^{n+1}_k = ρ^{n+1}_k L/(2iπkϵ_0), 
+```
 
  - For ``k = 0`` do nothing:
 
- `` f_{n+1}(υ_j) = f^n_k(υ_j), E^{n+1}_k = E^n_k. ``
+```math
+f_{n+1}(υ_j) = f^n_k(υ_j), E^{n+1}_k = E^n_k. 
+```
 
  - Perform inverse discrete Fourier transform of ``E^{n+1}_k`` and for each
    ``j`` of ``f^{n+1}_k (υ_j)``.
@@ -49,7 +57,8 @@ Compute Landau damping by solving Vlasov-Ampere system.
 
 ```@example 
 
-using Splittings
+import Splittings: advection_x!, advection_v!, UniformMesh
+import Splittings: @Strang, compute_rho, compute_e
 using Plots, LinearAlgebra
 pyplot()
 
@@ -90,10 +99,10 @@ function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
 
     for i in 1:nt
 
-        push!(nrj, 0.5*log(sum(e.^2)*meshx.dx))
+	push!(nrj, 0.5*log(sum(real(e).^2)*meshx.dx))
 
-        @Strang(  push_v!(fᵀ, meshx, meshv, e,  0.5dt),
-                  push_t!( f, fᵀ, meshx, meshv, e,  dt)
+        @Strang(  push_v!(fᵀ, meshx, meshv, e,  dt),
+                  push_t!(f, fᵀ, meshx, meshv, e,  dt)
                )
                   
     end
@@ -109,7 +118,7 @@ nt = 600
 t = range(0,stop=tf,length=nt)
 plot(t, vm1d(nx, nv, xmin, xmax, vmin, vmax, tf, nt) )
 plot!(t, -0.1533*t.-5.50)
-savefig("va1d1v-plot.png"); nothing # hide
+savefig("va-plot.png"); nothing # hide
 ```
 
-![](va1d1v-plot.png)
+![](va-plot.png)

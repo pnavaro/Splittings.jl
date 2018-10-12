@@ -7,42 +7,43 @@
 
 
 ```@example
-using Splittings
+import Splittings: advection!, UniformMesh
+import Splittings: @Strang
+using Plots
+pyplot(leg=false, ticks=nothing)
 
-" Exact solution of f after rotation during time tf "
-function exact(tf::Float64, mesh::RectMesh1D1V)
+function with_bsl(tf::Float64, nt::Int)
 
-    f = zeros(Float64,(mesh.nx,mesh.nv))
-    for (i, x) in enumerate(mesh.x), (j, v) in enumerate(mesh.v)
-        xn=cos(tf)*x-sin(tf)*v
-        yn=sin(tf)*x+cos(tf)*v
-        f[i,j] = exp(-(xn-1)*(xn-1)/0.1)*exp(-(yn-1)*(yn-1)/0.1)
-    end
-
-    f
-
-end
-
-function with_bsl(tf::Float64, nt::Int, mesh::RectMesh1D1V)
+   nx, ny = 64, 64
+   meshx = UniformMesh(-π, π, nx)
+   meshy = UniformMesh(-π, π, ny)
+   x = meshx.x
+   y = meshy.x
 
    dt = tf/nt
 
-   f  = exact(0.0, mesh)
-   
-   for n=1:nt
+   f = zeros(Float64,(nx,ny))
+
+   for (i, xp) in enumerate(x), (j, yp) in enumerate(y)
+       xn = cos(tf)*xp - sin(tf)*yp
+       yn = sin(tf)*xp + cos(tf)*yp
+       f[i,j] = exp(-(xn-1)*(xn-1)/0.2)*exp(-(yn-1)*(yn-1)/0.2)
+   end
+
+   anim = @animate for n=1:nt
        
-      @Strang(advection!( f,  mesh,  mesh.v, tan(dt), axis=1),
-              advection!( f,  mesh, -mesh.x, sin(dt), axis=2))
+      @Strang(advection!( f,  meshx,  y, tan(dt), axis=1),
+              advection!( f,  meshy, -x, sin(dt), axis=2))
+
+      surface(f)
                                       
    end
 
-   f
+   gif(anim, "rotanim.gif", fps=15)
 
 end
 
-tf, nt = 10π, 100
-
-mesh = RectMesh1D1V(-π, π, 64, -π, π, 64)
-
-@time f = with_bsl(tf, nt, mesh)
+f = with_bsl( 10π, 100)
 ```
+
+![](rotanim.gif)

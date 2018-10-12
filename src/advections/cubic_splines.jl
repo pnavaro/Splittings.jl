@@ -127,7 +127,7 @@ function advection!( f::Array{Float64,2}, mesh::UniformMesh,
         @assert ( mesh.nx    == size(f)[2] )
         @assert ( size(v)[1] == size(f)[1] )
     
-        lv = meshv.xmax - meshv.xmin
+        lv = mesh.xmax - mesh.xmin
         for i in 1:size(v)[1]
             coeffs = compute_interpolants(mesh.nx, f[i,:])       
             for j in 1:mesh.nx
@@ -139,4 +139,4 @@ function advection!( f::Array{Float64,2}, mesh::UniformMesh,
 
     end
     
-end            
+end
