@@ -13,7 +13,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "Splittings.jl Documentation",
     "category": "section",
-    "text": "Operators splitting package to solve equations of the form `fracdUdt = (T+V)U,where T and  V are two differential operators by solving successively the simpler equationsThe abstract type OperatorSplitting implements the composition form of different kinds of composition methods defined by their coefficients.The application of an operator splitting method to a concrete problem is done by extending this type containing on the one hand the data on which the operators act and a specific implementation of the two operators"
+    "text": "Operators splitting package to solve equations of the form dUdt = (T+V)U,where T and  V are two differential operators by solving successively the simpler equationsThe application of an operator splitting method to a concrete problem is done by using Julia macros."
 },
 
 {
@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "Examples of applications are provided for",
     "category": "section",
-    "text": "The linear pendulum problem.\nThe Vlasov equation with constant coefficients advection field.\nThe non linear Vlasov-Poisson equations in cartesian coordinates.<b> References </b>E. Hairer, C. Lubich, G. Wanner, Geometrical numerical integration, Springer 2006This code is derived from Fortran and Python codes written by - Eric Sonnendrucker   (Max-Planck-Institut für Plasmaphysik).\n- Michel Mehrenberger  (Aix-Marseille Université).\n- Edwin Chacon Golcher (Institute of Physics of the Czech Academy of Sciences).CurrentModule = SplittingsSemi-Lagrangian method"
+    "text": "The linear pendulum problem.\nThe Vlasov equation with constant coefficients advection field.\nThe non linear Vlasov-Poisson equations in cartesian coordinates.ReferencesE. Hairer, C. Lubich, G. Wanner, Geometrical numerical integration, Springer 2006This code is derived from Fortran and Python codes written by - Edwin Chacon Golcher (Institute of Physics of the Czech Academy of Sciences).\n- Michel Mehrenberger  (Aix-Marseille Université).\n- Eric Sonnendrucker   (Max-Planck-Institut für Plasmaphysik).CurrentModule = SplittingsSemi-Lagrangian method"
 },
 
 {
@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Introduction",
     "title": "Examples",
     "category": "section",
-    "text": "Vlasov Poisson\nLandau Damping\nBump on tail  "
+    "text": "Vlasov-Poisson\nVlasov-Ampere\nBump On Tail"
 },
 
 {
