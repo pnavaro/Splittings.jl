@@ -1,3 +1,4 @@
+```@example 
 using Plots, LinearAlgebra
 pyplot()
 
@@ -110,3 +111,7 @@ nt = 600
 t = range(0,stop=tf,length=nt)
 plot(t, vm1d(nx, nv, xmin, xmax, vmin, vmax, tf, nt) )
 plot!(t, -0.1533*t.-5.50)
+savefig("va1d1v-plot.png"); nothing # hide
+```
+
+![](va1d1v-plot.png)

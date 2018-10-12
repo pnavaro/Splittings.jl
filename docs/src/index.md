@@ -24,8 +24,11 @@ and a specific implementation of the two operators
 
 E. Hairer, C. Lubich, G. Wanner, Geometrical numerical integration, Springer 2006
 
-This code is translated from a Fortran code written by Eric Sonnendrucker (Max-Planck-Institut für Plasmaphysik)
-and Michel Mehrenberger (Aix-Marseille Université).
+This code is derived from Fortran and Python codes written by 
+
+    - Eric Sonnendrucker   (Max-Planck-Institut für Plasmaphysik).
+    - Michel Mehrenberger  (Aix-Marseille Université).
+    - Edwin Chacon Golcher (Institute of Physics of the Czech Academy of Sciences).
 
 ```@contents
 ```
@@ -40,8 +43,14 @@ CurrentModule = Splittings
 
   * [Vlasov Poisson](@ref)
   * [Landau Damping](@ref)
+  * [Bump on tail  ](@ref)
 
 ## Functions
+
+```@autodocs
+Modules = [Splittings]
+Order   = [:advection!, :UniformMesh]
+```
 
 ```@docs
 compute_rho( meshv, f)

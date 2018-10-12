@@ -1,5 +1,7 @@
+```@example
 
 using Plots, LinearAlgebra
+using Splittings
 
 
 """
@@ -70,8 +72,8 @@ function landau(tf, nt)
   nx, nv = 64, 128
   xmin, xmax = 0.0, 4π
   vmin, vmax = -6., 6.
-  meshx = Splittings.RectMesh1D(xmin, xmax, nx; endpoint=false)
-  meshv = Splittings.RectMesh1D(vmin, vmax, nv; endpoint=false)
+  meshx = UniformMesh(xmin, xmax, nx; endpoint=false)
+  meshv = UniformMesh(vmin, vmax, nv; endpoint=false)
   x = meshx.x
   v = meshv.x
   dx = meshx.dx
@@ -113,3 +115,8 @@ t  = range(0.0, stop=tf, length=nt)
 @time nrj = landau(tf, nt)
 plot( t, nrj)
 plot!(t, -0.1533*t.-5.50)
+savefig("landau-plot.png"); nothing # hide
+```
+
+![](landau-plot.png)
+

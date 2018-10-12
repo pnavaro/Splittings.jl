@@ -1,3 +1,5 @@
+```@example
+
 using Plots
 
 pyplot()
@@ -37,3 +39,8 @@ dt = t[2]
 @elapsed nrj = vlasov_poisson( mesh, f, nstep, dt)
 
 plot(t, nrj, label="``\\frac{1}{2}log(∫e²dx)``")
+savefig("bop-plot.png"); nothing # hide
+```
+
+![](bop-plot.svg)
+

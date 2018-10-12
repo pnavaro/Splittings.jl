@@ -1,3 +1,4 @@
+```@example
 import Splittings
 using Printf
 
@@ -63,12 +64,4 @@ mesh = Splittings.RectMesh1D1V(-π, π, 256, -π, π, 256)
 fe = exact(tf, mesh)
 @time fc, fs = with_bsl(tf, nt, mesh)
 println( " errors = ", error1(fc, fe), "\t", error1(fs, fe))
-
-fgnu = open("fc.dat", "w")
-for i = 1:mesh.nx
-   for j = 1:mesh.ny
-      @printf(fgnu, "%f %f %f %f\n", mesh.x[i], mesh.v[j], fc[i,j], fe[i,j])
-   end
-   @printf(fgnu, "\n")
-end
-close(fgnu)
+```
