@@ -2,10 +2,10 @@
 
 Compute Landau damping by solving Vlasov-Ampere system.
 
- ```math
+```math
  \frac{∂f}{∂t} + υ \frac{∂f}{∂x}
  - E(t,x) \frac{∂f}{∂υ} = 0
- ```
+```
 
 ```math
 \frac{∂E}{∂t} = - J = ∫ fυ dυ

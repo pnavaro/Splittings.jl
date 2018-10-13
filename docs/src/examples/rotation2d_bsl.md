@@ -39,7 +39,7 @@ function with_bsl(tf::Float64, nt::Int)
                                       
    end
 
-   gif(anim, "rotanim.gif", fps=15)
+   gif(anim, "rotanim.gif", fps=15); nothing #hide
 
 end
 
