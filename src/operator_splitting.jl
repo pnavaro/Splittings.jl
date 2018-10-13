@@ -1,19 +1,3 @@
-"""
-The operator splitting module provides a generic implementation of composition algorithms 
-of different order for two operators T and V for solving `` \\frac{dU}{dt} = (T+V) U ``. 
-The solution on one time step can be written `` U(Δt) = \\mathcal{S}_{T+V} U(0) ``. 
-The composition algorithm consists in successive solutions of the split equations 
-`` \\frac{dU}{dt} = T U `` and `` \\frac{dU}{dt} = V U ``. 
-Alternating the two reduced solution operators `` \\mathcal{S}_{T}  ``
-and `` \\mathcal{S}_{V} `` with adequately chosen time increments yields arbitrary 
-order in time for the full solution.
-
-The application of an operator splitting method to a concrete problem is done
-by extending the sll_t_operator_splitting splitting base class by a new type
-containing on the one hand the data on which the operators act
-and a specific implementation of the two operators
-"""
-abstract type OperatorSplitting end
 
 export @Lie, @Strang, @TripleJump, @Order6
 

@@ -1,5 +1,7 @@
 # # Vlasov-Poisson
 # 
+#md # [notebook](@__NBVIEWER_ROOT_URL__notebooks/vlasov-poisson.ipynb),
+#
 # We consider the dimensionless Vlasov-Poisson equation for one species
 # with a neutralizing background.
 # 
@@ -41,7 +43,7 @@ end
 function landau(tf, nt)
 
   p = 3
-  nx, nv = 64, 128
+  nx, nv = 32, 64
   xmin, xmax = 0.0, 4π
   vmin, vmax = -6., 6.
   meshx = UniformMesh(xmin, xmax, nx; endpoint=false)
@@ -78,10 +80,12 @@ plot( t, nrj)
 plot!(t, -0.1533*t.-5.50)
 savefig("landau-plot.png"); nothing # hide
 
-@test length(nrj) > 0  #src
+@testset "Vlasov-Poisson" begin  #src
+@test length(nrj) > 0            #src
+@end                             #src
 
-# 
-# 
-# ![](landau-plot.png)
-# 
-#
+ 
+ 
+#md # ![](landau-plot.png)
+
+

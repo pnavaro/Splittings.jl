@@ -1,11 +1,14 @@
 # # Vlasov-HMF
+#
+#md # [notebook](@__NBVIEWER_ROOT_URL__notebooks/vlasov-hmf.ipynb),
+#
 
-using LinearAlgebra, QuadGK, Roots, FFTW, BenchmarkTools
+using LinearAlgebra, QuadGK, Roots, FFTW
 using Splittings
 using Plots
 pyplot()
 
-#-
+#------------
 
 " Compute M₀ by solving F(m) = 0 "
 function mag(β, mass)
@@ -130,10 +133,12 @@ end
 nbiter = 2000
 deltat = 0.1
 @time t, T = vlasov_hmf_gauss(nbiter, deltat);
-plot(t, log.(T), 
-    xlabel = "t",
-    ylabel = "|C[f](t)-C[f][T]|")
+plot(t, log.(T), xlabel = "t", ylabel = "|C[f](t)-C[f][T]|")
+savefig("vlasov-hmf-plot.png"); nothing # hide
 
-# ![png](VlasovHMF_files/VlasovHMF_11_0.png)
-
-
+#
+#md # ![png](vlasov-hmf-plot.png)
+#
+@testset "Vlasov-HMF" begin  #src
+@test true                   #src
+@end                         #src

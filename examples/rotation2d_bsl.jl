@@ -1,5 +1,6 @@
 # # Rotation of a gaussian distribution
 # 
+# #md # [`notebook`](@__NBVIEWER_ROOT_URL__notebooks/rotation_2d_bsl.ipynb),
 # 
 # ```math
 #     \frac{df}{dt} +  (y \frac{df}{dx} - x \frac{df}{dy}) = 0
@@ -16,7 +17,7 @@ pyplot()
 
 function with_bsl(tf::Float64, nt::Int)
 
-   nx, ny = 64, 64
+   nx, ny = 32, 64
    meshx = UniformMesh(-π, π, nx)
    meshy = UniformMesh(-π, π, ny)
    x = meshx.points
@@ -47,7 +48,7 @@ end
 
 #-
 
-f = with_bsl( 10π, 100)
+@time f = with_bsl( 10π, 100)
 
 
 # ![](rotanim.gif)
