@@ -15,9 +15,9 @@ import FFTW:fft, ifft, fft!, ifft!
     return ρ - ρ̄ if neutralized=true
 
 """
-function compute_rho(mesh, f, neutralized=true)
+function compute_rho(meshv::UniformMesh, f, neutralized=true)
 
-   local dv  = mesh.dx
+   local dv  = meshv.step
    ρ = dv * sum(f, dims=2)
    if (neutralized)
        ρ .- mean(ρ)
@@ -35,9 +35,10 @@ end
 
 """
 function compute_rho!(rho::Vector{Complex{Float64}}, 
-		      mesh, f::Array{Complex{Float64},2})
+		      meshv::UniformMesh, 
+		      f::Array{Complex{Float64},2})
 
-   local dv = mesh.dx
+   local dv = meshv.step
    rho .= dv * vec(sum(f, dims=2))
    rho .= rho .- mean(rho)
 
@@ -50,10 +51,10 @@ end
     Compute 1d electric field using that -ik * e = ρ
 
 """
-function compute_e(mesh, ρ)
+function compute_e(meshx::UniformMesh, ρ)
 
-   nx = mesh.nx
-   k =  2π / (mesh.xmax - mesh.xmin)
+   nx = meshx.length
+   k =  2π / (meshx.stop - meshx.start)
    modes  = zeros(Float64, nx)
    modes .= k * vcat(0:nx÷2-1,-nx÷2:-1)
    modes[1] = 1.0
@@ -69,10 +70,12 @@ end
     Inplace computation of electric field
 
 """
-function compute_e!(e::Vector{Complex{Float64}}, mesh, ρ::Vector{Complex{Float64}})
+function compute_e!(e::Vector{Complex{Float64}}, 
+		    meshx::UniformMesh,
+		    ρ::Vector{Complex{Float64}})
 
-   nx = mesh.nx
-   k =  2π / (mesh.xmax - mesh.xmin)
+   nx = meshx.length
+   k =  2π / (meshx.stop - meshx.start)
    modes  = zeros(Float64, nx)
    modes .= k * vcat(0:nx÷2-1,-nx÷2:-1)
    modes[1] = 1.0

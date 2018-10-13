@@ -23,7 +23,6 @@ import Splittings:compute_rho!, compute_e!
 ex  = zeros(Complex{Float64},meshx.length)
 rho = similar(ex)
 
-
 compute_rho!(rho, meshv, f)
 @test real(rho) ≈ ϵ*cos.(kx*meshx.points)
 compute_e!(ex, meshx, rho)

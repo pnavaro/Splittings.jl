@@ -89,7 +89,7 @@ struct UniformMesh
 
    function UniformMesh(start, stop, length::Int; endpoint=true)
 
-       step = (start - stop) / (length-1)
+       step = (stop - start) / (length-1)
        if (endpoint)
            points = range(start, stop=stop, length=length)
        else

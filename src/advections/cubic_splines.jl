@@ -110,30 +110,30 @@ function advection!( f::Array{Float64,2}, mesh::UniformMesh,
 
     if (axis == 1) 
 
-        @assert ( mesh.nx    == size(f)[1] )
-        @assert ( size(v)[1] == size(f)[2] )
-        lx = mesh.xmax - mesh.xmin
+        @assert ( mesh.length == size(f)[1] )
+        @assert ( size(v)[1]  == size(f)[2] )
+        lx = mesh.stop - mesh.start
         for j in 1:size(v)[1]
-            coeffs = compute_interpolants(mesh.nx, f[:,j])        
-            for i in 1:mesh.nx
-                x_new = mesh.x[i] - dt * v[j]
-                x_new = mesh.xmin + mod(x_new - mesh.xmin, lx)
-                f[i,j] = interpolate(coeffs, mesh.nx, mesh.xmin, mesh.xmax, x_new)
+            coeffs = compute_interpolants(mesh.length, f[:,j])        
+            for i in 1:mesh.length
+                x_new = mesh.points[i] - dt * v[j]
+                x_new = mesh.start + mod(x_new - mesh.start, lx)
+                f[i,j] = interpolate(coeffs, mesh.length, mesh.start, mesh.stop, x_new)
             end
         end
 
     else
 
-        @assert ( mesh.nx    == size(f)[2] )
-        @assert ( size(v)[1] == size(f)[1] )
+        @assert ( mesh.length == size(f)[2] )
+        @assert ( size(v)[1]  == size(f)[1] )
     
-        lv = mesh.xmax - mesh.xmin
+        lv = mesh.stop - mesh.start
         for i in 1:size(v)[1]
-            coeffs = compute_interpolants(mesh.nx, f[i,:])       
-            for j in 1:mesh.nx
-                v_new = mesh.x[j] - dt * v[i] 
-                v_new = mesh.xmin + mod(v_new - mesh.xmin, lv)
-                f[i,j] = interpolate(coeffs, mesh.nx, mesh.xmin, mesh.xmax, v_new)
+            coeffs = compute_interpolants(mesh.length, f[i,:])       
+            for j in 1:mesh.length
+                v_new = mesh.points[j] - dt * v[i] 
+                v_new = mesh.start + mod(v_new - mesh.start, lv)
+                f[i,j] = interpolate(coeffs, mesh.length, mesh.start, mesh.stop, v_new)
             end
         end
 
