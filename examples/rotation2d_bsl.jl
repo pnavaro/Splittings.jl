@@ -10,7 +10,7 @@
 import Splittings: advection!, UniformMesh
 import Splittings: @Strang
 using Plots
-pyplot(leg=false, ticks=nothing)
+pyplot()
 
 #-
 

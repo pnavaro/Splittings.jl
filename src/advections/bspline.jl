@@ -78,7 +78,7 @@ end
 function interpolate(p     :: Int, 
                      f     :: Vector{Complex{Float64}}, 
                      delta :: Float64, 
-			   alpha :: Float64)
+                     alpha :: Float64)
 
    n = size(f)[1]
    modes = 2 * pi * (0:n-1) / n
@@ -166,13 +166,13 @@ advection!(f,  p, meshx, v, nv, dt)
 """
 function advection!(f::Array{Complex{Float64},2}, 
                     p::Int64, 
-		        mesh::UniformMesh, 
+                    mesh::UniformMesh, 
                     v::Vector{Float64}, 
                     nv::Int, 
                     dt::Float64)
 
-   nx = mesh.nx
-   dx = mesh.dx
+   nx = mesh.length
+   dx = mesh.step
    modes = [2π * i / nx for i in 0:nx-1]
    # compute eigenvalues of degree p b-spline matrix
    eig_bspl = zeros(Float64, nx)

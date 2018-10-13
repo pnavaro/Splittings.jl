@@ -89,25 +89,12 @@ struct UniformMesh
 
    function UniformMesh(start, stop, length::Int; endpoint=true)
 
-       step = (stop - start) / (length-1)
        if (endpoint)
            points = range(start, stop=stop, length=length)
        else
            points = range(start, stop=stop, length=length+1)[1:end-1]
        end
-
-       new( start, stop, length, step, points, endpoint)
-
-   end
-
-   function UniformMesh(xrange::StepRangeLen)
-
-       step     = xrange.step
-       start    = xrange.offset
-       length   = xrange.len
-       stop     = start + (length-1) * step
-       points   = collect(xrange)
-       endpoint = true
+       step = points[2]-points[1]
 
        new( start, stop, length, step, points, endpoint)
 
