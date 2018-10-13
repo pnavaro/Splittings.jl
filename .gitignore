@@ -2,8 +2,8 @@
 *.jl.*.cov
 *.jl.mem
 *.swp
-notebooks/.ipynb_checkpoints
 docs/build/
 docs/site/
 /.ipynb_checkpoints/
-examples/.ipynb_checkpoints/VlasovAmpere1D1V-checkpoint.ipynb
+docs/src/examples/
+notebooks/

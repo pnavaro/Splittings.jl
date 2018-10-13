@@ -1,12 +1,13 @@
-# Bump On Tail
+# # Bump On Tail
 
-```@example
 import Splittings: advection!, UniformMesh
 import Splittings: compute_rho, compute_e
 using Plots
 using LaTeXStrings
 
 pyplot()
+
+#-
 
 function vlasov_poisson(meshx  :: UniformMesh, 
                         meshv  :: UniformMesh, 
@@ -30,6 +31,8 @@ function vlasov_poisson(meshx  :: UniformMesh,
     
 end
 
+#-
+
 α = 0.03
 kx  = 0.3
 xmin, xmax = 0.0, 2π / kx
@@ -42,14 +45,17 @@ for (i,x) in enumerate(meshx.x), (j,v) in enumerate(meshv.x)
      f[i,j]  = (1.0+α*cos(kx*x)) / (10*sqrt(2π)) * (9*exp(-0.5*v^2)+2*exp(-2*(v-4.5)^2))
 end
 
+#-
+
 nstep = 500
 t = range(0.0, stop=50.0, length=nstep)
 dt = t[2]
 @elapsed nrj = vlasov_poisson( meshx, meshv, f, nstep, dt)
 
+#-
+
 plot(t, nrj, label=L"\frac{1}{2} \log(∫e²dx)")
 savefig("bot-plot.png"); nothing # hide
-```
 
-![](bot-plot.png)
+# ![](bot-plot.png)
 

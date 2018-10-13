@@ -1,16 +1,18 @@
-# Rotation of a gaussian distribution
+# # Rotation of a gaussian distribution
+# 
+# 
+# ```math
+#     \frac{df}{dt} +  (y \frac{df}{dx} - x \frac{df}{dy}) = 0
+# ```
+# 
+# 
 
-
-```math
-    \frac{df}{dt} +  (y \frac{df}{dx} - x \frac{df}{dy}) = 0
-```
-
-
-```@example
 import Splittings: advection!, UniformMesh
 import Splittings: @Strang
 using Plots
 pyplot(leg=false, ticks=nothing)
+
+#-
 
 function with_bsl(tf::Float64, nt::Int)
 
@@ -43,7 +45,9 @@ function with_bsl(tf::Float64, nt::Int)
 
 end
 
-f = with_bsl( 10π, 100)
-```
+#-
 
-![](rotanim.gif)
+f = with_bsl( 10π, 100)
+
+
+# ![](rotanim.gif)

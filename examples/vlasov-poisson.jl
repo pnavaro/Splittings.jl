@@ -1,18 +1,17 @@
-# Vlasov-Poisson
-
-We consider the dimensionless Vlasov-Poisson equation for one species
-with a neutralizing background.
-
-```math
- \\frac{∂f}{∂t}+ v⋅∇_x f + E(t,x) ⋅ ∇_v f = 0, \\
- - Δϕ = 1 - ρ, E = - ∇ ϕ \\
- ρ(t,x)  =  ∫ f(t,x,v)dv.
-```
-
- - [Vlasov Equation - Wikipedia](https://en.wikipedia.org/wiki/Vlasov_equation)
- - [Landau damping - Wikipedia](https://en.wikipedia.org/wiki/Landau_damping)
-
-```@example
+# # Vlasov-Poisson
+# 
+# We consider the dimensionless Vlasov-Poisson equation for one species
+# with a neutralizing background.
+# 
+# ```math
+#  \\frac{∂f}{∂t}+ v⋅∇_x f + E(t,x) ⋅ ∇_v f = 0, \\
+#  - Δϕ = 1 - ρ, E = - ∇ ϕ \\
+#  ρ(t,x)  =  ∫ f(t,x,v)dv.
+# ```
+# 
+#  - [Vlasov Equation - Wikipedia](https://en.wikipedia.org/wiki/Vlasov_equation)
+#  - [Landau damping - Wikipedia](https://en.wikipedia.org/wiki/Landau_damping)
+# 
 
 using Plots, LinearAlgebra
 pyplot()
@@ -20,11 +19,14 @@ import Splittings:UniformMesh
 import Splittings:@Strang
 import Splittings
 
+#-
 
 function push_t!(f, p, meshx, v, nv, dt)
     Splittings.advection!(f, p, meshx, v, nv, dt)
 end
 
+#-
+#
 function push_v!(f, fᵗ, p, meshx, meshv, nrj, dt)
     rho = Splittings.compute_rho(meshv, f)
     e   = Splittings.compute_e(meshx, rho)
@@ -33,6 +35,8 @@ function push_v!(f, fᵗ, p, meshx, meshv, nrj, dt)
     Splittings.advection!(fᵗ, p, meshv, e, meshx.nx, dt)
     transpose!(f, fᵗ)
 end
+
+#-
 
 function landau(tf, nt)
 
@@ -51,10 +55,8 @@ function landau(tf, nt)
   f .= (1.0.+ϵ*cos.(kx*x))/sqrt(2π) * transpose(exp.(-0.5*v.^2))
   fᵗ = zeros(Complex{Float64},(nv,nx))
 
-  # Set time domain
   dt = tf / nt
 
-  # Run simulation
   nrj = Float64[]
 
   for it in 1:nt
@@ -66,6 +68,8 @@ function landau(tf, nt)
 
 end
 
+#-
+
 nt = 600
 tf = 60.0
 t  = range(0.0, stop=tf, length=nt)
@@ -73,6 +77,11 @@ t  = range(0.0, stop=tf, length=nt)
 plot( t, nrj)
 plot!(t, -0.1533*t.-5.50)
 savefig("landau-plot.png"); nothing # hide
-```
 
-![](landau-plot.png)
+@test length(nrj) > 0  #src
+
+# 
+# 
+# ![](landau-plot.png)
+# 
+#
