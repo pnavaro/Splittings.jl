@@ -32,9 +32,12 @@ makedocs(modules=[Splittings],
          sitename = "Splittings.jl",
          pages = ["Introduction"    => "index.md",
                   "Semi-Lagrangian" => "bsl.md",
+		  "Advection functions" => "advections.md"
                   "Examples" => examples,
                   "User Documentation" => [
-                    "How to Contribute" => "contributing.md"]])
+                    "How to Contribute" => "contributing.md"],
+		  "Contents" => "contents.md"
+		  ])
 
 deploydocs(
     repo   = "github.com/pnavaro/Splittings.jl.git",

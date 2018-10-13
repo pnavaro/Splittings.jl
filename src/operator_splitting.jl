@@ -2,10 +2,14 @@
 export @Lie, @Strang, @TripleJump, @Order6
 
 """
-    Apply the composition method for given number of times steps.
-    	split	: OperatorSplitting object
-    	dt	: time step
-    	number_time_steps	: number of time steps to be performed
+
+    @Lie( push_t, push_v )
+
+    Apply the first order Lie splitting
+
+    push_t and push_v are two function calls with
+    `dt` as argument.
+
 """
 macro Lie(push_t, push_v)
     return esc( quote
@@ -14,6 +18,16 @@ macro Lie(push_t, push_v)
     end)
 end
 
+"""
+
+    @Strang( push_t, push_v )
+
+    Apply the second order Strang splitting
+
+    push_t and push_v are two function calls with
+    `dt` as argument.
+
+"""
 macro Strang(push_t, push_v)
     return esc(quote    
         local full_dt = dt
@@ -27,6 +41,16 @@ macro Strang(push_t, push_v)
     end)
 end
 
+"""
+
+    @TripleJump( push_t, push_v )
+
+    Apply the fourth order Triple Jump splitting
+
+    push_t and push_v are two function calls with
+    `dt` as argument.
+
+"""
 macro TripleJump(push_t, push_v)
     return esc(quote    
         local full_dt = dt
@@ -48,6 +72,16 @@ macro TripleJump(push_t, push_v)
     end)
 end
 
+"""
+
+    @Order6( push_t, push_v )
+
+    Apply the sixth order splitting
+
+    push_t and push_v are two function calls with
+    `dt` as argument.
+
+"""
 macro Order6(push_t, push_v)
     return esc(quote    
         local full_dt = dt

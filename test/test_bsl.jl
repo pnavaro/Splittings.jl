@@ -18,13 +18,13 @@ import Splittings: UniformMesh, advection!
   e = ones(Float64, nx)
   v = ones(Float64, nv)
 
-  advection!(f,  p, meshx, v, nv, dt)
+  advection!(f,  meshx, v, nv, dt, BSpline(p))
   transpose!(fᵗ, f)
-  advection!(fᵗ, p, meshv, e, nx, dt)
+  advection!(fᵗ, p, meshv, e, nx, dt, BSpline(p))
   transpose!(f,  fᵗ)
-  advection!(f,  p, meshx, -v, nv, dt)
+  advection!(f,  p, meshx, -v, nv, dt, BSpline(p))
   transpose!(fᵗ, f)
-  advection!(fᵗ, p, meshv, -e, nx, dt)
+  advection!(fᵗ, p, meshv, -e, nx, dt, BSpline(p))
   transpose!(f,  fᵗ)
 
   f0 =  exp.(-meshx.points.^2) * transpose(exp.(-meshv.points.^2))

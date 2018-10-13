@@ -1,6 +1,7 @@
 using FFTW, LinearAlgebra
 
 import Splittings:UniformMesh, compute_rho, compute_e
+import Splittings:Landau, distribution
 
 meshx = UniformMesh( 0., 4π,  64, endpoint=false)
 meshv = UniformMesh(-6., 6., 128, endpoint=false)
@@ -9,7 +10,8 @@ meshv = UniformMesh(-6., 6., 128, endpoint=false)
 
 f = zeros(Complex{Float64},(meshx.length,meshv.length))
 
-f .= (1.0.+ϵ*cos.(kx*meshx.points))/sqrt(2π) .* transpose(exp.(-0.5*meshv.points.^2))
+f .= distribution( meshx, meshv, Landau(ϵ, kx))
+
 
 @testset "Poisson 1D using FFT" begin
 
