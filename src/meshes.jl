@@ -1,5 +1,3 @@
-export RectMesh1D1V
-
 """
 
     RectMesh1D1V( xmin, xmax, nx, vmin, vmax, nv)
@@ -70,43 +68,48 @@ export UniformMesh
 
 """
 
-    UniformMesh(xmin, xmax, nx)
+    UniformMesh(start, stop, length)
 
-    1D uniform mesh data
+    1D uniform mesh data.
+
+    length   : number of points
+    length-1 : number of cells
+
+    To remove the last point, set endpoint=false
 
 """
 struct UniformMesh
 
-   xmin     :: Float64
-   xmax     :: Float64
-   nx       :: Int
-   dx       :: Float64
-   x        :: Vector{Float64}
+   start    :: Float64
+   stop     :: Float64
+   length   :: Int
+   step     :: Float64
+   points   :: Vector{Float64}
    endpoint :: Bool
 
-   function UniformMesh(xmin, xmax, nx::Int; endpoint=true)
+   function UniformMesh(start, stop, length::Int; endpoint=true)
 
-       dx = (xmax - xmin) / nx
+       step = (start - stop) / (length-1)
        if (endpoint)
-           x  = range(xmin, stop=xmax, length=nx)
+           points = range(start, stop=stop, length=length)
        else
-           x  = range(xmin, stop=xmax, length=nx+1)[1:end-1]
+           points = range(start, stop=stop, length=length+1)[1:end-1]
        end
 
-       new( xmin, xmax, nx, dx, x, endpoint)
+       new( start, stop, length, step, points, endpoint)
 
    end
 
-   function UniformMesh(xrange)
+   function UniformMesh(xrange::StepRangeLen)
 
-       dx = xrange.step
-       xmin = xrange.offset
-       nx = xrange.len
-       xmax = xmin + (nx-1) * dx
-       x = collect(xrange)
+       step     = xrange.step
+       start    = xrange.offset
+       length   = xrange.len
+       stop     = start + (length-1) * step
+       points   = collect(xrange)
        endpoint = true
 
-       new( xmin, xmax, nx, dx, x, endpoint)
+       new( start, stop, length, step, points, endpoint)
 
    end
 
