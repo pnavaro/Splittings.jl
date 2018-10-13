@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Vlasov-Poisson · Splittings.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../index.html"><img class="logo" src="../assets/logo.png" alt="Splittings.jl logo"/></a><h1>Splittings.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search.html"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../index.html">Introduction</a></li><li><a class="toctext" href="../bsl.html">Semi-Lagrangian</a></li><li><a class="toctext" href="../advections.html">Advection functions</a></li><li><span class="toctext">Examples</span><ul><li><a class="toctext" href="vlasov-ampere.html">Vlasov-Ampere</a></li><li class="current"><a class="toctext" href="vlasov-poisson.html">Vlasov-Poisson</a><ul class="internal"></ul></li><li><a class="toctext" href="bump_on_tail.html">Bump On Tail</a></li><li><a class="toctext" href="rotation2d_bsl.html">Rotation 2D</a></li><li><a class="toctext" href="vlasov-hmf.html">Vlasov-HMF</a></li></ul></li><li><span class="toctext">User Documentation</span><ul><li><a class="toctext" href="../contributing.html">How to Contribute</a></li></ul></li><li><a class="toctext" href="../contents.html">Contents</a></li></ul></nav><article id="docs"><header><nav><ul><li>Examples</li><li><a href="vlasov-poisson.html">Vlasov-Poisson</a></li></ul><a class="edit-page" href="https://github.com/pnavaro/Splittings.jl/blob/master/examples/vlasov-poisson.jl"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Vlasov-Poisson</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Vlasov-Poisson-1" href="#Vlasov-Poisson-1">Vlasov-Poisson</a></h1><p><a href="https://nbviewer.jupyter.org/github/pnavaro/Splittings.jl/blob/gh-pages/latest/notebooks/vlasov-poisson.ipynb">notebook</a>,</p><p>We consider the dimensionless Vlasov-Poisson equation for one species with a neutralizing background.</p><div>\[ \\frac{∂f}{∂t}+ v⋅∇_x f + E(t,x) ⋅ ∇_v f = 0, \\
+ - Δϕ = 1 - ρ, E = - ∇ ϕ \\
+ ρ(t,x)  =  ∫ f(t,x,v)dv.\]</div><ul><li><a href="https://en.wikipedia.org/wiki/Vlasov_equation">Vlasov Equation - Wikipedia</a></li><li><a href="https://en.wikipedia.org/wiki/Landau_damping">Landau damping - Wikipedia</a></li></ul><div><pre><code class="language-julia">using Plots, LinearAlgebra
+pyplot()
+import Splittings:UniformMesh, BSpline
+import Splittings:@Strang
+import Splittings</code></pre></div><div><pre><code class="language-julia">function push_t!(f, meshx, v, nv, dt)
+    Splittings.advection!(f, meshx, v, nv, dt, BSpline(5))
+end</code></pre><pre><code class="language-none">push_t! (generic function with 1 method)</code></pre></div><div><pre><code class="language-julia">function push_v!(f, fᵗ, meshx, meshv, nrj, dt)
+    rho = Splittings.compute_rho(meshv, f)
+    e   = Splittings.compute_e(meshx, rho)
+    push!(nrj, 0.5*log(sum(e.*e)*meshx.step))
+    transpose!(fᵗ, f)
+    Splittings.advection!(fᵗ, meshv, e, meshx.length, dt, BSpline(5))
+    transpose!(f, fᵗ)
+end</code></pre><pre><code class="language-none">push_v! (generic function with 1 method)</code></pre></div><div><pre><code class="language-julia">function landau(tf, nt)
+
+  nx, nv = 32, 64
+  xmin, xmax = 0.0, 4π
+  vmin, vmax = -6., 6.
+  meshx = UniformMesh(xmin, xmax, nx; endpoint=false)
+  meshv = UniformMesh(vmin, vmax, nv; endpoint=false)
+  x = meshx.points
+  v = meshv.points
+  dx = meshx.step
+
+  ϵ, kx = 0.001, 0.5
+  f = zeros(Complex{Float64},(nx,nv))
+  f .= (1.0.+ϵ*cos.(kx*x))/sqrt(2π) * transpose(exp.(-0.5*v.^2))
+  fᵗ = zeros(Complex{Float64},(nv,nx))
+
+  dt = tf / nt
+
+  nrj = Float64[]
+
+  for it in 1:nt
+      @Strang( push_t!(f, meshx, v, nv, dt),
+               push_v!(f, fᵗ, meshx, meshv, nrj, dt))
+  end
+
+  nrj
+
+end</code></pre><pre><code class="language-none">landau (generic function with 1 method)</code></pre></div><div><pre><code class="language-julia">nt = 600
+tf = 60.0
+t  = range(0.0, stop=tf, length=nt)
+@time nrj = landau(tf, nt)
+plot( t, nrj)
+plot!(t, -0.1533*t.-5.50)</code></pre><pre><code class="language-none">  1.129046 seconds (524.84 k allocations: 98.703 MiB, 3.38% gc time)</code></pre></div><p><img src="landau-plot.png" alt/></p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="vlasov-ampere.html"><span class="direction">Previous</span><span class="title">Vlasov-Ampere</span></a><a class="next" href="bump_on_tail.html"><span class="direction">Next</span><span class="title">Bump On Tail</span></a></footer></article></body></html>

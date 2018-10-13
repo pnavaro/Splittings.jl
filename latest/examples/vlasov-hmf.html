@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Vlasov-HMF · Splittings.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../index.html"><img class="logo" src="../assets/logo.png" alt="Splittings.jl logo"/></a><h1>Splittings.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search.html"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../index.html">Introduction</a></li><li><a class="toctext" href="../bsl.html">Semi-Lagrangian</a></li><li><a class="toctext" href="../advections.html">Advection functions</a></li><li><span class="toctext">Examples</span><ul><li><a class="toctext" href="vlasov-ampere.html">Vlasov-Ampere</a></li><li><a class="toctext" href="vlasov-poisson.html">Vlasov-Poisson</a></li><li><a class="toctext" href="bump_on_tail.html">Bump On Tail</a></li><li><a class="toctext" href="rotation2d_bsl.html">Rotation 2D</a></li><li class="current"><a class="toctext" href="vlasov-hmf.html">Vlasov-HMF</a><ul class="internal"></ul></li></ul></li><li><span class="toctext">User Documentation</span><ul><li><a class="toctext" href="../contributing.html">How to Contribute</a></li></ul></li><li><a class="toctext" href="../contents.html">Contents</a></li></ul></nav><article id="docs"><header><nav><ul><li>Examples</li><li><a href="vlasov-hmf.html">Vlasov-HMF</a></li></ul><a class="edit-page" href="https://github.com/pnavaro/Splittings.jl/blob/master/examples/vlasov-hmf.jl"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Vlasov-HMF</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Vlasov-HMF-1" href="#Vlasov-HMF-1">Vlasov-HMF</a></h1><p><a href="https://nbviewer.jupyter.org/github/pnavaro/Splittings.jl/blob/gh-pages/latest/notebooks/vlasov-hmf.ipynb">notebook</a>,</p><div><pre><code class="language-julia">using LinearAlgebra, QuadGK, Roots, FFTW
+using Splittings
+using Plots
+pyplot()</code></pre><pre><code class="language-none">Plots.PyPlotBackend()</code></pre></div><div><pre><code class="language-julia">&quot; Compute M₀ by solving F(m) = 0 &quot;
+function mag(β, mass)
+
+    F(m) = begin
+        g(x, n, m) = (1 / π) * (exp(β * m * cos(x)) * cos(n * x))
+        bessel0(x) = g(x, 0, m)
+        bessel1(x) = g(x, 1, m)
+        mass * quadgk(bessel1, 0, π)[1] / quadgk(bessel0, 0, π)[1] - m
+    end
+
+    find_zero(F, (0, mass))
+end</code></pre><pre><code class="language-none">Main.ex-vlasov-hmf.mag</code></pre></div><div><pre><code class="language-julia">function Norm(f::Array{Float64,2}, dx, dv)
+   return dx * sum(dv * sum(real(f), dims=1))
+end</code></pre><pre><code class="language-none">Norm (generic function with 1 method)</code></pre></div><div><pre><code class="language-julia">&quot;&quot;&quot;
+    Compute the electric hamiltonian mean field from a
+    2D distribution function
+&quot;&quot;&quot;
+function hmf_poisson!(fᵗ::Array{Complex{Float64},2},
+        meshx::UniformMesh,
+        meshv::UniformMesh,
+        ex::Array{Float64})
+
+    nx = meshx.length
+    rho = meshv.step .* vec(sum(fᵗ, dims=1))
+    kernel = zeros(Float64, nx)
+    k = π / (meshx.stop - meshx.start)
+    kernel[2] = k
+    ex .= real(ifft(1im * fft(rho) .* kernel * 4π ))
+
+end</code></pre><pre><code class="language-none">Main.ex-vlasov-hmf.hmf_poisson!</code></pre></div><div><pre><code class="language-julia">function bsl_advection!(f::Array{Complex{Float64},2},
+                        meshx::UniformMesh,
+                        meshv::UniformMesh,
+                        v::Array{Float64,1},
+                        dt;
+                        spline_degree=3)
+
+    fft!(f,1)
+    @simd for j in 1:meshv.length
+        alpha = v[j] * dt
+        @inbounds f[:,j] .= Splittings.interpolate(spline_degree, f[:,j],
+            meshx.step, alpha)
+    end
+    ifft!(f,1)
+end</code></pre><pre><code class="language-none">bsl_advection! (generic function with 1 method)</code></pre></div><div><pre><code class="language-julia">function push_v!(f, fᵗ, meshx, meshv, ex, dt)
+    transpose!(fᵗ, f)
+    hmf_poisson!(fᵗ, meshx, meshv, ex)
+    bsl_advection!(fᵗ, meshv, meshx, ex, dt)
+    transpose!(f, fᵗ)
+end</code></pre><pre><code class="language-none">push_v! (generic function with 1 method)</code></pre></div><div><pre><code class="language-julia">function vlasov_hmf_gauss(nbiter = 10000, dt = 0.1)
+
+    mass = 1.0
+    T = 0.1
+    meshx = UniformMesh(-π, π, 64)
+    meshv = UniformMesh(-8, 8, 64)
+
+    nx, dx = meshx.length, meshx.step
+    nv, dv = meshv.length, meshv.step
+    x, v = meshx.points, meshv.points
+    X = repeat(x,1,nv)
+    V = repeat(v,1,nx)&#39;
+    ϵ = 0.1
+
+    b = 1 / T
+    m = mag(b, mass)
+
+    w   = sqrt(m)
+    f   = zeros(Complex{Float64}, (nx,nv))
+    fᵗ  = zeros(Complex{Float64}, (nv,nx))
+
+    f  .= exp.(-b .* ((V.^2 / 2) - m * cos.(X)))
+    a   = mass / Norm(real(f), dx, dv)
+    @.  f =  a * exp(-b * (((V^2) / 2) - m * cos(X))) * (1 + ϵ * cos(X))
+
+    ex = zeros(Float64,nx)
+    hmf_poisson!(f, meshx, meshv, ex )
+    test = copy(f)
+    T = Float64[]
+    for n in 1:nbiter
+
+        gamma1 = Norm(real(f) .* cos.(X), dx, dv)
+        push!(T,gamma1)
+
+        @Strang(
+            bsl_advection!(f, meshx, meshv, v, dt),
+            push_v!(f, fᵗ, meshx, meshv, ex, dt)
+        )
+
+    end
+
+    #Substracting from gamma its long time average
+
+    Gamma1 = Norm(real(f) .*cos.(X), dx, dv)
+    T .= T .- Gamma1
+
+    range(0., stop=nbiter*deltat, length=nbiter), abs.(T)
+
+end</code></pre><pre><code class="language-none">vlasov_hmf_gauss (generic function with 3 methods)</code></pre></div><div><pre><code class="language-julia">nbiter = 2000
+deltat = 0.1
+@time t, T = vlasov_hmf_gauss(nbiter, deltat);
+plot(t, log.(T), xlabel = &quot;t&quot;, ylabel = &quot;|C[f](t)-C[f][T]|&quot;)</code></pre><pre><code class="language-none">  8.346125 seconds (5.45 M allocations: 2.415 GiB, 8.89% gc time)</code></pre></div><p><img src="vlasov-hmf-plot.png" alt="png"/></p><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p><footer><hr/><a class="previous" href="rotation2d_bsl.html"><span class="direction">Previous</span><span class="title">Rotation 2D</span></a><a class="next" href="../contributing.html"><span class="direction">Next</span><span class="title">How to Contribute</span></a></footer></article></body></html>
