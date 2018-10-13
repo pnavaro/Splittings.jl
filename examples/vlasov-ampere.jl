@@ -81,8 +81,8 @@ function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
     meshx = UniformMesh(xmin, xmax, nx, endpoint=false)
     meshv = UniformMesh(vmin, vmax, nv, endpoint=false)
 
-    x = meshx.x
-    v = meshv.x
+    x = meshx.points
+    v = meshv.points
     ϵ, kx = 0.001, 0.5
 
     f = zeros(Complex{Float64},(nx,nv))
@@ -102,7 +102,7 @@ function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
 
     for i in 1:nt
 
-	push!(nrj, 0.5*log(sum(real(e).^2)*meshx.dx))
+	push!(nrj, 0.5*log(sum(real(e).^2)*meshx.step))
 
         @Strang(  push_v!(fᵀ, meshx, meshv, e,  dt),
                   push_t!(f, fᵀ, meshx, meshv, e,  dt)

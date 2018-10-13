@@ -10,7 +10,7 @@ import Splittings: UniformMesh, advection!
   meshv = UniformMesh(vmin, vmax, nv; endpoint=false)
 
   f  = zeros(Complex{Float64},(nx,nv))
-  f .= exp.(-meshx.x.^2) * transpose(exp.(-meshv.x.^2))
+  f .= exp.(-meshx.points.^2) * transpose(exp.(-meshv.points.^2))
   fᵗ = zeros(Complex{Float64},(nv,nx))
 
   dt =  0.5
@@ -27,7 +27,7 @@ import Splittings: UniformMesh, advection!
   advection!(fᵗ, p, meshv, -e, nx, dt)
   transpose!(f,  fᵗ)
 
-  f0 =  exp.(-meshx.x.^2) * transpose(exp.(-meshv.x.^2))
+  f0 =  exp.(-meshx.points.^2) * transpose(exp.(-meshv.points.^2))
   println( maximum( abs.(real(f) -f0)))
 
   @test real(f) ≈ f0 atol=1e-6

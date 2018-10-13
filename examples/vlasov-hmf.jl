@@ -37,10 +37,10 @@ function hmf_poisson!(fᵗ::Array{Complex{Float64},2},
         meshv::UniformMesh,
         ex::Array{Float64})
 
-    nx = meshx.nx
-    rho = meshv.dx .* vec(sum(fᵗ, dims=1))
+    nx = meshx.length
+    rho = meshv.step .* vec(sum(fᵗ, dims=1))
     kernel = zeros(Float64, nx)
-    k = π / (meshx.xmax - meshx.xmin)
+    k = π / (meshx.stop - meshx.start)
     kernel[2] = k
     ex .= real(ifft(1im * fft(rho) .* kernel * 4π ))
 
@@ -56,10 +56,10 @@ function bsl_advection!(f::Array{Complex{Float64},2},
                         spline_degree=3)
     
     fft!(f,1)
-    @simd for j in 1:meshv.nx
+    @simd for j in 1:meshv.length
         alpha = v[j] * dt
         @inbounds f[:,j] .= Splittings.interpolate(spline_degree, f[:,j], 
-            meshx.dx, alpha)
+            meshx.step, alpha)
     end
     ifft!(f,1)
 end
@@ -82,9 +82,9 @@ function vlasov_hmf_gauss(nbiter = 10000, dt = 0.1)
     meshx = UniformMesh(-π, π, 64)
     meshv = UniformMesh(-8, 8, 64)
     
-    nx, dx = meshx.nx, meshx.dx
-    nv, dv = meshv.nx, meshv.dx
-    x, v = meshx.x, meshv.x
+    nx, dx = meshx.length, meshx.step
+    nv, dv = meshv.length, meshv.step
+    x, v = meshx.points, meshv.points
     X = repeat(x,1,nv)
     V = repeat(v,1,nx)'
     ϵ = 0.1

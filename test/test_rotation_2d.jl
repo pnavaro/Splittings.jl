@@ -9,8 +9,8 @@ import Splittings:UniformMesh
 """
 function exact(tf, meshx::UniformMesh, meshy::UniformMesh)
 
-    f = zeros(Float64,(meshx.nx,meshy.nx))
-    for (i, x) in enumerate(meshx.x), (j, y) in enumerate(meshy.x)
+    f = zeros(Float64,(meshx.length,meshy.length))
+    for (i, x) in enumerate(meshx.points), (j, y) in enumerate(meshy.points)
         xn = cos(tf) * x - sin(tf) * y
         yn = sin(tf) * x + cos(tf) * y
         f[i,j] = exp(-(xn-1)*(xn-1)/0.1)*exp(-(yn-1)*(yn-1)/0.1)
@@ -46,13 +46,13 @@ function rotation_2d_fft(tf, nt, meshx::UniformMesh, meshy::UniformMesh)
 
     dt = tf/nt
 
-    nx = meshx.nx
-    xmin, xmax = meshx.xmin, meshx.xmax
-    dx = meshx.dx
+    nx = meshx.length
+    xmin, xmax = meshx.start, meshx.stop
+    dx = meshx.step
 
-    ny = meshy.nx
-    ymin, ymax = meshy.xmin, meshy.xmax
-    dy = meshy.dx
+    ny = meshy.length
+    ymin, ymax = meshy.start, meshy.stop
+    dy = meshy.step
 
     kx = 2π/(xmax-xmin)*[0:nx÷2-1;nx÷2-nx:-1]
     ky = 2π/(ymax-ymin)*[0:ny÷2-1;ny÷2-ny:-1]
@@ -62,8 +62,8 @@ function rotation_2d_fft(tf, nt, meshx::UniformMesh, meshy::UniformMesh)
     fᵗ = zeros(Complex{Float64},(ny,nx))
     f̂ᵗ = similar(fᵗ)
     
-    exky = exp.( 1im * tan(dt/2) * ky .* transpose(meshx.x))
-    ekxy = exp.(-1im * sin(dt)   * kx .* transpose(meshy.x))
+    exky = exp.( 1im * tan(dt/2) * ky .* transpose(meshx.points))
+    ekxy = exp.(-1im * sin(dt)   * kx .* transpose(meshy.points))
     
     Px = plan_fft(f,  1)
     Py = plan_fft(fᵗ, 1)

@@ -36,7 +36,7 @@ import Splittings: UniformMesh, advection!
   meshv = UniformMesh(vmin, vmax, nv)
 
   f  = zeros(Float64,(nx,nv))
-  f .= exp.(-meshx.x.^2) * transpose(exp.(-meshv.x.^2))
+  f .= exp.(-meshx.points.^2) * transpose(exp.(-meshv.points.^2))
   fᵗ = zeros(Float64,(nv,nx))
 
   dt =  0.5
@@ -49,7 +49,7 @@ import Splittings: UniformMesh, advection!
   advection!(f, meshx, -v, dt)
   advection!(f, meshv, -e, dt)
 
-  f0 =  exp.(-meshx.x.^2) * transpose(exp.(-meshv.x.^2))
+  f0 =  exp.(-meshx.points.^2) * transpose(exp.(-meshv.points.^2))
   println( maximum( abs.(f .- f0)))
 
   @test f ≈ f0 atol=1e-3

@@ -104,15 +104,15 @@ struct RectMesh2D
 
     function RectMesh2D( meshx::UniformMesh, meshy::UniformMesh )
 
-        xmin = meshx.xmin    
-        xmax = meshx.xmax    
-        nx   = meshx.nx
-        dx   = meshx.dx
+        xmin = meshx.start    
+        xmax = meshx.stop    
+        nx   = meshx.length
+        dx   = meshx.step
 
-        ymin = meshy.xmin    
-        ymax = meshy.xmax    
-        ny   = meshy.nx
-        dy   = meshy.dx
+        ymin = meshy.start    
+        ymax = meshy.stop    
+        ny   = meshy.length
+        dy   = meshy.step
 
         new( xmin, xmax, nx, dx, ymin, ymax, ny, dy)
 

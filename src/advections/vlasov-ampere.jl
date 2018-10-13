@@ -18,8 +18,8 @@ function advection_v!( fᵀ    :: Array{Complex{Float64},2},
 		       e     :: Vector{Complex{Float64}}, 
 		       dt    :: Float64)
 
-    n = meshv.nx
-    L = meshv.xmax - meshv.xmin
+    n = meshv.length
+    L = meshv.stop - meshv.start
     k = 2π/L*[0:n÷2-1;-n÷2:-1]
     ek = exp.(-1im * dt * k * transpose(e))
 
@@ -46,16 +46,16 @@ function advection_x!( f     :: Array{Complex{Float64},2},
 		       e     :: Vector{Complex{Float64}}, 
 		       dt    :: Float64)
 
-    L = meshx.xmax - meshx.xmin
-    m = meshx.nx ÷ 2
+    L = meshx.stop - meshx.start
+    m = meshx.length ÷ 2
     k = 2π/L * [0:1:m-1;-m:1:-1]
-    v = meshv.x
+    v = meshv.points
     ev = exp.(-1im*dt * k * transpose(v))
 
     fft!(f,1)
     f   .= f .* ev
     k[1] = 1.0
-    e   .= -1im * meshv.dx * vec(sum(f,dims=2)) ./ k
+    e   .= -1im * meshv.step * vec(sum(f,dims=2)) ./ k
     e[1] = 0.0im
     ifft!(f,1)
     ifft!(e)

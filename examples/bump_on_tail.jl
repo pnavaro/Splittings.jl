@@ -15,8 +15,8 @@ function vlasov_poisson(meshx  :: UniformMesh,
                         nstep  :: Int64, 
                         dt     :: Float64)
     
-    x = meshx.x
-    v = meshv.x
+    x = meshx.points
+    v = meshv.points
 
     nrj = Float64[]
     for istep in 1:nstep
@@ -25,7 +25,7 @@ function vlasov_poisson(meshx  :: UniformMesh,
         e   = compute_e(meshx, rho)
         advection!( f, meshv, e, dt, axis=2)
         advection!( f, meshx, v, 0.5dt, axis=1)
-        push!(nrj, 0.5*log(sum(e.*e)*meshx.dx))
+        push!(nrj, 0.5*log(sum(e.*e)*meshx.step))
     end        
     nrj
     
@@ -40,8 +40,8 @@ nx, nv = 128, 256
 vmin, vmax = -9., 9.
 meshx = UniformMesh(xmin, xmax, nx)
 meshv = UniformMesh(vmin, vmax, nv)
-f = zeros(Float64,(meshx.nx,meshv.nx))           
-for (i,x) in enumerate(meshx.x), (j,v) in enumerate(meshv.x)
+f = zeros(Float64,(meshx.length,meshv.length))           
+for (i,x) in enumerate(meshx.points), (j,v) in enumerate(meshv.points)
      f[i,j]  = (1.0+α*cos(kx*x)) / (10*sqrt(2π)) * (9*exp(-0.5*v^2)+2*exp(-2*(v-4.5)^2))
 end
 

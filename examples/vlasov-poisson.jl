@@ -30,9 +30,9 @@ end
 function push_v!(f, fᵗ, p, meshx, meshv, nrj, dt)
     rho = Splittings.compute_rho(meshv, f)
     e   = Splittings.compute_e(meshx, rho)
-    push!(nrj, 0.5*log(sum(e.*e)*meshx.dx))
+    push!(nrj, 0.5*log(sum(e.*e)*meshx.step))
     transpose!(fᵗ, f)
-    Splittings.advection!(fᵗ, p, meshv, e, meshx.nx, dt)
+    Splittings.advection!(fᵗ, p, meshv, e, meshx.length, dt)
     transpose!(f, fᵗ)
 end
 
@@ -46,9 +46,9 @@ function landau(tf, nt)
   vmin, vmax = -6., 6.
   meshx = UniformMesh(xmin, xmax, nx; endpoint=false)
   meshv = UniformMesh(vmin, vmax, nv; endpoint=false)
-  x = meshx.x
-  v = meshv.x
-  dx = meshx.dx
+  x = meshx.points
+  v = meshv.points
+  dx = meshx.step
 
   ϵ, kx = 0.001, 0.5
   f = zeros(Complex{Float64},(nx,nv))

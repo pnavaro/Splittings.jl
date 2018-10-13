@@ -19,8 +19,8 @@ function with_bsl(tf::Float64, nt::Int)
    nx, ny = 64, 64
    meshx = UniformMesh(-π, π, nx)
    meshy = UniformMesh(-π, π, ny)
-   x = meshx.x
-   y = meshy.x
+   x = meshx.points
+   y = meshy.points
 
    dt = tf/nt
 
