@@ -6,6 +6,10 @@ os:
 julia:
   - 1.0
 
+before_install:
+  - brew update
+  - brew install ffmpeg
+
 notifications:
   email: false
 
