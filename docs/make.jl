@@ -12,9 +12,9 @@ makedocs(modules=[Splittings],
                       "Vlasov-Poisson" => "examples/vlasov-poisson.md",
                       "Bump On Tail"   => "examples/bump_on_tail.md",
                       "Rotation 2D"    => "examples/rotation2d_bsl.md"],
+                      "Vlasov-HMF"     => "examples/vlasov-hmf.md"],
                   "User Documentation" => [
                     "How to Contribute" => "contributing.md"]])
-
 
 deploydocs(
     repo   = "github.com/pnavaro/Splittings.jl.git",
