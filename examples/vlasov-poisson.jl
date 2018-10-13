@@ -17,32 +17,31 @@
 
 using Plots, LinearAlgebra
 pyplot()
-import Splittings:UniformMesh
+import Splittings:UniformMesh, BSpline
 import Splittings:@Strang
 import Splittings
 
-#-
+#-------------------------------------------------------------------
 
-function push_t!(f, p, meshx, v, nv, dt)
-    Splittings.advection!(f, p, meshx, v, nv, dt)
+function push_t!(f, meshx, v, nv, dt)
+    Splittings.advection!(f, meshx, v, nv, dt, BSpline(5))
 end
 
-#-
-#
-function push_v!(f, fᵗ, p, meshx, meshv, nrj, dt)
+#-------------------------------------------------------------------
+
+function push_v!(f, fᵗ, meshx, meshv, nrj, dt)
     rho = Splittings.compute_rho(meshv, f)
     e   = Splittings.compute_e(meshx, rho)
     push!(nrj, 0.5*log(sum(e.*e)*meshx.step))
     transpose!(fᵗ, f)
-    Splittings.advection!(fᵗ, p, meshv, e, meshx.length, dt)
+    Splittings.advection!(fᵗ, meshv, e, meshx.length, dt, BSpline(5))
     transpose!(f, fᵗ)
 end
 
-#-
+#-------------------------------------------------------------------
 
 function landau(tf, nt)
 
-  p = 3
   nx, nv = 32, 64
   xmin, xmax = 0.0, 4π
   vmin, vmax = -6., 6.
@@ -62,15 +61,15 @@ function landau(tf, nt)
   nrj = Float64[]
 
   for it in 1:nt
-      @Strang( push_t!(f, p, meshx, v, nv, dt),
-               push_v!(f, fᵗ, p, meshx, meshv, nrj, dt))
+      @Strang( push_t!(f, meshx, v, nv, dt),
+               push_v!(f, fᵗ, meshx, meshv, nrj, dt))
   end
 
   nrj
 
 end
 
-#-
+#-------------------------------------------------------------------
 
 nt = 600
 tf = 60.0
@@ -85,7 +84,4 @@ savefig("landau-plot.png"); nothing # hide
 @end                             #src
 
  
- 
 #md # ![](landau-plot.png)
-
-

@@ -48,7 +48,7 @@ end
 
 #-
 
-@time f = with_bsl( 10π, 100)
+@time f = with_bsl( 2π, 20)
 
 
 # ![](rotanim.gif)

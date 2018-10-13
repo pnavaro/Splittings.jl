@@ -1,13 +1,15 @@
 using FFTW, LinearAlgebra
 
 
+export BSpline
+
 struct BSpline
 
     p :: Int64
 
     function BSpline( p )
 	
-	@assert (b & 1 == 1)
+	@assert (p & 1 == 1)
 	new( p )
 
     end
