@@ -7,3 +7,8 @@ docs/site/
 /.ipynb_checkpoints/
 docs/src/examples/
 notebooks/
+test/examples/
+test/landau-plot.png
+test/bot-plot.png
+test/rotanim.gif
+test/va-plot.png
