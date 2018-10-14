@@ -8,7 +8,7 @@
 # ```math
 #  \\frac{∂f}{∂t}+ v⋅∇_x f + E(t,x) ⋅ ∇_v f = 0, \\
 #  - Δϕ = 1 - ρ, E = - ∇ ϕ \\
-#  ρ(t,x)  =  ∫ f(t,x,v)dv.
+#  ρ(t,x)  =  ∫ f(t,x,v)delta2.
 # ```
 # 
 #  - [Vlasov Equation - Wikipedia](https://en.wikipedia.org/wiki/Vlasov_equation)
@@ -23,18 +23,18 @@ import Splittings
 
 #-------------------------------------------------------------------
 
-function push_t!(f, meshx, v, nv, dt)
-    Splittings.advection!(f, meshx, v, nv, dt, BSpline(5))
+function push_t!(f, mesh1, v, n2, dt)
+    Splittings.advection!(f, mesh1, v, n2, dt, BSpline(5))
 end
 
 #-------------------------------------------------------------------
 
-function push_v!(f, fᵗ, meshx, meshv, nrj, dt)
-    rho = Splittings.compute_rho(meshv, f)
-    e   = Splittings.compute_e(meshx, rho)
-    push!(nrj, 0.5*log(sum(e.*e)*meshx.step))
+function push_v!(f, fᵗ, mesh1, mesh2, nrj, dt)
+    rho = Splittings.compute_rho(mesh2, f)
+    e   = Splittings.compute_e(mesh1, rho)
+    push!(nrj, 0.5*log(sum(e.*e)*mesh1.step))
     transpose!(fᵗ, f)
-    Splittings.advection!(fᵗ, meshv, e, meshx.length, dt, BSpline(5))
+    Splittings.advection!(fᵗ, mesh2, e, mesh1.length, dt, BSpline(5))
     transpose!(f, fᵗ)
 end
 
@@ -42,27 +42,27 @@ end
 
 function landau(tf, nt)
 
-  nx, nv = 32, 64
-  xmin, xmax = 0.0, 4π
-  vmin, vmax = -6., 6.
-  meshx = UniformMesh(xmin, xmax, nx; endpoint=false)
-  meshv = UniformMesh(vmin, vmax, nv; endpoint=false)
-  x = meshx.points
-  v = meshv.points
-  dx = meshx.step
+  n1, n2 = 32, 64
+  x1min, x1max = 0.0, 4π
+  x2min, x2max = -6., 6.
+  mesh1 = UniformMesh(x1min, x1max, n1; endpoint=false)
+  mesh2 = UniformMesh(x2min, x2max, n2; endpoint=false)
+  x = mesh1.points
+  v = mesh2.points
+  delta1 = mesh1.step
 
   ϵ, kx = 0.001, 0.5
-  f = zeros(Complex{Float64},(nx,nv))
+  f = zeros(Complex{Float64},(n1,n2))
   f .= (1.0.+ϵ*cos.(kx*x))/sqrt(2π) * transpose(exp.(-0.5*v.^2))
-  fᵗ = zeros(Complex{Float64},(nv,nx))
+  fᵗ = zeros(Complex{Float64},(n2,n1))
 
   dt = tf / nt
 
   nrj = Float64[]
 
   for it in 1:nt
-      @Strang( push_t!(f, meshx, v, nv, dt),
-               push_v!(f, fᵗ, meshx, meshv, nrj, dt))
+      @Strang( push_t!(f, mesh1, v, n2, dt),
+               push_v!(f, fᵗ, mesh1, mesh2, nrj, dt))
   end
 
   nrj

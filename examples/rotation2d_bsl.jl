@@ -3,13 +3,13 @@
 # #md # [`notebook`](https://nbviewer.jupyter.org/github/pnavaro/Splittings.jl/blob/master/notebooks/rotation_2d_bsl.ipynb)
 # 
 # ```math
-#     \frac{df}{dt} +  (y \frac{df}{dx} - x \frac{df}{dy}) = 0
+#     \frac{df}{dt} +  (y \frac{df}{delta1} - x \frac{df}{delta2}) = 0
 # ```
 # 
 # 
 
 import Splittings: advection!, UniformMesh
-import Splittings: @Strang
+import Splittings: @Strang, CubicSpline
 using Plots
 pyplot()
 
@@ -17,15 +17,15 @@ pyplot()
 
 function with_bsl(tf::Float64, nt::Int)
 
-   nx, ny = 32, 64
-   meshx = UniformMesh(-π, π, nx)
-   meshy = UniformMesh(-π, π, ny)
-   x = meshx.points
-   y = meshy.points
+   n1, n2 = 32, 64
+   mesh1 = UniformMesh(-π, π, n1)
+   mesh2 = UniformMesh(-π, π, n2)
+   x = mesh1.points
+   y = mesh2.points
 
    dt = tf/nt
 
-   f = zeros(Float64,(nx,ny))
+   f = zeros(Float64,(n1,n2))
 
    for (i, xp) in enumerate(x), (j, yp) in enumerate(y)
        xn = cos(tf)*xp - sin(tf)*yp
@@ -35,8 +35,9 @@ function with_bsl(tf::Float64, nt::Int)
 
    anim = @animate for n=1:nt
        
-      @Strang(advection!( f,  meshx,  y, tan(dt), axis=1),
-              advection!( f,  meshy, -x, sin(dt), axis=2))
+	   @Strang(advection!( f,  mesh1,  y, tan(dt), CubicSpline(), 1),
+		   advection!( f,  mesh2, -x, sin(dt), CubicSpline(), 2)
+		   )
 
       surface(f)
                                       

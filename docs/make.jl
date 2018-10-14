@@ -27,7 +27,7 @@ for example in examples
 end
 
 makedocs(modules=[Splittings],
-         doctest = true,
+         doctest = false,
          format = :html,
          sitename = "Splittings.jl",
          pages = ["Introduction"    => "index.md",

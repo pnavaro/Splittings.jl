@@ -27,61 +27,61 @@ contains
     integer, intent(out)       :: iflag ! error flag
     ! local variables
     integer :: err ! error flag
-    integer :: nx,ny ! dimensions
-    integer :: nxp1, nxp2, nxp3, nyp1, nyp2, nyp3
+    integer :: n1,n2 ! dimensions
+    integer :: n1p1, n1p2, n1p3, n2p1, n2p2, n2p3
     real(wp) :: aa1x, aa1y, aa2x, aa2y
     integer i,j, info
     ! initialisation des variables locales
     iflag = 0
-    nx = geom%nx
-    ny = geom%ny
-    nxp1=nx+1
-    nxp2=nx+2
-    nxp3=nx+3
-    nyp1=ny+1
-    nyp2=ny+2
-    nyp3=ny+3
+    n1 = geom%n1
+    n2 = geom%n2
+    n1p1=n1+1
+    n1p2=n1+2
+    n1p3=n1+3
+    n2p1=n2+1
+    n2p2=n2+2
+    n2p3=n2+3
 
     ! initialisation de geom
     this%geom = geom
 
     ! memory allocation
-    allocate(this%axm1gamma(nxp1,2), stat=err)
+    allocate(this%axm1gamma(n1p1,2), stat=err)
     if (err.ne.0) then
        iflag = 10
        return
     end if
-    allocate(this%aym1gamma(nyp1,2), stat=err)
+    allocate(this%aym1gamma(n2p1,2), stat=err)
     if (err.ne.0) then
        iflag = 15
        return
     end if
-    allocate(this%axd(nxp1), stat=err)
+    allocate(this%axd(n1p1), stat=err)
     if (err.ne.0) then
        iflag = 20
        return
     end if
-    allocate(this%axod(nx), stat=err)
+    allocate(this%axod(n1), stat=err)
     if (err.ne.0) then
        iflag = 30
        return
     end if
-    allocate(this%ayd(nyp1), stat=err)
+    allocate(this%ayd(n2p1), stat=err)
     if (err.ne.0) then
        iflag = 40
        return
     end if
-    allocate(this%ayod(ny), stat=err)
+    allocate(this%ayod(n2), stat=err)
     if (err.ne.0) then
        iflag = 45
        return
     end if
-    allocate(this%coef(nxp3,nyp3), stat=err)
+    allocate(this%coef(n1p3,n2p3), stat=err)
     if (err.ne.0) then
        iflag = 50
        return
     end if
-    allocate(this%bcoef(nxp3,ny), stat=err)
+    allocate(this%bcoef(n1p3,n2), stat=err)
     if (err.ne.0) then
        iflag = 60
        return
@@ -91,9 +91,9 @@ contains
     this%axd = 4_wp
     this%axod = 1_wp
 #ifdef _CRAY
-    call spttrf(nxp1,this%axd,this%axod,err)
+    call spttrf(n1p1,this%axd,this%axod,err)
 #else
-    call dpttrf(nxp1,this%axd,this%axod,err)
+    call dpttrf(n1p1,this%axd,this%axod,err)
 #endif
     if (err.ne.0) then
        iflag = 70
@@ -102,9 +102,9 @@ contains
     this%ayd = 4_wp
     this%ayod = 1_wp
 #ifdef _CRAY
-    call spttrf(nyp1,this%ayd,this%ayod,err)
+    call spttrf(n2p1,this%ayd,this%ayod,err)
 #else
-    call dpttrf(nyp1,this%ayd,this%ayod,err)
+    call dpttrf(n2p1,this%ayd,this%ayod,err)
 #endif
     if (err.ne.0) then
        iflag = 80
@@ -113,11 +113,11 @@ contains
     ! compute Ax-1.gamma
     this%axm1gamma = 0_wp
     this%axm1gamma(1,2) = 1_wp
-    this%axm1gamma(nxp1,1) = 1_wp
+    this%axm1gamma(n1p1,1) = 1_wp
 #ifdef _CRAY
-    call spttrs(nxp1,2,this%axd,this%axod,this%axm1gamma,nxp1,err)
+    call spttrs(n1p1,2,this%axd,this%axod,this%axm1gamma,n1p1,err)
 #else
-    call dpttrs(nxp1,2,this%axd,this%axod,this%axm1gamma,nxp1,err)
+    call dpttrs(n1p1,2,this%axd,this%axod,this%axm1gamma,n1p1,err)
 #endif
     if (err.ne.0) then
        iflag = 90
@@ -126,35 +126,35 @@ contains
     ! compute Ay-1.gamma
     this%aym1gamma = 0_wp
     this%aym1gamma(1,2) = 1_wp
-    this%aym1gamma(nyp1,1) = 1_wp
+    this%aym1gamma(n2p1,1) = 1_wp
 #ifdef _CRAY
-    call spttrs(nyp1,2,this%ayd,this%ayod,this%aym1gamma,nyp1,err)
+    call spttrs(n2p1,2,this%ayd,this%ayod,this%aym1gamma,n2p1,err)
 #else
-    call dpttrs(nyp1,2,this%ayd,this%ayod,this%aym1gamma,nyp1,err)
+    call dpttrs(n2p1,2,this%ayd,this%ayod,this%aym1gamma,n2p1,err)
 #endif
     if (err.ne.0) then
        iflag = 100
        return
     end if
 
-    aa1x=3_wp/geom%dx
-    aa1y=3_wp/geom%dy
-    aa2x=6_wp/(geom%dx*geom%dx)
-    aa2y=6_wp/(geom%dy*geom%dy)
+    aa1x=3_wp/geom%delta1
+    aa1y=3_wp/geom%delta2
+    aa2x=6_wp/(geom%delta1*geom%delta1)
+    aa2y=6_wp/(geom%delta2*geom%delta2)
     ! assemblage de la matrice 2x2 pour la spline dans la direction Ox
-       this%a1x = -aa1x*(1. + this%axm1gamma(2,1)+this%axm1gamma(nx,1))
-       this%a2x = -aa1x*(1. + this%axm1gamma(2,2)+this%axm1gamma(nx,2))
+       this%a1x = -aa1x*(1. + this%axm1gamma(2,1)+this%axm1gamma(n1,1))
+       this%a2x = -aa1x*(1. + this%axm1gamma(2,2)+this%axm1gamma(n1,2))
        this%a3x = aa2x*(-1. + 2*this%axm1gamma(1,1) - this%axm1gamma(2,1) &
-            + this%axm1gamma(nx,1) - 2*this%axm1gamma(nxp1,1))
+            + this%axm1gamma(n1,1) - 2*this%axm1gamma(n1p1,1))
        this%a4x = aa2x*(1. + 2*this%axm1gamma(1,2) - this%axm1gamma(2,2) &
-            + this%axm1gamma(nx,2) - 2*this%axm1gamma(nxp1,2))
+            + this%axm1gamma(n1,2) - 2*this%axm1gamma(n1p1,2))
     ! assemblage de la matrice 2x2 pour spline naturels (direction Oy)
-       this%a1y = -aa1y*(1. + this%aym1gamma(2,1)+this%aym1gamma(ny,1))
-       this%a2y = -aa1y*(1. + this%aym1gamma(2,2)+this%aym1gamma(ny,2))
+       this%a1y = -aa1y*(1. + this%aym1gamma(2,1)+this%aym1gamma(n2,1))
+       this%a2y = -aa1y*(1. + this%aym1gamma(2,2)+this%aym1gamma(n2,2))
        this%a3y = aa2y*(-1. + 2*this%aym1gamma(1,1) - this%aym1gamma(2,1) &
-            + this%aym1gamma(ny,1) - 2*this%aym1gamma(nyp1,1))
+            + this%aym1gamma(n2,1) - 2*this%aym1gamma(n2p1,1))
        this%a4y = aa2y*(1. + 2*this%aym1gamma(1,2) - this%aym1gamma(2,2) &
-            + this%aym1gamma(ny,2) - 2*this%aym1gamma(nyp1,2))
+            + this%aym1gamma(n2,2) - 2*this%aym1gamma(n2p1,2))
  end subroutine new_splinepp
 
   subroutine interpole_splinepp(this,fin,fout,x,y) 
@@ -256,49 +256,49 @@ contains
     integer, intent(out) :: iflag    ! indicateur d erreur
     ! variables locales
     integer i,j ! indices de boucle
-    integer nx, ny, nxp2, nxp3  !  nx+2, nx+3
+    integer n1, n2, n1p2, n1p3  !  n1+2, n1+3
     integer :: err ! error flag
 
-    real(wp) :: axm1f(this%geom%nx+1,this%geom%ny)
+    real(wp) :: axm1f(this%geom%n1+1,this%geom%n2)
     real(wp) :: det, gamma1, gamma2
 
     ! initialisations
     iflag =0
-    nx=this%geom%nx
-    ny=this%geom%ny
-    nxp2=nx+2
-    nxp3=nx+3
+    n1=this%geom%n1
+    n2=this%geom%n2
+    n1p2=n1+2
+    n1p3=n1+3
     det=this%a1x*this%a4x - this%a2x*this%a3x
 
     ! Calcul de Ax^-1 f
     ! assemblage du membre de droite pour le calcul de Ax^-1 f
-    do j=1,ny
-       do i=1,nx
+    do j=1,n2
+       do i=1,n1
           axm1f(i,j) = 6*gtau(i,j)
        end do
-       axm1f(nx+1,j) = 6*gtau(1,j)  ! calcul par periodicite
+       axm1f(n1+1,j) = 6*gtau(1,j)  ! calcul par periodicite
     end do
 
 #ifdef _CRAY
-    call spttrs(nx+1,ny,this%axd,this%axod,axm1f,nx+1,err)
+    call spttrs(n1+1,n2,this%axd,this%axod,axm1f,n1+1,err)
 #else 
-    call dpttrs(nx+1,ny,this%axd,this%axod,axm1f,nx+1,err)
+    call dpttrs(n1+1,n2,this%axd,this%axod,axm1f,n1+1,err)
 #endif
     if (err.ne.0) then
        iflag = 10
        return
     end if
-    do  j=1,ny
+    do  j=1,n2
        ! assemblage du second membre du systeme 2x2 
-       gamma1 =  - (3.0/this%geom%dx)*(axm1f(2,j) +axm1f(this%geom%nx,j))
-       gamma2 =  (6.0/(this%geom%dx)**2)*(2*axm1f(1,j) - axm1f(2,j) &
-            + axm1f(this%geom%nx,j) - 2*axm1f(this%geom%nx+1,j))
+       gamma1 =  - (3.0/this%geom%delta1)*(axm1f(2,j) +axm1f(this%geom%n1,j))
+       gamma2 =  (6.0/(this%geom%delta1)**2)*(2*axm1f(1,j) - axm1f(2,j) &
+            + axm1f(this%geom%n1,j) - 2*axm1f(this%geom%n1+1,j))
 
-       this%bcoef(nxp3,j)= (gamma1*this%a4x - gamma2*this%a2x)/det
+       this%bcoef(n1p3,j)= (gamma1*this%a4x - gamma2*this%a2x)/det
        this%bcoef(1,j)= (gamma2*this%a1x - gamma1*this%a3x)/det
-       do  i=2,nxp2
+       do  i=2,n1p2
           this%bcoef(i,j)= axm1f(i-1,j) &
-               - this%axm1gamma(i-1,1)*this%bcoef(nxp3,j) &
+               - this%axm1gamma(i-1,1)*this%bcoef(n1p3,j) &
                - this%axm1gamma(i-1,2)*this%bcoef(1,j)
        end do
     end do
@@ -309,49 +309,49 @@ contains
     integer, intent(out) :: iflag    ! indicateur d erreur
     ! variables locales
     integer i,j ! indices de boucle
-    integer ny, nxp3, nyp3  !  nx+3, ny+3
+    integer n2, n1p3, n2p3  !  n1+3, n2+3
     integer :: err ! error flag
 
-    real(wp) :: aym1f(this%geom%ny+1,this%geom%nx+3)
+    real(wp) :: aym1f(this%geom%n2+1,this%geom%n1+3)
     real(wp) :: det, gamma1, gamma2
 
     ! initialisations
     iflag =0
-    ny = this%geom%ny
-    nxp3=this%geom%nx+3
-    nyp3=this%geom%ny+3
+    n2 = this%geom%n2
+    n1p3=this%geom%n1+3
+    n2p3=this%geom%n2+3
     det=this%a1y*this%a4y - this%a2y*this%a3y
 
-    ! calcul de coef par resolution de nxp2 systemes lineaires.
+    ! calcul de coef par resolution de n1p2 systemes lineaires.
 
     ! Calcul de Ay^-1 f
     ! assemblage du membre de droite pour le calcul de Ay^-1 f
-    do i=1,nxp3
-       do j=1,ny
+    do i=1,n1p3
+       do j=1,n2
           aym1f(j,i) = 6.*this%bcoef(i,j)
        end do
-       aym1f(ny+1,i) = 6.*this%bcoef(i,1)
+       aym1f(n2+1,i) = 6.*this%bcoef(i,1)
     end do
 #ifdef _CRAY
-    call spttrs(ny+1,nxp3,this%ayd,this%ayod,aym1f,ny+1,err)
+    call spttrs(n2+1,n1p3,this%ayd,this%ayod,aym1f,n2+1,err)
 #else
-    call dpttrs(ny+1,nxp3,this%ayd,this%ayod,aym1f,ny+1,err)
+    call dpttrs(n2+1,n1p3,this%ayd,this%ayod,aym1f,n2+1,err)
 #endif
     if (err.ne.0) then
        iflag = 10
        return
     end if
-    do i=1,nxp3
+    do i=1,n1p3
        ! assemblage du second membre du systeme 2x2 
-       gamma1 =  - (3.0/this%geom%dy)*(aym1f(2,i) +aym1f(this%geom%ny,i))
-       gamma2 =  (6.0/(this%geom%dy)**2)*(2*aym1f(1,i) - aym1f(2,i) &
-            + aym1f(this%geom%ny,i) - 2*aym1f(this%geom%ny+1,i))
+       gamma1 =  - (3.0/this%geom%delta2)*(aym1f(2,i) +aym1f(this%geom%n2,i))
+       gamma2 =  (6.0/(this%geom%delta2)**2)*(2*aym1f(1,i) - aym1f(2,i) &
+            + aym1f(this%geom%n2,i) - 2*aym1f(this%geom%n2+1,i))
        ! resolution du syteme lineaire 2x2
-       this%coef(i,nyp3) = (gamma1*this%a4y - gamma2*this%a2y)/det
+       this%coef(i,n2p3) = (gamma1*this%a4y - gamma2*this%a2y)/det
        this%coef(i,1) = (gamma2*this%a1y - gamma1*this%a3y)/det
-       do  j=2,this%geom%ny + 2
+       do  j=2,this%geom%n2 + 2
           this%coef(i,j)= aym1f(j-1,i)                   &
-               - this%aym1gamma(j-1,1)*this%coef(i,nyp3) &
+               - this%aym1gamma(j-1,1)*this%coef(i,n2p3) &
                - this%aym1gamma(j-1,2)*this%coef(i,1)
        end do
     end do
@@ -370,30 +370,30 @@ contains
     ! variables locales
     real(wp) :: sval   ! valeur de la fonction au point (xd,yd)
     real(wp) :: bvalx1,bvalx2,bvalx3,bvalx4,bvaly1,bvaly2,bvaly3,bvaly4
-    real(wp) :: a1,dxx,dxxx,dxxx6,dyy,dyyy,dyyy6,xd1,xdp1,yd1,ydp1
-    real(wp) :: sval1, sval2, sval3, sval4, idx, idy, lx, ly
+    real(wp) :: a1,delta1x,delta1xx,delta1xx6,delta2y,delta2yy,delta2yy6,xd1,xdp1,yd1,ydp1
+    real(wp) :: sval1, sval2, sval3, sval4, idelta1, idelta2, lx, ly
     integer i1,j1,i,j
     !
-    dxx=this%geom%dx*this%geom%dx
-    dxxx=dxx*this%geom%dx
-    dxxx6=1./(6.*dxxx)
+    delta1x=this%geom%delta1*this%geom%delta1
+    delta1xx=delta1x*this%geom%delta1
+    delta1xx6=1./(6.*delta1xx)
     !
     !
-    dyy=this%geom%dy*this%geom%dy
-    dyyy=dyy*this%geom%dy
-    dyyy6=1./(6.*dyyy)
+    delta2y=this%geom%delta2*this%geom%delta2
+    delta2yy=delta2y*this%geom%delta2
+    delta2yy6=1./(6.*delta2yy)
 
-    idx = 1/this%geom%dx
-    idy = 1/this%geom%dy
+    idelta1 = 1/this%geom%delta1
+    idelta2 = 1/this%geom%delta2
 
-    lx = (this%geom%nx-1)*this%geom%dx
-    ly = (this%geom%ny-1)*this%geom%dy
+    lx = (this%geom%n1-1)*this%geom%delta1
+    ly = (this%geom%n2-1)*this%geom%delta2
     !print*,'l ',lx,ly
 
-    ! evaluation des splines pour le calcul des nx-1 lignes 
-    ! et ny-1 colonnes de fout
-    do j=1,this%geom%ny
-       do i=1,this%geom%nx
+    ! evaluation des splines pour le calcul des n1-1 lignes 
+    ! et n2-1 colonnes de fout
+    do j=1,this%geom%n2
+       do i=1,this%geom%n1
 !!$          do while (xd(i,j)<this%geom%x0)
 !!$             !print*,i,j,xd(i,j),this%geom%x0
 !!$             xd(i,j)=xd(i,j)+lx
@@ -411,29 +411,29 @@ contains
 !!$             yd(i,j)=yd(i,j)-ly
 !!$          end do
 
-          i1=(xd(i,j)-this%geom%x0)*idx
-          j1=(yd(i,j)-this%geom%y0)*idy
+          i1=(xd(i,j)-this%geom%x0)*idelta1
+          j1=(yd(i,j)-this%geom%y0)*idelta2
 
-          if ((i1<0).or.(i1>this%geom%nx-1)) print*,'i1',i1
-          if ((j1<0).or.(j1>this%geom%ny-1)) print*,'j1',j1
+          if ((i1<0).or.(i1>this%geom%n1-1)) print*,'i1',i1
+          if ((j1<0).or.(j1>this%geom%n2-1)) print*,'j1',j1
           
-          !i1=mod(i1+this%geom%nx,this%geom%nx)
-          !j1=mod(j1+this%geom%ny,this%geom%ny)
-          !print*,'rrr ',i,j,xd(i,j),yd(i,j),i1,j1,this%geom%nx,this%geom%ny
+          !i1=mod(i1+this%geom%n1,this%geom%n1)
+          !j1=mod(j1+this%geom%n2,this%geom%n2)
+          !print*,'rrr ',i,j,xd(i,j),yd(i,j),i1,j1,this%geom%n1,this%geom%n2
 
           xdp1=this%geom%xgrid(i1+2)-xd(i,j)
           bvalx1=xdp1*xdp1*xdp1
-          bvalx2=dxxx+3.*dxx*xdp1+3.*this%geom%dx* &
+          bvalx2=delta1xx+3.*delta1x*xdp1+3.*this%geom%delta1* &
                &xdp1*xdp1-3.*xdp1*xdp1*xdp1
           xd1=xd(i,j)-this%geom%xgrid(i1+1)
-          bvalx3=dxxx+3.*dxx*xd1+3.*this%geom%dx* &
+          bvalx3=delta1xx+3.*delta1x*xd1+3.*this%geom%delta1* &
                &xd1*xd1-3.*xd1*xd1*xd1
           bvalx4=xd1*xd1*xd1
           ydp1=this%geom%ygrid(j1+2)-yd(i,j)
           bvaly1=ydp1*ydp1*ydp1
-          bvaly2=dyyy+3.*ydp1*(dyy+ydp1*(this%geom%dy-ydp1))          
+          bvaly2=delta2yy+3.*ydp1*(delta2y+ydp1*(this%geom%delta2-ydp1))          
           yd1=yd(i,j)-this%geom%ygrid(j1+1)
-          bvaly3=dyyy+3.*yd1*(dyy+yd1*(this%geom%dy-yd1))
+          bvaly3=delta2yy+3.*yd1*(delta2y+yd1*(this%geom%delta2-yd1))
           bvaly4=yd1*yd1*yd1
 
           sval=0.
@@ -458,7 +458,7 @@ contains
           sval4=sval4+this%coef(i1+4,j1+4)*bvaly4
           sval=sval+sval4*bvalx4
          
-          fout(i,j) = dxxx6*dyyy6*sval
+          fout(i,j) = delta1xx6*delta2yy6*sval
        end do
     end do
  
@@ -475,58 +475,58 @@ contains
     ! variables locales
     real(wp) :: sval   ! valeur de la fonction au point d'evaluation
     real(wp) bvalx1,bvalx2,bvalx3,bvalx4,bvaly1,bvaly2,bvaly3, &
-         &bvaly4,dxx,dxxx,dxxx6,dyy,dyyy,dyyy6,xd1,xdp1,yd1,ydp1
+         &bvaly4,delta1x,delta1xx,delta1xx6,delta2y,delta2yy,delta2yy6,xd1,xdp1,yd1,ydp1
     real(wp) :: sval1, sval2, sval3, sval4
-    integer :: intaxsdx, intaysdy 
+    integer :: intaxsdelta1, intaysdelta2 
     integer i1,j1,i,j
 
     ! debut du code
-    dxx=this%geom%dx*this%geom%dx
-    dxxx=dxx*this%geom%dx
-    dxxx6=1./(6.*dxxx)
+    delta1x=this%geom%delta1*this%geom%delta1
+    delta1xx=delta1x*this%geom%delta1
+    delta1xx6=1./(6.*delta1xx)
 
-    dyy=this%geom%dy*this%geom%dy
-    dyyy=dyy*this%geom%dy
-    dyyy6=1./(6.*dyyy)
+    delta2y=this%geom%delta2*this%geom%delta2
+    delta2yy=delta2y*this%geom%delta2
+    delta2yy6=1./(6.*delta2yy)
 
     if (alphax.gt.0) then
-       intaxsdx=int(-alphax/this%geom%dx+epsilon)-1  
-! intaxsdx=int(-alphax/this%geom%dx)-1 
-!       intaxsdx = -1
+       intaxsdelta1=int(-alphax/this%geom%delta1+epsilon)-1  
+! intaxsdelta1=int(-alphax/this%geom%delta1)-1 
+!       intaxsdelta1 = -1
     else
-       intaxsdx=int(-alphax/this%geom%dx)
+       intaxsdelta1=int(-alphax/this%geom%delta1)
     end if
     
     if (alphay.gt.0) then
-       intaysdy=int(-alphay/this%geom%dy+epsilon)-1
-!intaysdy=int(-alphax/this%geom%dx)-1    
-!intaysdy=-1
+       intaysdelta2=int(-alphay/this%geom%delta2+epsilon)-1
+!intaysdelta2=int(-alphax/this%geom%delta1)-1    
+!intaysdelta2=-1
     else
-       intaysdy=int(-alphay/this%geom%dy)
+       intaysdelta2=int(-alphay/this%geom%delta2)
     end if
-    xd1=-alphax-intaxsdx*this%geom%dx
-    xdp1=this%geom%dx-xd1
-    yd1=-alphay-intaysdy*this%geom%dy
-    ydp1=this%geom%dy-yd1
+    xd1=-alphax-intaxsdelta1*this%geom%delta1
+    xdp1=this%geom%delta1-xd1
+    yd1=-alphay-intaysdelta2*this%geom%delta2
+    ydp1=this%geom%delta2-yd1
 
     bvalx1=xdp1*xdp1*xdp1
-    bvalx2=dxxx+3.*dxx*xdp1+3.*this%geom%dx* &
+    bvalx2=delta1xx+3.*delta1x*xdp1+3.*this%geom%delta1* &
          &xdp1*xdp1-3.*xdp1*xdp1*xdp1
-    bvalx3=dxxx+3.*dxx*xd1+3.*this%geom%dx* &
+    bvalx3=delta1xx+3.*delta1x*xd1+3.*this%geom%delta1* &
          &xd1*xd1-3.*xd1*xd1*xd1
     bvalx4=xd1*xd1*xd1
     bvaly1=ydp1*ydp1*ydp1
-    bvaly2=dyyy+3.*ydp1*(dyy+ydp1*(this%geom%dy-ydp1))          
-    bvaly3=dyyy+3.*yd1*(dyy+yd1*(this%geom%dy-yd1))
+    bvaly2=delta2yy+3.*ydp1*(delta2y+ydp1*(this%geom%delta2-ydp1))          
+    bvaly3=delta2yy+3.*yd1*(delta2y+yd1*(this%geom%delta2-yd1))
     bvaly4=yd1*yd1*yd1
 
-    do j=1,this%geom%ny
-       j1=mod(this%geom%ny+j-1+intaysdy,this%geom%ny)
+    do j=1,this%geom%n2
+       j1=mod(this%geom%n2+j-1+intaysdelta2,this%geom%n2)
 
-       do i=1,this%geom%nx
-          i1=mod(this%geom%nx+i-1+intaxsdx,this%geom%nx)
+       do i=1,this%geom%n1
+          i1=mod(this%geom%n1+i-1+intaxsdelta1,this%geom%n1)
 
-          fout(i,j) = dxxx6*dyyy6* ( &
+          fout(i,j) = delta1xx6*delta2yy6* ( &
                bvalx1*( this%coef(i1+1,j1+1)*bvaly1 &
                +this%coef(i1+1,j1+2)*bvaly2 &
                +this%coef(i1+1,j1+3)*bvaly3 &

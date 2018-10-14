@@ -10,15 +10,15 @@ import FFTW:fft, ifft, fft!, ifft!
 
     Compute charge density
 
-    ρ(x,t) = ∫ f(x,v,t) dv
+    ρ(x,t) = ∫ f(x,v,t) delta2
 
     return ρ - ρ̄ if neutralized=true
 
 """
-function compute_rho(meshv::UniformMesh, f, neutralized=true)
+function compute_rho(mesh2::UniformMesh, f, neutralized=true)
 
-   local dv  = meshv.step
-   ρ = dv * sum(f, dims=2)
+   local delta2  = mesh2.step
+   ρ = delta2 * sum(f, dims=2)
    if (neutralized)
        ρ .- mean(ρ)
    else
@@ -35,11 +35,11 @@ end
 
 """
 function compute_rho!(rho::Vector{Complex{Float64}}, 
-		      meshv::UniformMesh, 
+		      mesh2::UniformMesh, 
 		      f::Array{Complex{Float64},2})
 
-   local dv = meshv.step
-   rho .= dv * vec(sum(f, dims=2))
+   local delta2 = mesh2.step
+   rho .= delta2 * vec(sum(f, dims=2))
    rho .= rho .- mean(rho)
 
 end
@@ -51,12 +51,12 @@ end
     Compute 1d electric field using that -ik * e = ρ
 
 """
-function compute_e(meshx::UniformMesh, ρ)
+function compute_e(mesh1::UniformMesh, ρ)
 
-   nx = meshx.length
-   k =  2π / (meshx.stop - meshx.start)
-   modes  = zeros(Float64, nx)
-   modes .= k * vcat(0:nx÷2-1,-nx÷2:-1)
+   n1 = mesh1.length
+   k =  2π / (mesh1.stop - mesh1.start)
+   modes  = zeros(Float64, n1)
+   modes .= k * vcat(0:n1÷2-1,-n1÷2:-1)
    modes[1] = 1.0
    ρ̂ = fft(ρ)./modes
    vec(real(ifft(-1im*ρ̂)))
@@ -71,13 +71,13 @@ end
 
 """
 function compute_e!(e::Vector{Complex{Float64}}, 
-		    meshx::UniformMesh,
+		    mesh1::UniformMesh,
 		    ρ::Vector{Complex{Float64}})
 
-   nx = meshx.length
-   k =  2π / (meshx.stop - meshx.start)
-   modes  = zeros(Float64, nx)
-   modes .= k * vcat(0:nx÷2-1,-nx÷2:-1)
+   n1 = mesh1.length
+   k =  2π / (mesh1.stop - mesh1.start)
+   modes  = zeros(Float64, n1)
+   modes .= k * vcat(0:n1÷2-1,-n1÷2:-1)
    modes[1] = 1.0
    fft!(ρ)
    e .= -1im * ρ ./ modes
@@ -89,35 +89,35 @@ export RectMesh2D
 
 """
 
-    mesh = RectMesh2D( meshx, meshy)
+    mesh = RectMesh2D( mesh1, mesh2)
 
     Data type that represents a 2D Rectangular Mesh 
 
 """
 struct RectMesh2D
 
-    xmin :: Float64
-    xmax :: Float64
-    nx   :: Int64
-    dx   :: Float64
+    x1min :: Float64
+    x1max :: Float64
+    n1   :: Int64
+    delta1   :: Float64
     ymin :: Float64
     ymax :: Float64
-    ny   :: Int64
-    dy   :: Float64
+    n2   :: Int64
+    delta2   :: Float64
 
-    function RectMesh2D( meshx::UniformMesh, meshy::UniformMesh )
+    function RectMesh2D( mesh1::UniformMesh, mesh2::UniformMesh )
 
-        xmin = meshx.start    
-        xmax = meshx.stop    
-        nx   = meshx.length
-        dx   = meshx.step
+        x1min = mesh1.start    
+        x1max = mesh1.stop    
+        n1   = mesh1.length
+        delta1   = mesh1.step
 
-        ymin = meshy.start    
-        ymax = meshy.stop    
-        ny   = meshy.length
-        dy   = meshy.step
+        ymin = mesh2.start    
+        ymax = mesh2.stop    
+        n2   = mesh2.length
+        delta2   = mesh2.step
 
-        new( xmin, xmax, nx, dx, ymin, ymax, ny, dy)
+        new( x1min, x1max, n1, delta1, ymin, ymax, n2, delta2)
 
     end
 
@@ -133,8 +133,8 @@ export meshgrid
 """
 function meshgrid( x, y )
 
-   nx, ny = size(x)[1], size(y)[1]
-   repeat(x,1,ny), repeat(y',nx,1)
+   n1, n2 = size(x)[1], size(y)[1]
+   repeat(x,1,n2), repeat(y',n1,1)
 
 end
 
@@ -157,24 +157,24 @@ function poisson!( ρ::Array{Complex{Float64},2},
 		   ex::Array{Complex{Float64},2}, 
 		   ey::Array{Complex{Float64},2} )
 
-    kx0 =  2π / (mesh.xmax - mesh.xmin)
+    kx0 =  2π / (mesh.x1max - mesh.x1min)
     ky0 =  2π / (mesh.ymax - mesh.ymin)
 
     fft!(ρ,[1,2])
     
-    kx = kx0 * vcat(0:mesh.nx÷2-1,-mesh.nx÷2:-1)
+    kx = kx0 * vcat(0:mesh.n1÷2-1,-mesh.n1÷2:-1)
     kx[1] = 1.0
-    ky = ky0 * vcat(0:mesh.ny÷2-1,-mesh.ny÷2:-1)
+    ky = ky0 * vcat(0:mesh.n2÷2-1,-mesh.n2÷2:-1)
     kx[1] = 1.0
 
-    for i = 1:mesh.nx
+    for i = 1:mesh.n1
        kx2 = kx[i]*kx[i]
-       for j =  1:mesh.ny÷2+1
+       for j =  1:mesh.n2÷2+1
           k2 = kx2 +ky[j]*ky[j]
           ex[i,j] = -1im * kx[i]/k2 * ρ[i,j]
 	  ey[i,j] = -1im * ky[j]/k2 * ρ[i,j]
        end 
-       for j = mesh.ny÷2+2:mesh.ny            
+       for j = mesh.n2÷2+2:mesh.n2            
           k2 = kx2 +ky[j]*ky[j]
           ex[i,j] = -1im * kx[i]/k2 * ρ[i,j]
           ey[i,j] = -1im * ky[j]/k2 * ρ[i,j]

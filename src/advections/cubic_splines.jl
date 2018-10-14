@@ -1,3 +1,8 @@
+export CubicSpline
+
+
+struct CubicSpline end
+
 """
 
     compute_interpolants( n, f)
@@ -70,16 +75,16 @@ Edwin Chacon Golcher (Institute of Physics of the Czech Academy of Sciences)
    
 """
 function interpolate( coeffs :: Array{Float64,1}, 
-                      nx     :: Int,
-                      xmin   :: Float64, 
-                      xmax   :: Float64, 
+                      n1     :: Int,
+                      x1min   :: Float64, 
+                      x1max   :: Float64, 
                       x      :: Float64 )
 
-      rh        = (nx-1) / (xmax - xmin)
-      t0        = (x-xmin)*rh
+      rh        = (n1-1) / (x1max - x1min)
+      t0        = (x-x1min)*rh
       cell      = floor(t0)
-      dx        = t0 - cell
-      cdx       = 1.0 - dx
+      delta1        = t0 - cell
+      cdelta1       = 1.0 - delta1
       icell     = trunc(Int, cell+1)
       cim1      = coeffs[icell]
       ci        = coeffs[icell+1]
@@ -87,15 +92,15 @@ function interpolate( coeffs :: Array{Float64,1},
       cip2      = coeffs[icell+3]
       t1        = 3.0*ci
       t3        = 3.0*cip1
-      t2        = cdx*(cdx*(cdx*(cim1 - t1) + t1) + t1) + ci
-      t4        =  dx*( dx*( dx*(cip2 - t3) + t3) + t3) + cip1
+      t2        = cdelta1*(cdelta1*(cdelta1*(cim1 - t1) + t1) + t1) + ci
+      t4        =  delta1*( delta1*( delta1*(cip2 - t3) + t3) + t3) + cip1
 
       (1.0/6.0) * (t2 + t4)
 
 end
 
 """
-     advection!( f, meshx, v,  dt)
+     advection!( f, mesh1, v,  dt)
 
 Semi-lagrangian advection function of 2D distribution function represented 
 by array `f`. The advection operates along `axis` (=1 is most efficient) 
@@ -104,8 +109,12 @@ with speed `v` during `dt`.
 It uses cubic splines interpolation.
 
 """
-function advection!( f::Array{Float64,2}, mesh::UniformMesh, 
-                     v::Vector{Float64},  dt::Float64; axis=1)
+function advection!( f::Array{Float64,2}, 
+		     mesh::UniformMesh, 
+                     v::Vector{Float64},  
+		     dt::Float64,
+		     interp::CubicSpline,
+		     axis::Int64 )
     
 
     if (axis == 1) 

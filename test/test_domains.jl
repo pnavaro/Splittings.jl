@@ -8,10 +8,10 @@ import Splittings:PeriodicDomain
 
     m = x * transpose(v)
 
-    @test m.xmin ==  0.
-    @test m.xmax ==  0.9
-    @test m.vmin == -2.
-    @test m.vmax ==  1.9
+    @test m.x1min ==  0.
+    @test m.x1max ==  0.9
+    @test m.x2min == -2.
+    @test m.x2max ==  1.9
 end
 
 @testset "Domains 2" begin
@@ -21,10 +21,10 @@ end
 
     m = transpose(x) * v
 
-    @test m.xmin == -2.
-    @test m.xmax ==  1.9
-    @test m.vmin == -1.
-    @test m.vmax ==  0.9
+    @test m.x1min == -2.
+    @test m.x1max ==  1.9
+    @test m.x2min == -1.
+    @test m.x2max ==  0.9
 
 end
 
@@ -35,9 +35,9 @@ end
 
     m = transpose(x) * v
 
-    @test m.xmin == -2.
-    @test m.xmax ==  2.0
-    @test m.vmin == -1.
-    @test m.vmax ==  1.0
+    @test m.x1min == -2.
+    @test m.x1max ==  2.0
+    @test m.x2min == -1.
+    @test m.x2max ==  1.0
 
 end

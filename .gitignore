@@ -13,3 +13,5 @@ test/rotanim.gif
 test/va-plot.png
 test/vlasov-hmf-plot.png
 notebooks/.ipynb_checkpoints/
+/Manifest.toml
+*.DS_Store
