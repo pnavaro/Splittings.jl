@@ -6,7 +6,6 @@ docs/build/
 docs/site/
 /.ipynb_checkpoints/
 docs/src/examples/
-notebooks/
 test/examples/
 test/landau-plot.png
 test/bot-plot.png
