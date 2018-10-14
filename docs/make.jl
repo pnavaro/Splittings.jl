@@ -22,7 +22,7 @@ for example in examples
     NB_OUTPUT   = joinpath(@__DIR__, "..",  "notebooks")
    
     Literate.markdown(EXAMPLE, DOC_OUTPUT)
-    Literate.notebook(EXAMPLE, NB_OUTPUT)
+    Literate.notebook(EXAMPLE, NB_OUTPUT, execute=false)
 
 end
 

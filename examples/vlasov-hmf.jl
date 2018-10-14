@@ -1,6 +1,6 @@
 # # Vlasov-HMF
 #
-#md # [notebook](@__NBVIEWER_ROOT_URL__notebooks/vlasov-hmf.ipynb),
+#md # [notebook](https://nbviewer.jupyter.org/github/pnavaro/Splittings.jl/blob/master/notebooks/vlasov-hmf.ipynb),
 #
 
 using LinearAlgebra, QuadGK, Roots, FFTW

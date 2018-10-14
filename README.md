@@ -15,7 +15,3 @@ julia> Pkg.clone("https://github.com/pnavaro/Splittings.jl.git")
 julia> using Splittings
 julia>
 ~~~
-
-## Examples
-
-I am working on it!

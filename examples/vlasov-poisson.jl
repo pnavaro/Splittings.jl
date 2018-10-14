@@ -1,6 +1,6 @@
 # # Vlasov-Poisson
 # 
-#md # [notebook](@__NBVIEWER_ROOT_URL__notebooks/vlasov-poisson.ipynb),
+#md # [notebook](https://nbviewer.jupyter.org/github/pnavaro/Splittings.jl/blob/master/notebooks/vlasov-poisson.ipynb),
 #
 # We consider the dimensionless Vlasov-Poisson equation for one species
 # with a neutralizing background.
