@@ -1,6 +1,6 @@
 # # Vlasov-Ampere
 #
-#md # [`notebook`](@__NBVIEWER_ROOT_URL__notebooks/vlasov-ampere.ipynb),
+#md # [`notebook`](https://nbviewer.jupyter.org/github/pnavaro/Splittings.jl/blob/master/notebooks/vlasov-ampere.ipynb),
 # 
 # Compute Landau damping by solving Vlasov-Ampere system.
 # 
