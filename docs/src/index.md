@@ -6,10 +6,6 @@ Operators splitting package to solve equations of the form
 ```
 where T and V are differential operators.
 
-The solution on one time step can be written 
-```math
-U(Δt) = \mathcal{S}_{T+V} U(0). 
-```
 The composition algorithm consists in successive solutions of the split equations 
 ```math
 \frac{dU}{dt} = T U 
@@ -33,14 +29,12 @@ by using Julia macros:
 @Order6
 ```
 
-Examples of applications are provided for~:
-
+Examples of applications are provided for:
  - The linear pendulum problem.
  - The Vlasov equation with constant coefficients advection field.
  - The non linear Vlasov-Poisson equations in cartesian coordinates.
 
-This code is derived from Fortran and Python codes written by~:
-
+This code is derived from Fortran and Python codes written by:
  - Edwin Chacon Golcher (Institute of Physics of the Czech Academy of Sciences).
  - Michel Mehrenberger  (Aix-Marseille Université).
  - Eric Sonnendrucker   (Max-Planck-Institut für Plasmaphysik).
