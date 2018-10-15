@@ -8,13 +8,13 @@ Advection in x and compute electric field
 
 ∂ f / ∂ t − υ ∂ f / ∂ x  = 0
 
-∂E / ∂t = −J = ∫ fυ dυ</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/pnavaro/Splittings.jl/blob/0a88aa9d1523ed39d5b270e2edc9c0dd76d9b294/src/advections/vlasov-ampere.jl#L33-L42">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Splittings.advection_v!" href="#Splittings.advection_v!"><code>Splittings.advection_v!</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">advection_v!( fᵀ, meshx, meshv, E, dt) 
+∂E / ∂t = −J = ∫ fυ dυ</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/pnavaro/Splittings.jl/blob/be7996cd6f2828baf9ad1e1599729f9e29e527bc/src/advections/vlasov-ampere.jl#L33-L42">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="Splittings.advection_v!" href="#Splittings.advection_v!"><code>Splittings.advection_v!</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">advection_v!( fᵀ, meshx, meshv, E, dt) 
 
 Advection in υ
 
 ∂ f / ∂ t − E(x) ∂ f / ∂ υ  = 0
 
-Apply this advection on transposed `f`</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/pnavaro/Splittings.jl/blob/0a88aa9d1523ed39d5b270e2edc9c0dd76d9b294/src/advections/vlasov-ampere.jl#L5-L14">source</a></section><div><pre><code class="language-julia">function push_t!( f, fᵀ, meshx, meshv, e,  dt)
+Apply this advection on transposed `f`</code></pre></div></div><a class="source-link" target="_blank" href="https://github.com/pnavaro/Splittings.jl/blob/be7996cd6f2828baf9ad1e1599729f9e29e527bc/src/advections/vlasov-ampere.jl#L5-L14">source</a></section><div><pre><code class="language-julia">function push_t!( f, fᵀ, meshx, meshv, e,  dt)
     transpose!(f,fᵀ)
     advection_x!( f, meshx, meshv, e,  dt)
     transpose!(fᵀ,f)
