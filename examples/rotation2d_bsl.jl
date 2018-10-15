@@ -1,6 +1,6 @@
 # # Rotation of a gaussian distribution
 # 
-# #md # [`notebook`](https://nbviewer.jupyter.org/github/pnavaro/Splittings.jl/blob/master/notebooks/rotation_2d_bsl.ipynb)
+#md # [`notebook`](https://@__NBVIEWER_ROOT_URL__notebooks/rotation_2d_bsl.ipynb)
 # 
 # ```math
 #     \frac{df}{dt} +  (y \frac{df}{delta1} - x \frac{df}{delta2}) = 0

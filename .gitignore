@@ -15,3 +15,4 @@ test/vlasov-hmf-plot.png
 notebooks/.ipynb_checkpoints/
 /Manifest.toml
 *.DS_Store
+docs/src/notebooks/

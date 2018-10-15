@@ -1,6 +1,6 @@
 # # Bump On Tail
 #
-#md # [`notebook`](https://nbviewer.jupyter.org/github/pnavaro/Splittings.jl/blob/master/notebooks/bump_on_tail.ipynb)
+#md # [`notebook`](@__NBVIEWER_ROOT_URL__notebooks/bump_on_tail.ipynb)
 #
 
 import Splittings: advection!, UniformMesh
