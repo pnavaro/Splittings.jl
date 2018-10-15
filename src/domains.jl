@@ -1,7 +1,5 @@
 using IntervalSets
 
-export PeriodicDomain
-
 """
 
     PeriodicDomain( left, right, ncells)
@@ -75,9 +73,7 @@ Base.:*(x::PeriodicDomain, y::PeriodicDomain) = begin
 end
 
 import LinearAlgebra
-
 import LinearAlgebra.transpose
-
 
 LinearAlgebra.:transpose(d::PeriodicDomain) = begin
     

@@ -54,10 +54,10 @@ end
     Eric Sonnendrucker Max-Planck-Institut fur Plasmaphysik
 
 """
-function interpolate(p::Int, 
-                     f::Vector{Float64}, 
-		     delta::Float64, 
-		     alpha::Float64)
+function interpolate(p     :: Int, 
+                     f     :: Vector{Float64}, 
+		     delta :: Float64, 
+		     alpha :: Float64)
 
    n = size(f)[1]
    modes = 2π * (0:n-1) / n
@@ -86,7 +86,7 @@ end
     degree of a 1D function f on a periodic uniform mesh, at
     all points x-alpha
     input f is the Fourier transform and complex
-    you have to inverse transform after return
+    you have to in2erse transform after return
 
 """
 function interpolate(p     :: Int, 
@@ -125,29 +125,31 @@ import Splittings:RectMesh1D1V
 """
 function advection!(f      :: Array{Float64,2}, 
                     mesh   :: RectMesh1D1V,
-                    v      :: Any, 
+		    v      :: Vector{Float64}, 
                     dt     :: Float64,
 		    interp :: BSpline,
-		    ; axis=0)
+		    axis   :: Int64 )
+
+    @assert ( axis == 1 || axis == 2 )
 
     p = interp.p
 
     if (axis == 1)
-        for j in 1:mesh.nv
+        for j in 1:mesh.n2
             alpha = v[j] * dt
-            f[:,j] .= interpolate(p, f[:,j], mesh.dx, alpha)
+            f[:,j] .= interpolate(p, f[:,j], mesh.delta1, alpha)
         end
     else
-        for i in 1:mesh.nx
+        for i in 1:mesh.n1
             alpha = v[i] * dt
-            f[i,:] .= interpolate(p, f[i,:], mesh.dv, alpha)
+            f[i,:] .= interpolate(p, f[i,:], mesh.delta2, alpha)
         end
     end
 
 end
 
 """
-    advection!(f, mesh, v, nv, dt, interp)
+    advection!(f, mesh, v, n2, dt, interp)
 
     Advection of a 2d function `f` along its first dimension with
     velocity `v`. Since the fft are computed inplace, the function 
@@ -157,28 +159,28 @@ end
 function advection!(f::Array{Complex{Float64},2}, 
                     mesh::UniformMesh, 
                     v::Vector{Float64}, 
-                    nv::Int, 
+                    n2::Int, 
                     dt::Float64,
 		    interp::BSpline)
 
    p  = interp.p
-   nx = mesh.length
-   dx = mesh.step
-   modes = [2π * i / nx for i in 0:nx-1]
-   # compute eigenvalues of degree p b-spline matrix
-   eig_bspl = zeros(Float64, nx)
+   n1 = mesh.length
+   delta1 = mesh.step
+   modes = [2π * i / n1 for i in 0:n1-1]
+   # compute eigen2alues of degree p b-spline matrix
+   eig_bspl = zeros(Float64, n1)
    eig_bspl .= bspline(p, -div(p+1,2), 0.0)
    for i in 1:div(p+1,2)-1
       eig_bspl .+= bspline(p, i - div(p+1,2), 0.0) * 2 .* cos.(i * modes)
    end
-   eigalpha = zeros(Complex{Float64}, nx)
+   eigalpha = zeros(Complex{Float64}, n1)
 
    fft!(f,1)
 
-   for j in 1:nv
-      alpha = dt * v[j] / dx
+   for j in 1:n2
+      alpha = dt * v[j] / delta1
 
-      # compute eigenvalues of cubic splines evaluated at displaced points
+      # compute eigen2alues of cubic splines evaluated at displaced points
       ishift = floor(-alpha)
       beta   = -ishift - alpha
       fill!(eigalpha,0.0im)

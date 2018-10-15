@@ -1,6 +1,6 @@
 """
 
-    RectMesh1D1V( xmin, xmax, nx, vmin, vmax, nv)
+    RectMesh1D1V( x1min, x1max, n1, x2min, x2max, n2)
     RectMesh1D1V( x, v)
 
     Regular cartesian 2D mesh for 1D1V simulation
@@ -8,63 +8,62 @@
 """
 struct RectMesh1D1V
     
-    xmin :: Float64
-    xmax :: Float64
-    nx   :: Int
-    vmin :: Float64
-    vmax :: Float64
-    nv   :: Int
+    x1min :: Float64
+    x1max :: Float64
+    n1   :: Int
+    x2min :: Float64
+    x2max :: Float64
+    n2   :: Int
     x    :: Vector{Float64}
     v    :: Vector{Float64}
-    dx   :: Float64
-    dv   :: Float64
+    delta1   :: Float64
+    delta2   :: Float64
     bc   :: Dict{Symbol, Symbol}
     
     function RectMesh1D1V(x::Vector{Float64}, v::Vector{Float64})
 
-        nx = size(x)[1]
-        nv = size(v)[1]
-        xmin, xmax = x[1], x[end]
-        vmin, vmax = v[1], v[end]
-        dx = (xmax - xmin) / (nx-1)
-        dv = (vmax - vmin) / (nv-1)
+        n1 = size(x)[1]
+        n2 = size(v)[1]
+        x1min, x1max = x[1], x[end]
+        x2min, x2max = v[1], v[end]
+        delta1 = (x1max - x1min) / (n1-1)
+        delta2 = (x2max - x2min) / (n2-1)
         bc = Dict(:x=>:periodic,:v=>:periodic)
-        new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv, bc)
+        new(x1min, x1max, n1, x2min, x2max, n2, x, v, delta1, delta2, bc)
 
     end
 
-    function RectMesh1D1V(xmin, xmax, nx::Int,  
-                          vmin, vmax, nv::Int)
+    function RectMesh1D1V(x1min, x1max, n1::Int,  
+                          x2min, x2max, n2::Int)
 
-        x  = range(xmin, stop=xmax, length=nx)
-        v  = range(vmin, stop=vmax, length=nv)
-        dx = (xmax - xmin) / (nx-1)
-        dv = (vmax - vmin) / (nv-1)
+        x  = range(x1min, stop=x1max, length=n1)
+        v  = range(x2min, stop=x2max, length=n2)
+        delta1 = (x1max - x1min) / (n1-1)
+        delta2 = (x2max - x2min) / (n2-1)
         bc = Dict(:x=>:periodic,:v=>:periodic)
-        new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv, bc)
+        new(x1min, x1max, n1, x2min, x2max, n2, x, v, delta1, delta2, bc)
 
     end
 
     function RectMesh1D1V(x::StepRangeLen, v::StepRangeLen)
 
-	  xmin = x.offset
-	  nx   = x.len
-	  dx   = x.step
-	  xmax = xmin + (nx-1) * dx 
+	  x1min = x.offset
+	  n1   = x.len
+	  delta1   = x.step
+	  x1max = x1min + (n1-1) * delta1 
 
-	  vmin = v.offset
-	  nv   = v.len
-	  dv   = v.step
-	  vmax = vmin + (nv-1) * dv 
+	  x2min = v.offset
+	  n2   = v.len
+	  delta2   = v.step
+	  x2max = x2min + (n2-1) * delta2 
 
 	  bc = Dict(:x=>:periodic,:v=>:periodic)
-        new(xmin, xmax, nx, vmin, vmax, nv, x, v, dx, dv, bc)
+        new(x1min, x1max, n1, x2min, x2max, n2, x, v, delta1, delta2, bc)
 
     end
 
 end
 
-export UniformMesh
 
 """
 

@@ -17,8 +17,8 @@ end
 
 #-
 
-function Norm(f::Array{Float64,2}, dx, dv)
-   return dx * sum(dv * sum(real(f), dims=1))
+function Norm(f::Array{Float64,2}, delta1, delta2)
+   return delta1 * sum(delta2 * sum(real(f), dims=1))
 end
 
 struct HMF
@@ -37,18 +37,18 @@ struct HMF
 
 end
 
-function distribution( meshx :: UniformMesh,
-                       meshv :: UniformMesh,
+function distribution( mesh1 :: UniformMesh,
+                       mesh2 :: UniformMesh,
 		       hmf   :: HMF)
     b  = hmf.b
     m  = hmf.m
-    dx = meshx.step
-    dv = meshv.step
-    x  = meshx.points
-    v  = meshv.points
+    delta1 = mesh1.step
+    delta2 = mesh2.step
+    x  = mesh1.points
+    v  = mesh2.points
     
     f  = transpose(exp.(-b * (v.^2 / 2))) .* exp.(b * m * cos.(x))
-    a  = mass / Norm(real(f), dx, dv)
+    a  = mass / Norm(real(f), delta1, delta2)
     @. a * transpose(exp(-b * (v^2) / 2)) * exp(b*m*cos(x)) * (1+ϵ*cos(x))
     
 end 

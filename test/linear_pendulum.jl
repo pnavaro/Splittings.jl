@@ -3,9 +3,9 @@ import Splittings: @Lie, @Strang, @TripleJump, @Order6
 
     Implements split operators for linear pendulum 
 
-    Solve linear pendulum problem: ``\\frac{dx}{dt} = v ``, 
+    Solve linear pendulum problem: ``\\frac{delta1}{dt} = v ``, 
 
-    ``\\frac{dv}{dt} = - ω^2 x``. The exact solution is
+    ``\\frac{delta2}{dt} = - ω^2 x``. The exact solution is
     ``x(t)=  x(0)   cos(ωt) + \frac{v(0)}{ω}sin(ωt),```
     ``v(t)= -x(0) ω sin(ωt) + v(0)cos(ωt) ``
 

@@ -24,11 +24,11 @@
 # ```math
 # f_{n+1}(υ_j) = f^n_k(υ_j), E^{n+1}_k = E^n_k. 
 # ```
-#  - Perform inverse discrete Fourier transform of ``E^{n+1}_k`` and for each
+#  - Perform in2erse discrete Fourier transform of ``E^{n+1}_k`` and for each
 #    ``j`` of ``f^{n+1}_k (υ_j)``.
 # 
 
-import Splittings: advection_x!, advection_v!, UniformMesh
+import Splittings: advection!, Ampere, UniformMesh
 import Splittings: @Strang, compute_rho, compute_e
 using Plots, LinearAlgebra
 pyplot()
@@ -36,43 +36,44 @@ pyplot()
 #-
 #md #
 #md # ```@docs
-#md # Splittings.advection_x!
-#md # Splittings.advection_v!
+#md # Splittings.advection!
 #md # ```
 
-function push_t!( f, fᵀ, meshx, meshv, e,  dt)
-    transpose!(f,fᵀ)
-    advection_x!( f, meshx, meshv, e,  dt)
-    transpose!(fᵀ,f)
+function push_t!( f, fᵀ, mesh1, mesh2, e,  dt)
+
+    advection!( f, fᵀ, mesh1, mesh2, e,  dt, Ampere(), 1 )
+
 end
 
 #-
 
-function push_v!(fᵀ, meshx, meshv, e, dt)
-    advection_v!(fᵀ, meshx, meshv, e, dt)
+function push_v!(f, fᵀ, mesh1, mesh2, e, dt)
+
+    advection!( f, fᵀ, mesh1, mesh2, e, dt, Ampere(), 2)
+
 end
 
 #-
 
-function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
+function vm1d( n1, n2, x1min, x1max, x2min, x2max , tf, nt)
 
-    meshx = UniformMesh(xmin, xmax, nx, endpoint=false)
-    meshv = UniformMesh(vmin, vmax, nv, endpoint=false)
+    mesh1 = UniformMesh(x1min, x1max, n1, endpoint=false)
+    mesh2 = UniformMesh(x2min, x2max, n2, endpoint=false)
 
-    x = meshx.points
-    v = meshv.points
+    x = mesh1.points
+    v = mesh2.points
     ϵ, kx = 0.001, 0.5
 
-    f = zeros(Complex{Float64},(nx,nv))
-    fᵀ= zeros(Complex{Float64},(nv,nx))
+    f = zeros(Complex{Float64},(n1,n2))
+    fᵀ= zeros(Complex{Float64},(n2,n1))
 
     f .= (1.0.+ϵ*cos.(kx*x))/sqrt(2π) .* transpose(exp.(-0.5*v.*v))
     transpose!(fᵀ,f)
 
-    e = zeros(Complex{Float64},nx)
+    e = zeros(Complex{Float64},n1)
 
-    ρ  = compute_rho(meshv, f)
-    e .= compute_e(meshx, ρ)
+    ρ  = compute_rho(mesh2, f)
+    e .= compute_e(mesh1, ρ)
 
     nrj = Float64[]
 
@@ -80,10 +81,10 @@ function vm1d( nx, nv, xmin, xmax, vmin, vmax , tf, nt)
 
     for i in 1:nt
 
-	push!(nrj, 0.5*log(sum(real(e).^2)*meshx.step))
+	push!(nrj, 0.5*log(sum(real(e).^2)*mesh1.step))
 
-        @Strang(  push_v!(fᵀ, meshx, meshv, e,  dt),
-                  push_t!(f, fᵀ, meshx, meshv, e,  dt)
+        @Strang(  push_v!(f, fᵀ, mesh1, mesh2, e, dt),
+                  push_t!(f, fᵀ, mesh1, mesh2, e, dt)
                )
                   
     end
@@ -92,14 +93,14 @@ end
 
 #-
 
-nx, nv = 32, 64
-xmin, xmax =  0., 4π
-vmin, vmax = -6., 6.
+n1, n2 = 32, 64
+x1min, x1max =  0., 4π
+x2min, x2max = -6., 6.
 tf = 80
 nt = 600
 
 t = range(0,stop=tf,length=nt)
-plot(t, vm1d(nx, nv, xmin, xmax, vmin, vmax, tf, nt) )
+plot(t, vm1d(n1, n2, x1min, x1max, x2min, x2max, tf, nt) )
 plot!(t, -0.1533*t.-5.50)
 savefig("va-plot.png"); nothing 
 
