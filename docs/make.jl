@@ -19,7 +19,7 @@ for example in examples
 
     EXAMPLE     = joinpath(@__DIR__, "..",  string(example[2][1:end-3],".jl"))
     DOC_OUTPUT  = joinpath(@__DIR__, "src", "examples")
-    NB_OUTPUT   = joinpath(@__DIR__, "..",  "notebooks")
+    NB_OUTPUT   = joinpath(@__DIR__, "src", "notebooks")
    
     Literate.markdown(EXAMPLE, DOC_OUTPUT)
     Literate.notebook(EXAMPLE, NB_OUTPUT, execute=false)
@@ -32,12 +32,11 @@ makedocs(modules=[Splittings],
          sitename = "Splittings.jl",
          pages = ["Introduction"    => "index.md",
                   "Semi-Lagrangian" => "bsl.md",
-		  "Advection functions" => "advections.md",
+		      "Advection functions" => "advections.md",
                   "Examples" => examples,
                   "User Documentation" => [
-                    "How to Contribute" => "contributing.md"],
-		  "Contents" => "contents.md"
-		  ])
+                      "How to Contribute" => "contributing.md"],
+		          "Contents" => "contents.md"])
 
 deploydocs(
     deps   = Deps.pip("mkdocs", "python-markdown-math"),
