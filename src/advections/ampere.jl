@@ -10,23 +10,23 @@ struct Ampere end
 
     if axis == 1 Advection in x and compute electric field
 
-    ∂ f / ∂ t − υ ∂ f / ∂ x  = 0
+    ∂f/∂t − υ∂f/∂x  = 0
 
-    ∂E / ∂t = −J = ∫ fυ dυ
+    ∂E/∂t = −J = ∫ fυ dυ
 
     if axis == 2 Advection in υ
 
-    ∂ f / ∂ t − E(x) ∂ f / ∂ υ  = 0
+    ∂f/∂t − E(x) ∂f/∂υ  = 0
 
 """
 function advection!( f     :: Array{Complex{Float64},2}, 
                      fᵀ    :: Array{Complex{Float64},2},
-		     mesh1 :: UniformMesh, 
-		     mesh2 :: UniformMesh, 
-		     e     :: Vector{Complex{Float64}}, 
-		     dt    :: Float64,
-	             type  :: Ampere, 
-		     axis  :: Int64 )
+		         mesh1 :: UniformMesh, 
+		         mesh2 :: UniformMesh, 
+		         e     :: Vector{Complex{Float64}}, 
+		         dt    :: Float64,
+	               type  :: Ampere, 
+		         axis  :: Int64 )
 
     @assert ( axis == 1 || axis == 2 )
 

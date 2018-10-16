@@ -1,6 +1,6 @@
 # # Vlasov-Ampere
 #
-#md # [`notebook`](@__NBVIEWER_ROOT_URL__notebooks/vlasov-ampere.ipynb),
+#md # [`notebook`](@__NBVIEWER_ROOT_URL__notebooks/vlasov-ampere.ipynb)
 # 
 # Compute Landau damping by solving Vlasov-Ampere system.
 # 
@@ -91,16 +91,17 @@ function vm1d( n1, n2, x1min, x1max, x2min, x2max , tf, nt)
     nrj
 end
 
-#-
+#------------------------------------------------------------------------------
 
 n1, n2 = 32, 64
 x1min, x1max =  0., 4π
 x2min, x2max = -6., 6.
-tf = 80
-nt = 600
+tf = 50
+nt = 500
 
 t = range(0,stop=tf,length=nt)
-plot(t, vm1d(n1, n2, x1min, x1max, x2min, x2max, tf, nt) )
+nrj = vm1d(n1, n2, x1min, x1max, x2min, x2max, tf, nt)
+plot(t, nrj)
 plot!(t, -0.1533*t.-5.50)
 savefig("va-plot.png"); nothing 
 

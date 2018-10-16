@@ -1,6 +1,5 @@
 export CubicSpline
 
-
 struct CubicSpline end
 
 """

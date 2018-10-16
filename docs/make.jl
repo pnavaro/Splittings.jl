@@ -6,18 +6,18 @@ using Literate
 using Plots # to not capture precompilation output
 
 examples = [
-"Vlasov-Ampere"  => "examples/vlasov-ampere.md",
-"Vlasov-Poisson" => "examples/vlasov-poisson.md",
-"Bump On Tail"   => "examples/bump_on_tail.md",
-"Rotation 2D"    => "examples/rotation2d_bsl.md",
-"Vlasov-HMF"     => "examples/vlasov-hmf.md"
+"Vlasov-Ampere"  => "examples/vlasov-ampere",
+"Vlasov-Poisson" => "examples/vlasov-poisson",
+"Bump On Tail"   => "examples/bump_on_tail",
+"Rotation 2D"    => "examples/rotation2d_bsl",
+"Vlasov-HMF"     => "examples/vlasov-hmf"
 ]
 
 # generate examples
 
 for example in examples
 
-    EXAMPLE     = joinpath(@__DIR__, "..",  string(example[2][1:end-3],".jl"))
+    EXAMPLE     = joinpath(@__DIR__, "..",  string(example[2],".jl"))
     DOC_OUTPUT  = joinpath(@__DIR__, "src", "examples")
     NB_OUTPUT   = joinpath(@__DIR__, "src", "notebooks")
    
@@ -33,7 +33,7 @@ makedocs(modules=[Splittings],
          pages = ["Introduction"    => "index.md",
                   "Semi-Lagrangian" => "bsl.md",
 		      "Advection functions" => "advections.md",
-                  "Examples" => examples,
+                  "Examples" => [string(example[2],".md") for example in examples],
                   "User Documentation" => [
                       "How to Contribute" => "contributing.md"],
 		          "Contents" => "contents.md"])

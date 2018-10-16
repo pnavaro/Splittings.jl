@@ -3,7 +3,7 @@
 #md # [`notebook`](https://@__NBVIEWER_ROOT_URL__notebooks/rotation_2d_bsl.ipynb)
 # 
 # ```math
-#     \frac{df}{dt} +  (y \frac{df}{delta1} - x \frac{df}{delta2}) = 0
+# \frac{df}{dt} +  (y \frac{df}{dx} - x \frac{df}{dy}) = 0
 # ```
 # 
 # 
@@ -13,7 +13,7 @@ import Splittings: @Strang, CubicSpline
 using Plots
 pyplot()
 
-#-
+#------------------------------------------------------------------------------
 
 function with_bsl(tf::Float64, nt::Int)
 
@@ -47,7 +47,7 @@ function with_bsl(tf::Float64, nt::Int)
 
 end
 
-#-
+#------------------------------------------------------------------------------
 
 @time f = with_bsl( 2π, 20)
 

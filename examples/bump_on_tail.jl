@@ -5,13 +5,29 @@
 
 import Splittings: advection!, UniformMesh
 import Splittings: compute_rho, compute_e
-import Splittings: CubicSpline
+import Splittings: CubicSpline, @Strang
+
 using Plots
 using LaTeXStrings
 
 pyplot()
 
-#-
+#------------------------------------------------------------------------------
+
+function push_t!( f, mesh1, v, dt )
+
+    advection!( f, mesh1, v, 0.5dt, CubicSpline(), 1)
+
+end 
+
+function push_v!( f, mesh1, mesh2, nrj, dt )
+
+    rho = compute_rho(mesh2, f)
+    e   = compute_e(mesh1, rho)
+    advection!( f, mesh2, e, dt, CubicSpline(), 2)
+    push!(nrj, 0.5*log(sum(e.*e)*mesh1.step))
+
+end 
 
 function vlasov_poisson(mesh1  :: UniformMesh, 
                         mesh2  :: UniformMesh, 
@@ -24,18 +40,17 @@ function vlasov_poisson(mesh1  :: UniformMesh,
 
     nrj = Float64[]
     for istep in 1:nstep
-	advection!( f, mesh1, v, 0.5dt, CubicSpline(), 1)
-        rho = compute_rho(mesh2, f)
-        e   = compute_e(mesh1, rho)
-	advection!( f, mesh2, e, dt,    CubicSpline(), 2)
-	advection!( f, mesh1, v, 0.5dt, CubicSpline(), 1)
-        push!(nrj, 0.5*log(sum(e.*e)*mesh1.step))
+
+        @Strang(  push_t!( f, mesh1, v, dt ),
+                  push_v!( f, mesh1, mesh2, nrj, dt ))
+
+
     end        
     nrj
     
 end
 
-#-
+#------------------------------------------------------------------------------
 
 α = 0.03
 kx  = 0.3
@@ -49,20 +64,20 @@ for (i,x) in enumerate(mesh1.points), (j,v) in enumerate(mesh2.points)
     f[i,j]  = (1.0+α*cos(kx*x)) / (10*sqrt(2π)) * (9*exp(-0.5*v^2)+2*exp(-2*(v-4.5)^2))
 end
 
-#-
+#------------------------------------------------------------------------------
 
 nstep = 500
 t = range(0.0, stop=50.0, length=nstep)
 dt = t[2]
 @elapsed nrj = vlasov_poisson( mesh1, mesh2, f, nstep, dt)
 
-#-
+#------------------------------------------------------------------------------
 
 plot(t, nrj, label=L"\frac{1}{2} \log(∫e²delta1)")
 savefig("bot-plot.png"); nothing # hide
 
 @testset "Bump On Tail" begin    #src
-@test true                       #src
+@test length(nrj) > 0            #src
 end                              #src
 
 #md # ![](bot-plot.png)

@@ -60,18 +60,6 @@ mutable struct PeriodicDomain
 end
 
 
-import Base.*
-
-Base.:*(x::PeriodicDomain, y::PeriodicDomain) = begin
-
-    if ( x.axis >= y.axis )
-        RectMesh1D1V( y.points, x.points )
-    else
-        RectMesh1D1V( x.points, y.points )
-    end
-
-end
-
 import LinearAlgebra
 import LinearAlgebra.transpose
 

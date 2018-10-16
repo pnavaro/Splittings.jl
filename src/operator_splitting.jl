@@ -43,6 +43,32 @@ end
 
 """
 
+    @Magic( push_t, push_v )
+
+    Apply the second order modified Strang splitting
+
+    with tan(dt/2) instead of dt/2 for push_t and sin(dt)
+    instead of dt for push_v
+    
+    push_t and push_v are two function calls with
+    `dt` as argument.
+
+"""
+macro Magic(push_t, push_v)
+    return esc(quote    
+        local full_dt = dt
+	  dt = tan(0.5full_dt)
+        $push_t
+	  dt = sin(full_dt)
+        $push_v
+	  dt = tan(0.5full_dt)
+        $push_t
+	  dt = full_dt
+    end)
+end
+
+"""
+
     @TripleJump( push_t, push_v )
 
     Apply the fourth order Triple Jump splitting

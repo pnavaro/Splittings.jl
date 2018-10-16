@@ -1,6 +1,6 @@
 # # Vlasov-HMF
 #
-#md # [notebook](@__NBVIEWER_ROOT_URL__notebooks/vlasov-hmf.ipynb),
+#md # [notebook](@__NBVIEWER_ROOT_URL__notebooks/vlasov-hmf.ipynb)
 #
 
 using LinearAlgebra, QuadGK, Roots, FFTW
@@ -8,7 +8,7 @@ using Splittings
 using Plots
 pyplot()
 
-#------------
+#------------------------------------------------------------------------------
 
 " Compute M₀ by solving F(m) = 0 "
 function mag(β, mass)
@@ -29,7 +29,7 @@ function Norm(f::Array{Float64,2}, delta1, delta2)
    return delta1 * sum(delta2 * sum(real(f), dims=1))
 end
 
-#------------
+#------------------------------------------------------------------------------
 
 """
     Compute the electric hamiltonian mean field from a 
@@ -49,7 +49,7 @@ function hmf_poisson!(fᵗ::Array{Complex{Float64},2},
 
 end
 
-#------------
+#------------------------------------------------------------------------------
 
 function bsl_advection!(f::Array{Complex{Float64},2},
                         mesh1::UniformMesh, 
@@ -67,7 +67,7 @@ function bsl_advection!(f::Array{Complex{Float64},2},
     ifft!(f,1)
 end
 
-#------------
+#------------------------------------------------------------------------------
 
 function push_v!(f, fᵗ, mesh1, mesh2, ex, dt)
     transpose!(fᵗ, f)
@@ -76,7 +76,7 @@ function push_v!(f, fᵗ, mesh1, mesh2, ex, dt)
     transpose!(f, fᵗ)
 end
 
-#------------
+#------------------------------------------------------------------------------
 
 function vlasov_hmf_gauss(nbiter = 10000, dt = 0.1)
 
@@ -128,9 +128,9 @@ function vlasov_hmf_gauss(nbiter = 10000, dt = 0.1)
     
 end 
 
-#------------
+#------------------------------------------------------------------------------
 
-nbiter = 2000
+nbiter = 1000
 deltat = 0.1
 @time t, T = vlasov_hmf_gauss(nbiter, deltat);
 plot(t, log.(T), xlabel = "t", ylabel = "|C[f](t)-C[f][T]|")
@@ -140,5 +140,5 @@ savefig("vlasov-hmf-plot.png"); nothing # hide
 #md # ![png](vlasov-hmf-plot.png)
 #
 @testset "Vlasov-HMF" begin  #src
-@test true                   #src
+@test length(T) > 0          #src
 @end                         #src

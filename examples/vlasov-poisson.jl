@@ -1,12 +1,12 @@
 # # Vlasov-Poisson
 # 
-#md # [notebook](@__NBVIEWER_ROOT_URL__notebooks/vlasov-poisson.ipynb),
+#md # [notebook](@__NBVIEWER_ROOT_URL__notebooks/vlasov-poisson.ipynb)
 #
 # We consider the dimensionless Vlasov-Poisson equation for one species
 # with a neutralizing background.
 # 
 # ```math
-#  \\frac{∂f}{∂t}+ v⋅∇_x f + E(t,x) ⋅ ∇_v f = 0, \\
+#  \frac{∂f}{∂t}+ v⋅∇_x f + E(t,x) ⋅ ∇_v f = 0, \\
 #  - Δϕ = 1 - ρ, E = - ∇ ϕ \\
 #  ρ(t,x)  =  ∫ f(t,x,v)delta2.
 # ```
@@ -71,8 +71,8 @@ end
 
 #-------------------------------------------------------------------
 
-nt = 600
-tf = 60.0
+nt = 500
+tf = 50.0
 t  = range(0.0, stop=tf, length=nt)
 @time nrj = landau(tf, nt)
 plot( t, nrj)

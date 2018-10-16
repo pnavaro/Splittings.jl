@@ -56,8 +56,8 @@ end
 """
 function interpolate(p     :: Int, 
                      f     :: Vector{Float64}, 
-		     delta :: Float64, 
-		     alpha :: Float64)
+                     delta :: Float64, 
+                     alpha :: Float64)
 
    n = size(f)[1]
    modes = 2π * (0:n-1) / n
@@ -114,7 +114,6 @@ function interpolate(p     :: Int,
 
 end
 
-import Splittings:RectMesh1D1V
 
 """
     advection!( mesh, f, v, dt, interp, axis)
@@ -124,25 +123,26 @@ import Splittings:RectMesh1D1V
 
 """
 function advection!(f      :: Array{Float64,2}, 
-                    mesh   :: RectMesh1D1V,
-		    v      :: Vector{Float64}, 
+                    mesh1  :: UniformMesh,
+                    mesh2  :: UniformMesh,
+                    v      :: Vector{Float64}, 
                     dt     :: Float64,
-		    interp :: BSpline,
-		    axis   :: Int64 )
+                    interp :: BSpline,
+                    axis   :: Int64 )
 
     @assert ( axis == 1 || axis == 2 )
 
     p = interp.p
 
     if (axis == 1)
-        for j in 1:mesh.n2
+        for (j,v) in enumerate(v)
             alpha = v[j] * dt
-            f[:,j] .= interpolate(p, f[:,j], mesh.delta1, alpha)
+            f[:,j] .= interpolate(p, f[:,j], mesh1.step, alpha)
         end
     else
-        for i in 1:mesh.n1
+        for (i,v1) in enumerate(v)
             alpha = v[i] * dt
-            f[i,:] .= interpolate(p, f[i,:], mesh.delta2, alpha)
+            f[i,:] .= interpolate(p, f[i,:], mesh2.step, alpha)
         end
     end
 
@@ -161,7 +161,7 @@ function advection!(f::Array{Complex{Float64},2},
                     v::Vector{Float64}, 
                     n2::Int, 
                     dt::Float64,
-		    interp::BSpline)
+                    interp::BSpline)
 
    p  = interp.p
    n1 = mesh.length
