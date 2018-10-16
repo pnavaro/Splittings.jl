@@ -27,20 +27,16 @@ characteristics. Two steps are needed to update the distribution function
 
 *[Eric Sonnendrücker - Numerical methods for the Vlasov equations](http://www-m16.ma.tum.de/foswiki/pub/M16/Allgemeines/NumMethVlasov/Num-Meth-Vlasov-Notes.pdf)*
 
-```@contents
-```
-
 ```@meta
 CurrentModule = Splittings
 ```
 
-## Functions
+## Advection functions
 
 ```@docs
-advection!(f, p, mesh, v, nv, dt)
+advection!(::Array{Float64,2}, ::UniformMesh, v, ::CubicSpline, ::Float64, ::Int64)
 ```
 
-## Index
-
-```@index
+```@docs
+advection!(::Array{Float64,2}, ::UniformMesh, v, ::BSpline, ::Float64, ::Int64)
 ```
