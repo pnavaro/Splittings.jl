@@ -65,19 +65,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "bsl.html#Functions-1",
+    "location": "bsl.html#Advection-functions-1",
     "page": "Semi-Lagrangian",
-    "title": "Functions",
+    "title": "Advection functions",
     "category": "section",
-    "text": "advection!(f, p, mesh, v, nv, dt)"
-},
-
-{
-    "location": "bsl.html#Index-1",
-    "page": "Semi-Lagrangian",
-    "title": "Index",
-    "category": "section",
-    "text": ""
+    "text": "advection!(::Array{Float64,2}, ::UniformMesh, v, ::CubicSpline, ::Float64, ::Int64)advection!(::Array{Float64,2}, ::UniformMesh, v, ::BSpline, ::Float64, ::Int64)"
 },
 
 {
