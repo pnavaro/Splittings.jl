@@ -9,7 +9,7 @@
 # 
 
 import Splittings: advection!, UniformMesh
-import Splittings: @Strang, CubicSpline
+import Splittings: @Magic, CubicSpline
 using Plots
 pyplot()
 

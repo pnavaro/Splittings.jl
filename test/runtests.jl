@@ -3,8 +3,8 @@ using IntervalSets
 using LinearAlgebra
 using Literate
 
-include("geometry.jl")
-#include("splinepp.jl")
+include("splinenn.jl")
+include("test_geometry.jl")
 include("linear_pendulum.jl")
 include("test_meshes.jl")
 include("test_cubic_splines.jl")

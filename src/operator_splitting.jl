@@ -1,5 +1,5 @@
 
-export @Lie, @Strang, @TripleJump, @Order6
+export @Lie, @Strang, @TripleJump, @Order6, @Magic
 
 """
 
@@ -58,11 +58,11 @@ macro Magic(push_t, push_v)
     return esc(quote    
         local full_dt = dt
 	  dt = tan(0.5full_dt)
-        $push_t
+          $push_t
 	  dt = sin(full_dt)
-        $push_v
+          $push_v
 	  dt = tan(0.5full_dt)
-        $push_t
+          $push_t
 	  dt = full_dt
     end)
 end

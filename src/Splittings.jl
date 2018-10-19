@@ -5,6 +5,7 @@ export advection!
 
 include("meshes.jl")
 include("domains.jl")
+include("geometry.jl")
 include("operator_splitting.jl")
 include("poisson.jl")
 include("advections/ampere.jl")
