@@ -6,15 +6,15 @@ export Ampere
 struct Ampere end
 
 """
+
     advection!( fᵀ, mesh1, mesh2, E, dt, type, axis ) 
 
-    if axis == 1 Advection in x and compute electric field
+- axis == 1 Advection in x and compute electric field
 
     ∂f/∂t − υ∂f/∂x  = 0
-
     ∂E/∂t = −J = ∫ fυ dυ
 
-    if axis == 2 Advection in υ
+- axis == 2 Advection in υ
 
     ∂f/∂t − E(x) ∂f/∂υ  = 0
 

@@ -35,8 +35,8 @@ function with_bsl(tf::Float64, nt::Int)
 
    anim = @animate for n=1:nt
        
-	   @Strang(advection!( f,  mesh1,  y, tan(dt), CubicSpline(), 1),
-		   advection!( f,  mesh2, -x, sin(dt), CubicSpline(), 2)
+	   @Magic(advection!( f,  mesh1,  y, dt, CubicSpline(), 1),
+		    advection!( f,  mesh2, -x, dt, CubicSpline(), 2)
 		   )
 
       surface(f)
@@ -49,7 +49,7 @@ end
 
 #------------------------------------------------------------------------------
 
-@time f = with_bsl( 2π, 20)
+@time f = with_bsl( 2π, 6)
 
 
 # ![](rotanim.gif)

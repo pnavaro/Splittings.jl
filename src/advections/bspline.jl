@@ -1,6 +1,5 @@
 using FFTW, LinearAlgebra
 
-
 export BSpline
 
 struct BSpline
@@ -19,15 +18,16 @@ end
 """
     bspline(p, j, x)
 
-    Return the value at x in [0,1[ of the B-spline with
-    integer nodes of degree p with support starting at j.
-    Implemented recursively using the de Boor's recursion formula
+Return the value at x in [0,1[ of the B-spline with
+integer nodes of degree p with support starting at j.
+Implemented recursively using the de Boor's recursion formula
 
-    Derived from a Python program written by 
-    Eric Sonnendrucker Max-Planck-Institut fur Plasmaphysik
+Derived from a Python program written by 
+Eric Sonnendrucker (Max-Planck-Institut fur Plasmaphysik - Garching))
 
 """
 function bspline(p::Int, j::Int, x::Float64)
+
    if p == 0
        if j == 0
            return 1.0
@@ -46,12 +46,12 @@ end
 """
     interpolate( p, f, delta, alpha)
 
-    Compute the interpolating spline of degree p of odd
-    degree of a 1D function f on a periodic uniform mesh, at
-    all points x-alpha. f type is Vector{Float64}.
+Compute the interpolating spline of degree p of odd
+degree of a 1D function f on a periodic uniform mesh, at
+all points x-alpha. f type is Vector{Float64}.
 
-    Derived from a Python program written by 
-    Eric Sonnendrucker Max-Planck-Institut fur Plasmaphysik
+Derived from a Python program written by 
+Eric Sonnendrucker (Max-Planck-Institut fur Plasmaphysik - Garching)
 
 """
 function interpolate(p     :: Int, 
@@ -82,11 +82,11 @@ end
 """
     interpolate( p, f, delta, alpha)
 
-    Compute the interpolating spline of degree p of odd
-    degree of a 1D function f on a periodic uniform mesh, at
-    all points x-alpha
-    input f is the Fourier transform and complex
-    you have to in2erse transform after return
+Compute the interpolating spline of degree p of odd
+degree of a 1D function f on a periodic uniform mesh, at
+all points x-alpha
+input f is the Fourier transform and complex
+you have to in2erse transform after return
 
 """
 function interpolate(p     :: Int, 
@@ -118,8 +118,8 @@ end
 """
     advection!( mesh, f, v, dt, interp, axis)
 
-    Advection of a 2d function `f` discretized on a 2d `mesh`
-    along the input axis at velocity `v`
+Advection of a 2d function `f` discretized on a 2d `mesh`
+along the input axis at velocity `v`
 
 """
 function advection!(f      :: Array{Float64,2}, 
@@ -151,9 +151,9 @@ end
 """
     advection!(f, mesh, v, n2, dt, interp)
 
-    Advection of a 2d function `f` along its first dimension with
-    velocity `v`. Since the fft are computed inplace, the function 
-    must be represented by a Array{Complex{Float64},2}.
+Advection of a 2d function `f` along its first dimension with
+velocity `v`. Since the fft are computed inplace, the function 
+must be represented by a Array{Complex{Float64},2}.
 
 """
 function advection!(f::Array{Complex{Float64},2}, 
@@ -163,37 +163,37 @@ function advection!(f::Array{Complex{Float64},2},
                     dt::Float64,
                     interp::BSpline)
 
-   p  = interp.p
-   n1 = mesh.length
-   delta1 = mesh.step
-   modes = [2π * i / n1 for i in 0:n1-1]
-   # compute eigen2alues of degree p b-spline matrix
-   eig_bspl = zeros(Float64, n1)
-   eig_bspl .= bspline(p, -div(p+1,2), 0.0)
-   for i in 1:div(p+1,2)-1
-      eig_bspl .+= bspline(p, i - div(p+1,2), 0.0) * 2 .* cos.(i * modes)
-   end
-   eigalpha = zeros(Complex{Float64}, n1)
+    p  = interp.p
+    n1 = mesh.length
+    delta1 = mesh.step
+    modes = [2π * i / n1 for i in 0:n1-1]
+    # compute eigen2alues of degree p b-spline matrix
+    eig_bspl = zeros(Float64, n1)
+    eig_bspl .= bspline(p, -div(p+1,2), 0.0)
+    for i in 1:div(p+1,2)-1
+       eig_bspl .+= bspline(p, i - div(p+1,2), 0.0) * 2 .* cos.(i * modes)
+    end
+    eigalpha = zeros(Complex{Float64}, n1)
 
-   fft!(f,1)
+    fft!(f,1)
 
-   for j in 1:n2
-      alpha = dt * v[j] / delta1
+    for j in 1:n2
+       alpha = dt * v[j] / delta1
 
-      # compute eigen2alues of cubic splines evaluated at displaced points
-      ishift = floor(-alpha)
-      beta   = -ishift - alpha
-      fill!(eigalpha,0.0im)
-      for i in -div(p-1,2):div(p+1,2)
-         eigalpha .+= (bspline(p, i-div(p+1,2), beta)
-                        .* exp.((ishift+i) * 1im .* modes))
-      end
+       # compute eigen2alues of cubic splines evaluated at displaced points
+       ishift = floor(-alpha)
+       beta   = -ishift - alpha
+       fill!(eigalpha,0.0im)
+       for i in -div(p-1,2):div(p+1,2)
+          eigalpha .+= (bspline(p, i-div(p+1,2), beta)
+                         .* exp.((ishift+i) * 1im .* modes))
+       end
 
-      # compute interpolating spline using fft and properties of circulant matrices
-      f[:,j] .*= eigalpha ./ eig_bspl
+       # compute interpolating spline using fft and properties of circulant matrices
+       f[:,j] .*= eigalpha ./ eig_bspl
 
-   end
+    end
 
-   ifft!(f,1)
+    ifft!(f,1)
 
 end

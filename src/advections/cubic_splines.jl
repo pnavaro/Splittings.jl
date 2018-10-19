@@ -9,7 +9,6 @@ struct CubicSpline end
 Compute interpolation coefficients
 
 This function is a julia version of a Fortran code written by
-   
 Edwin Chacon Golcher (Institute of Physics of the Czech Academy of Sciences)
    
 """
