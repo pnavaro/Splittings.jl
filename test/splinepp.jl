@@ -76,18 +76,19 @@ mutable struct SplinePP
     end 
 end
 
-function interpole!(spline::SplinePP, f::Array{Float64,2}, x::Float64, y::Float64) 
+function interpolate!(spline::SplinePP, f::Array{Float64,2}, 
+		      x::Array{Float64,2}, y::Array{Float64,2}) 
 
     per_x!( spline, f )
 
     per_y!( spline )
 
-    evaltab( spline, x, y, f)     
+    evaltab!( spline, x, y, f)     
 
 end
 
-function interpole!(spline::SplinePP, f::Array{Float64,2}, 
-		    depx::Array{Float64,2}, depy::Array{Float64,2}) 
+function interpolate!(spline::SplinePP, f::Array{Float64,2}, 
+		      depx::Float64, depy::Float64) 
 
     per_x!( spline, f )
     per_y!( spline )
@@ -95,7 +96,7 @@ function interpole!(spline::SplinePP, f::Array{Float64,2},
 
 end 
 
-function per_x!( spline::SplinePP, gtau::Array{Float64,2}g)
+function per_x!( spline::SplinePP, gtau::Array{Float64,2})
 
     n1 = spline.geom.n1
     n2 = spline.geom.n2
@@ -117,14 +118,14 @@ function per_x!( spline::SplinePP, gtau::Array{Float64,2}g)
     for j=1:n2
 
         gamma1 =  - (3.0/spline.geom.delta1)*(axm1f[2,j] +axm1f[spline.geom.n1,j])
-        gamma2 =  (6.0/(spline.geom.delta1)**2)*(2*axm1f[1,j] - axm1f[2,j]
+        gamma2 =  (6.0/(spline.geom.delta1)^2)*(2*axm1f[1,j] - axm1f[2,j]
                    + axm1f[spline.geom.n1,j] - 2*axm1f[spline.geom.n1+1,j])
 
         spline.bcoef[n1p3,j]= (gamma1*spline.a4x - gamma2*spline.a2x)/det
         spline.bcoef[1,j]= (gamma2*spline.a1x - gamma1*spline.a3x)/det
 
         for i=2:n1p2
-            spline.bcoef[i,j]= axm1f[i-1,j] &
+            spline.bcoef[i,j]= axm1f[i-1,j] 
                 - spline.axm1gamma[i-1,1]*spline.bcoef[n1p3,j]
                 - spline.axm1gamma[i-1,2]*spline.bcoef[1,j]
         end
@@ -135,27 +136,31 @@ end
 
 function per_y!(spline)
 
+    n1    = spline.geom.n1
     n2    = spline.geom.n2
     n1p3  = spline.geom.n1+3
     n2p3  = spline.geom.n2+3
     det   = spline.a1y*spline.a4y - spline.a2y*spline.a3y
 
-    aym1f = zeros(Float64, (spline.geom.n2+1,spline.geom.n1+3))
+    delta1    = spline.geom.delta1
+    delta2    = spline.geom.delta2
+
+    aym1f = zeros(Float64, (n2+1,n1+3))
 
     for i=1:n1p3
         for j=1:n2
-           aym1f[j,i] = 6.*spline.bcoef[i,j]
+           aym1f[j,i] = 6*spline.bcoef[i,j]
         end
-        aym1f[n2+1,i] = 6.*spline.bcoef[i,1]
+        aym1f[n2+1,i] = 6*spline.bcoef[i,1]
     end
 
     pttrs!(spline.ayd,spline.ayod,aym1f)
 
     for i=1:n1p3
        
-        gamma1 =  - (3.0/spline.geom.delta2)*(aym1f[2,i] +aym1f[spline.geom.n2,i])
-        gamma2 =  (6.0/(spline.geom.delta2)**2)*(2*aym1f[1,i] - aym1f[2,i]
-                 + aym1f[spline.geom.n2,i] - 2*aym1f[spline.geom.n2+1,i])
+        gamma1 =  - (3.0/delta2)*(aym1f[2,i] +aym1f[n2,i])
+        gamma2 =  (6.0/delta2^2)*(2*aym1f[1,i] - aym1f[2,i]
+                 + aym1f[n2,i] - 2*aym1f[n2+1,i])
 
         spline.coef[i,n2p3] = (gamma1*spline.a4y - gamma2*spline.a2y)/det
         spline.coef[i,1]    = (gamma2*spline.a1y - gamma1*spline.a3y)/det
@@ -169,133 +174,157 @@ function per_y!(spline)
 
 end
 
-function evaltab!(spline, xd, yd, fout)
+function evaltab!(spline::SplinePP, 
+		  xd::Array{Float64,2}, 
+		  yd::Array{Float64,2}, 
+		  fout::Array{Float64,2})
+
+    n1 = spline.geom.n1
+    n2 = spline.geom.n2
    
-    delta1x    = spline.geom.delta1*spline.geom.delta1
-    delta1xx   = delta1x*spline.geom.delta1
-    delta1xx6  = 1./(6.*delta1xx)
+    delta1     = spline.geom.delta1
+    delta1x    = delta1*delta1
+    delta1xx   = delta1x*delta1
+    delta1xx6  = 1/(6*delta1xx)
 
-    delta2y    = spline.geom.delta2*spline.geom.delta2
-    delta2yy   = delta2y*spline.geom.delta2
-    delta2yy6  = 1./(6.*delta2yy)
+    delta2     = spline.geom.delta2
+    delta2y    = delta2*delta2
+    delta2yy   = delta2y*delta2
+    delta2yy6  = 1/(6*delta2yy)
 
-    idelta1 = 1/spline.geom.delta1
-    idelta2 = 1/spline.geom.delta2
+    idelta1 = 1/delta1
+    idelta2 = 1/delta2
 
-    lx = (spline.geom.n1-1)*spline.geom.delta1
-    ly = (spline.geom.n2-1)*spline.geom.delta2
+    lx = (n1-1)*delta1
+    ly = (n2-1)*delta2
 
-    for j=1:spline.geom.n2
+    for j=1:n2
 
-        for i=1:spline.geom.n1
+        for i=1:n1
 
-	    i1 = (xd[i,j]-spline.geom.x0)*idelta1
-            j1 = (yd[i,j]-spline.geom.y0)*idelta2
+	    i1 = floor(Int64,(xd[i,j]-spline.geom.x1min)*idelta1)
+	    j1 = floor(Int64,(yd[i,j]-spline.geom.x2min)*idelta2)
 
-            xdp1   = spline.geom.xgrid(i1+2)-xd(i,j)
+            xdp1   = spline.geom.x1grid[i1+2]-xd[i,j]
             bvalx1 = xdp1*xdp1*xdp1
-            bvalx2 = delta1xx+3.*delta1x*xdp1+3.*spline.geom.delta1*xdp1*xdp1-3.*xdp1*xdp1*xdp1
-            xd1    = xd[i,j]-spline.geom.xgrid(i1+1)
-            bvalx3 = delta1xx+3.*delta1x*xd1+3.*spline.geom.delta1* xd1*xd1-3.*xd1*xd1*xd1
+            bvalx2 = (delta1xx+3*delta1x*xdp1
+	             +3*delta1*xdp1*xdp1-3*xdp1*xdp1*xdp1)
+            xd1    = xd[i,j]-spline.geom.x1grid[i1+1]
+            bvalx3 = (delta1xx+3*delta1x*xd1
+	             +3*delta1* xd1*xd1-3*xd1*xd1*xd1)
             bvalx4 = xd1*xd1*xd1
-            ydp1   = spline.geom.ygrid[j1+2]-yd[i,j]
+            ydp1   = spline.geom.x2grid[j1+2]-yd[i,j]
             bvaly1 = ydp1*ydp1*ydp1
-            bvaly2 = delta2yy+3.*ydp1*(delta2y+ydp1*(spline.geom.delta2-ydp1))          
-            yd1    = yd[i,j]-spline.geom.ygrid[j1+1]
-            bvaly3 = delta2yy+3.*yd1*(delta2y+yd1*(spline.geom.delta2-yd1))
+            bvaly2 = delta2yy+3*ydp1*(delta2y+ydp1*(delta2-ydp1))          
+            yd1    = yd[i,j]-spline.geom.x2grid[j1+1]
+            bvaly3 = delta2yy+3*yd1*(delta2y+yd1*(delta2-yd1))
             bvaly4 = yd1*yd1*yd1
 
             sval   = 0.
-            sval1  = spline.coef(i1+1,j1+1)*bvaly1
-            sval1  = sval1+spline.coef(i1+1,j1+2)*bvaly2
-            sval1  = sval1+spline.coef(i1+1,j1+3)*bvaly3
-            sval1  = sval1+spline.coef(i1+1,j1+4)*bvaly4        
+            sval1  = spline.coef[i1+1,j1+1]*bvaly1
+	    sval1  = sval1+spline.coef[i1+1,j1+2]*bvaly2
+            sval1  = sval1+spline.coef[i1+1,j1+3]*bvaly3
+            sval1  = sval1+spline.coef[i1+1,j1+4]*bvaly4        
             sval   = sval+sval1*bvalx1
-            sval2  = spline.coef(i1+2,j1+1)*bvaly1
-            sval2  = sval2+spline.coef(i1+2,j1+2)*bvaly2
-            sval2  = sval2+spline.coef(i1+2,j1+3)*bvaly3
-            sval2  = sval2+spline.coef(i1+2,j1+4)*bvaly4
+
+            sval2  = spline.coef[i1+2,j1+1]*bvaly1
+	    sval2  = sval2+spline.coef[i1+2,j1+2]*bvaly2
+            sval2  = sval2+spline.coef[i1+2,j1+3]*bvaly3
+            sval2  = sval2+spline.coef[i1+2,j1+4]*bvaly4
             sval   = sval+sval2*bvalx2
-            sval3  = spline.coef(i1+3,j1+1)*bvaly1
-            sval3  = sval3+spline.coef(i1+3,j1+2)*bvaly2
-            sval3  = sval3+spline.coef(i1+3,j1+3)*bvaly3
-            sval3  = sval3+spline.coef(i1+3,j1+4)*bvaly4
+
+            sval3  = spline.coef[i1+3,j1+1]*bvaly1
+	    sval3  = sval3+spline.coef[i1+3,j1+2]*bvaly2
+            sval3  = sval3+spline.coef[i1+3,j1+3]*bvaly3
+            sval3  = sval3+spline.coef[i1+3,j1+4]*bvaly4
             sval   = sval+sval3*bvalx3
-            sval4  = spline.coef(i1+4,j1+1)*bvaly1
-            sval4  = sval4+spline.coef(i1+4,j1+2)*bvaly2
-            sval4  = sval4+spline.coef(i1+4,j1+3)*bvaly3
-            sval4  = sval4+spline.coef(i1+4,j1+4)*bvaly4
+
+            sval4  = spline.coef[i1+4,j1+1]*bvaly1
+	    sval4  = sval4+spline.coef[i1+4,j1+2]*bvaly2
+            sval4  = sval4+spline.coef[i1+4,j1+3]*bvaly3
+            sval4  = sval4+spline.coef[i1+4,j1+4]*bvaly4
             sval   = sval+sval4*bvalx4
          
             fout[i,j] = delta1xx6*delta2yy6*sval
+
         end
     end
  
 end
 
-function evaldep( spline, alphax, alphay, fout )
+function evaldep!( spline :: SplinePP, 
+		   alphax :: Float64, 
+		   alphay :: Float64,
+		   fout   :: Array{Float64,2} )
 
-    delta1x   = spline.geom.delta1*spline.geom.delta1
-    delta1xx  = delta1x*spline.geom.delta1
-    delta1xx6 = 1./(6.*delta1xx)
+    n1 = spline.geom.n1
+    n2 = spline.geom.n2
 
-    delta2y   = spline.geom.delta2*spline.geom.delta2
-    delta2yy  = delta2y*spline.geom.delta2
-    delta2yy6 = 1./(6.*delta2yy)
+    delta1    = spline.geom.delta1
+    delta1x   = delta1*delta1
+    delta1xx  = delta1x*delta1
+    delta1xx6 = 1/(6*delta1xx)
+
+    delta2    = spline.geom.delta2
+    delta2y   = delta2*delta2
+    delta2yy  = delta2y*delta2
+    delta2yy6 = 1/(6*delta2yy)
 
     if (alphax > 0) 
-        intaxsdelta1 = trunc(-alphax/spline.geom.delta1+eps(Float64))-1  
+        intaxsdelta1 = trunc(Int64,-alphax/delta1+eps(Float64))-1  
     else
-        intaxsdelta1 = int(-alphax/spline.geom.delta1)
+        intaxsdelta1 = trunc(Int64,-alphax/delta1)
     end
     
-    if (alphay.gt.0) 
-	intaysdelta2 = trunc(-alphay/spline.geom.delta2+eps(Float64))-1
+    if (alphay > 0) 
+	intaysdelta2 = trunc(Int64,-alphay/delta2+eps(Float64))-1
     else
-        intaysdelta2 = trunc(-alphay/spline.geom.delta2)
+        intaysdelta2 = trunc(Int64,-alphay/delta2)
     end
 
-    xd1  = -alphax - intaxsdelta1 * spline.geom.delta1
-    xdp1 =  spline.geom.delta1-xd1
-    yd1  = -alphay - intaysdelta2 * spline.geom.delta2
-    ydp1 =  spline.geom.delta2-yd1
+    xd1  = -alphax - intaxsdelta1 * delta1
+    xdp1 =  delta1-xd1
+    yd1  = -alphay - intaysdelta2 * delta2
+    ydp1 =  delta2-yd1
 
     bvalx1 = xdp1*xdp1*xdp1
-    bvalx2 = delta1xx+3.*delta1x*xdp1+3.*spline.geom.delta1* xdp1*xdp1-3.*xdp1*xdp1*xdp1
-    bvalx3 = delta1xx+3.*delta1x*xd1+3.*spline.geom.delta1* xd1*xd1-3.*xd1*xd1*xd1
+    bvalx2 = delta1xx+3*delta1x*xdp1+3*delta1* xdp1*xdp1-3*xdp1*xdp1*xdp1
+    bvalx3 = delta1xx+3*delta1x*xd1+3*delta1* xd1*xd1-3*xd1*xd1*xd1
     bvalx4 = xd1*xd1*xd1
     bvaly1 = ydp1*ydp1*ydp1
-    bvaly2 = delta2yy+3.*ydp1*(delta2y+ydp1*(spline.geom.delta2-ydp1))          
-    bvaly3 = delta2yy+3.*yd1*(delta2y+yd1*(spline.geom.delta2-yd1))
+    bvaly2 = delta2yy+3*ydp1*(delta2y+ydp1*(delta2-ydp1))          
+    bvaly3 = delta2yy+3*yd1*(delta2y+yd1*(delta2-yd1))
     bvaly4 = yd1*yd1*yd1
 
-    for j=1:spline.geom.n2
-       j1 = mod(spline.geom.n2+j-1+intaysdelta2,spline.geom.n2)
+    for j=1:n2
 
-       for i=1:spline.geom.n1
-          i1=mod(spline.geom.n1+i-1+intaxsdelta1,spline.geom.n1)
+        j1 = mod(n2+j-1+intaysdelta2,n2)
 
-          fout[i,j] = delta1xx6 * delta2yy6 * ( 
-                 bvalx1 * ( 
-                 spline.coef[i1+1,j1+1]*bvaly1 
-               + spline.coef[i1+1,j1+2]*bvaly2 
-               + spline.coef[i1+1,j1+3]*bvaly3 
-               + spline.coef[i1+1,j1+4]*bvaly4) 
-               + bvalx2 * (
-                 spline.coef[i1+2,j1+1]*bvaly1 
-               + spline.coef[i1+2,j1+2]*bvaly2 
-               + spline.coef[i1+2,j1+3]*bvaly3 
-               + spline.coef[i1+2,j1+4]*bvaly4) 
-               + bvalx3 * (
-                 spline.coef[i1+3,j1+1]*bvaly1 
-               + spline.coef[i1+3,j1+2]*bvaly2 
-               + spline.coef[i1+3,j1+3]*bvaly3 
-               + spline.coef[i1+3,j1+4]*bvaly4) 
-               + bvalx4 * (
-                 spline.coef[i1+4,j1+1]*bvaly1 
-               + spline.coef[i1+4,j1+2]*bvaly2 
-               + spline.coef[i1+4,j1+3]*bvaly3 
-               + spline.coef[i1+4,j1+4]*bvaly4))
+        for i=1:n1
+
+            i1 = mod(n1+i-1+intaxsdelta1,n1)
+
+            fout[i,j] = delta1xx6 * delta2yy6 * ( 
+                   bvalx1 * ( 
+                   spline.coef[i1+1,j1+1]*bvaly1 
+                 + spline.coef[i1+1,j1+2]*bvaly2 
+                 + spline.coef[i1+1,j1+3]*bvaly3 
+                 + spline.coef[i1+1,j1+4]*bvaly4) 
+                 + bvalx2 * (
+                   spline.coef[i1+2,j1+1]*bvaly1 
+                 + spline.coef[i1+2,j1+2]*bvaly2 
+                 + spline.coef[i1+2,j1+3]*bvaly3 
+                 + spline.coef[i1+2,j1+4]*bvaly4) 
+                 + bvalx3 * (
+                   spline.coef[i1+3,j1+1]*bvaly1 
+                 + spline.coef[i1+3,j1+2]*bvaly2 
+                 + spline.coef[i1+3,j1+3]*bvaly3 
+                 + spline.coef[i1+3,j1+4]*bvaly4) 
+                 + bvalx4 * (
+                   spline.coef[i1+4,j1+1]*bvaly1 
+                 + spline.coef[i1+4,j1+2]*bvaly2 
+                 + spline.coef[i1+4,j1+3]*bvaly3 
+                 + spline.coef[i1+4,j1+4]*bvaly4))
         end
     end
 
@@ -303,16 +332,19 @@ end
 
 import Splittings: Geometry, meshgrid
 
-geom = Geometry( 10, 20, 0.0, 0.0, 0.1, 0.1 )
+geom = Geometry( 101, 101, -5.0, -5.0, 0.1, 0.1 )
 
-x1, x2 = meshgrid( geom.x1grid, geom.x2grid )
+println(geom.x1grid)
 
-fe = sin.(x1) .* cos.(x2)
-fc = copy(fe)
+x1, x2 = geom.x1grid, geom.x2grid
 
+dt = 0.5
+
+fc = exp.(- x1.^2) .* transpose(exp.(- x2.^2))
 spline = SplinePP( geom )
+interpolate!( spline, fc, dt, 0.0 )
 
-interpolate!( spline, fc, x1, x2 )
+fe = exp.(- (x1.-dt).^2) .* transpose(exp.(-x2.^2))
 
 println( " error ", maximum( abs.( fe .- fc )))
 
