@@ -227,8 +227,8 @@ function evaltab!(spline :: SplineNN,
     for j = 2:n2-1
        for i = 2:n1-1
 
-          i1 = floor(Int64,(xd[i,j]-spline.geom.x1min)*idelta1)
-          j1 = floor(Int64,(yd[i,j]-spline.geom.x2min)*idelta2)
+          i1 = trunc(Int64,(xd[i,j]-spline.geom.x1min)*idelta1)
+          j1 = trunc(Int64,(yd[i,j]-spline.geom.x2min)*idelta2)
 
           xdp1   = spline.geom.x1grid[i1+2]-xd[i,j]
           bvalx1 = xdp1*xdp1*xdp1
@@ -295,34 +295,35 @@ function evaldep!(spline::SplineNN,
 
     n1        = spline.geom.n1
     n2        = spline.geom.n2
+
     delta1    = spline.geom.delta1
-    delta2    = spline.geom.delta2
     delta1x   = delta1*delta1
     delta1xx  = delta1x*delta1
     delta1xx6 = 1/(6*delta1xx)
     
+    delta2    = spline.geom.delta2
     delta2y   = delta2*delta2
     delta2yy  = delta2y*delta2
     delta2yy6 = 1/(6*delta2yy)
 
     if (alphax > 0) 
-       intaxsdelta1=trunc(-alphax/delta1+eps(Float64))-1 
-       ideb = trunc(alphax/delta1)+2
+       intaxsdelta1=trunc(Int64,-alphax/delta1+eps(Float64))-1 
+       ideb = trunc(Int64,alphax/delta1)+2
        ifin = n1 - 1
     else
-       intaxsdelta1=trunc(-alphax/delta1)
+       intaxsdelta1=trunc(Int64,-alphax/delta1)
        ideb = 2
-       ifin = -trunc(-alphax/delta1)+n1-1
+       ifin = -trunc(Int64,-alphax/delta1)+n1-1
     end
 
     if (alphay>0) 
-       intaysdelta2=trunc(-alphay/delta2+eps(Float64))-1
-       jdeb = trunc(alphay/delta2)+2
+       intaysdelta2=trunc(Int64,-alphay/delta2+eps(Float64))-1
+       jdeb = trunc(Int64,alphay/delta2)+2
        jfin = n2 - 1
     else
-       intaysdelta2=trunc(-alphay/delta2)
+       intaysdelta2=trunc(Int64,-alphay/delta2)
        jdeb = 2
-       jfin = -trunc(-alphay/delta2)+n2-1
+       jfin = -trunc(Int64,-alphay/delta2)+n2-1
     end
 
     xd1    = -alphax-intaxsdelta1*delta1
@@ -344,47 +345,62 @@ function evaldep!(spline::SplineNN,
           i1=i-1+intaxsdelta1
 
           f[i,j] = delta1xx6*delta2yy6* ( 
-                 bvalx1 * (spline.coef(i1+1,j1+1)*bvaly1 
-               + spline.coef(i1+1,j1+2) * bvaly2 
-               + spline.coef(i1+1,j1+3) * bvaly3 
-               + spline.coef(i1+1,j1+4) * bvaly4) 
-               + bvalx2 * (spline.coef(i1+2,j1+1)*bvaly1 
-               + spline.coef(i1+2,j1+2) * bvaly2 
-               + spline.coef(i1+2,j1+3) * bvaly3 
-               + spline.coef(i1+2,j1+4) * bvaly4) 
-               + bvalx3 * (spline.coef(i1+3,j1+1)*bvaly1 
-               + spline.coef(i1+3,j1+2) * bvaly2 
-               + spline.coef(i1+3,j1+3) * bvaly3 
-               + spline.coef(i1+3,j1+4) * bvaly4) 
-               + bvalx4 * (spline.coef(i1+4,j1+1)*bvaly1 
-               + spline.coef(i1+4,j1+2) * bvaly2 
-               + spline.coef(i1+4,j1+3) * bvaly3 
-               + spline.coef(i1+4,j1+4) * bvaly4))
+                 bvalx1 * (
+                 spline.coef[i1+1,j1+1] * bvaly1 
+               + spline.coef[i1+1,j1+2] * bvaly2 
+               + spline.coef[i1+1,j1+3] * bvaly3 
+               + spline.coef[i1+1,j1+4] * bvaly4) 
+               + bvalx2 * (
+                 spline.coef[i1+2,j1+1] * bvaly1 
+               + spline.coef[i1+2,j1+2] * bvaly2 
+               + spline.coef[i1+2,j1+3] * bvaly3 
+               + spline.coef[i1+2,j1+4] * bvaly4) 
+               + bvalx3 * (
+                 spline.coef[i1+3,j1+1] * bvaly1 
+               + spline.coef[i1+3,j1+2] * bvaly2 
+               + spline.coef[i1+3,j1+3] * bvaly3 
+               + spline.coef[i1+3,j1+4] * bvaly4) 
+               + bvalx4 * (
+                 spline.coef[i1+4,j1+1] * bvaly1 
+               + spline.coef[i1+4,j1+2] * bvaly2 
+               + spline.coef[i1+4,j1+3] * bvaly3 
+               + spline.coef[i1+4,j1+4] * bvaly4))
        end
     end
 
-    f[1:ideb-1,:]=0
-    f[ifin+1:n1,:]=0
+    fill!(view(f,1:ideb-1,:),0)
+    fill!(view(f,ifin+1:n1,:),0)
 
-    f[:,1:jdeb-1]=0
-    f[:,jfin+1:n2]=0
+    fill!(view(f,:,1:jdeb-1),0)
+    fill!(view(f,:,jfin+1:n2),0)
 
 end 
 
 
 import Splittings: Geometry, meshgrid
 
-geom = Geometry( 10, 20, 0.0, 0.0, 0.1, 0.1 )
+@testset "Natural Spline" begin
 
-x1, x2 = meshgrid( geom.x1grid, geom.x2grid )
+    geom = Geometry( 101, 101, -5.0, -5.0, 0.1, 0.1 )
+    x1, x2 = geom.x1grid, geom.x2grid
+    dt = 0.5
+    fc = exp.(-x1.^2) .* transpose(exp.(-x2.^2))
+    spline = SplinePP( geom )
+    interpolate!( spline, fc, dt, dt )
+    fe = exp.(-(x1.-dt).^2) .* transpose(exp.(-(x2.-dt).^2))
+    error = maximum( abs.( fe .- fc ))
+    println( " error  = $error ")
+    @test fc ≈ fe 
 
-fe = geom.x1grid .* transpose(geom.x2grid)
-fc = copy(fe)
+    geom = Geometry( 51, 101, -5.0, -5.0, 0.2, 0.1 )
+    x1, x2 = geom.x1grid, geom.x2grid
+    dt = 0.5
+    fc = exp.(-x1.^2) .* transpose(exp.(-x2.^2))
+    spline = SplineNN( geom )
+    interpolate!( spline, fc, dt, dt )
+    fe = exp.(-(x1.-dt).^2) .* transpose(exp.(-(x2.-dt).^2))
+    error = maximum( abs.( fe .- fc ))
+    println( " error  = $error ")
+    @test error < 1e-4
 
-spline = SplineNN( geom )
-
-interpolate!( spline, fc, x1, x2 )
-
-println( " error ", maximum( abs.( fe .- fc )))
-
-#@test fc ≈ fe
+end
