@@ -16,3 +16,4 @@ notebooks/.ipynb_checkpoints/
 /Manifest.toml
 *.DS_Store
 docs/src/notebooks/
+Manifest.toml

@@ -280,11 +280,11 @@ function evaltab!(spline :: SplineNN,
        end
     end
 
-    f[ 1, 1:end] .= 0
-    f[n1, 1:end] .= 0 
+    fill!(view(f, 1, :), 0)
+    fill!(view(f,n1, :), 0)
 
-    f[1:end,  1] .= 0
-    f[1:end, n2] .= 0 
+    fill!(view(f,:,  1), 0)
+    fill!(view(f,:, n2), 0)
 
 end
 
@@ -307,28 +307,28 @@ function evaldep!(spline::SplineNN,
     delta2yy6 = 1/(6*delta2yy)
 
     if (alphax > 0) 
-       intaxsdelta1=trunc(Int64,-alphax/delta1+eps(Float64))-1 
+       intaxsdx=trunc(Int64,-alphax/delta1+eps(Float64))-1 
        ideb = trunc(Int64,alphax/delta1)+2
        ifin = n1 - 1
     else
-       intaxsdelta1=trunc(Int64,-alphax/delta1)
+       intaxsdx=trunc(Int64,-alphax/delta1)
        ideb = 2
        ifin = -trunc(Int64,-alphax/delta1)+n1-1
     end
 
     if (alphay>0) 
-       intaysdelta2=trunc(Int64,-alphay/delta2+eps(Float64))-1
+       intaysdy=trunc(Int64,-alphay/delta2+eps(Float64))-1
        jdeb = trunc(Int64,alphay/delta2)+2
        jfin = n2 - 1
     else
-       intaysdelta2=trunc(Int64,-alphay/delta2)
+       intaysdy=trunc(Int64,-alphay/delta2)
        jdeb = 2
        jfin = -trunc(Int64,-alphay/delta2)+n2-1
     end
 
-    xd1    = -alphax-intaxsdelta1*delta1
+    xd1    = -alphax-intaxsdx*delta1
     xdp1   =  delta1-xd1
-    yd1    = -alphay-intaysdelta2*delta2
+    yd1    = -alphay-intaysdy*delta2
     ydp1   =  delta2-yd1
     bvalx1 = xdp1*xdp1*xdp1
     bvalx2 = delta1xx+3*delta1x*xdp1+3*delta1*xdp1*xdp1-3*xdp1*xdp1*xdp1
@@ -340,9 +340,9 @@ function evaldep!(spline::SplineNN,
     bvaly4 = yd1*yd1*yd1
 
     for j=jdeb:jfin
-       j1=j-1+intaysdelta2
+       j1=j-1+intaysdy
        for i=ideb:ifin
-          i1=i-1+intaxsdelta1
+          i1=i-1+intaxsdx
 
           f[i,j] = delta1xx6*delta2yy6* ( 
                  bvalx1 * (
@@ -375,32 +375,3 @@ function evaldep!(spline::SplineNN,
     fill!(view(f,:,jfin+1:n2),0)
 
 end 
-
-
-import Splittings: Geometry, meshgrid
-
-@testset "Natural Spline" begin
-
-    geom = Geometry( 101, 101, -5.0, -5.0, 0.1, 0.1 )
-    x1, x2 = geom.x1grid, geom.x2grid
-    dt = 0.5
-    fc = exp.(-x1.^2) .* transpose(exp.(-x2.^2))
-    spline = SplinePP( geom )
-    interpolate!( spline, fc, dt, dt )
-    fe = exp.(-(x1.-dt).^2) .* transpose(exp.(-(x2.-dt).^2))
-    error = maximum( abs.( fe .- fc ))
-    println( " error  = $error ")
-    @test fc ≈ fe 
-
-    geom = Geometry( 51, 101, -5.0, -5.0, 0.2, 0.1 )
-    x1, x2 = geom.x1grid, geom.x2grid
-    dt = 0.5
-    fc = exp.(-x1.^2) .* transpose(exp.(-x2.^2))
-    spline = SplineNN( geom )
-    interpolate!( spline, fc, dt, dt )
-    fe = exp.(-(x1.-dt).^2) .* transpose(exp.(-(x2.-dt).^2))
-    error = maximum( abs.( fe .- fc ))
-    println( " error  = $error ")
-    @test error < 1e-4
-
-end
