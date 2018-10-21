@@ -3,6 +3,7 @@ using IntervalSets
 using LinearAlgebra
 using Literate
 
+include("splinepp.jl")
 include("splinenn.jl")
 include("test_geometry.jl")
 include("linear_pendulum.jl")
