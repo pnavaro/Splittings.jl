@@ -81,11 +81,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "advections.html#Splittings.advection!",
+    "page": "Advection functions",
+    "title": "Splittings.advection!",
+    "category": "function",
+    "text": "advection!( fᵀ, mesh1, mesh2, E, dt, type, axis )\n\naxis == 1 Advection in x and compute electric field\n∂f/∂t − υ∂f/∂x  = 0   ∂E/∂t = −J = ∫ fυ dυ\naxis == 2 Advection in υ\n∂f/∂t − E(x) ∂f/∂υ  = 0\n\n\n\n\n\nadvection!( mesh, f, v, dt, interp, axis)\n\nAdvection of a 2d function f discretized on a 2d mesh along the input axis at velocity v\n\n\n\n\n\nadvection!(f, mesh, v, n2, dt, interp)\n\nAdvection of a 2d function f along its first dimension with velocity v. Since the fft are computed inplace, the function  must be represented by a Array{Complex{Float64},2}.\n\n\n\n\n\n advection!( f, mesh1, v,  dt)\n\nSemi-lagrangian advection function of 2D distribution function represented  by array f. The advection operates along axis (=1 is most efficient)  with speed v during dt.\n\nIt uses cubic splines interpolation.\n\n\n\n\n\n"
+},
+
+{
     "location": "advections.html#Advection-functions-1",
     "page": "Advection functions",
     "title": "Advection functions",
     "category": "section",
-    "text": "CurrentModule = SplittingsModules = [Splittings]\nOrder   = [:advection!]"
+    "text": "CurrentModule = SplittingsModules = [Splittings]\nOrder   = [:advection!]Splittings.advection!"
 },
 
 {
@@ -105,19 +113,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "examples/vlasov-ampere.html#Splittings.advection!",
-    "page": "Vlasov-Ampere",
-    "title": "Splittings.advection!",
-    "category": "function",
-    "text": "advection!( fᵀ, mesh1, mesh2, E, dt, type, axis )\n\naxis == 1 Advection in x and compute electric field\n∂f/∂t − υ∂f/∂x  = 0   ∂E/∂t = −J = ∫ fυ dυ\naxis == 2 Advection in υ\n∂f/∂t − E(x) ∂f/∂υ  = 0\n\n\n\n\n\nadvection!( mesh, f, v, dt, interp, axis)\n\nAdvection of a 2d function f discretized on a 2d mesh along the input axis at velocity v\n\n\n\n\n\nadvection!(f, mesh, v, n2, dt, interp)\n\nAdvection of a 2d function f along its first dimension with velocity v. Since the fft are computed inplace, the function  must be represented by a Array{Complex{Float64},2}.\n\n\n\n\n\n advection!( f, mesh1, v,  dt)\n\nSemi-lagrangian advection function of 2D distribution function represented  by array f. The advection operates along axis (=1 is most efficient)  with speed v during dt.\n\nIt uses cubic splines interpolation.\n\n\n\n\n\n"
-},
-
-{
     "location": "examples/vlasov-ampere.html#Algorithm-1",
     "page": "Vlasov-Ampere",
     "title": "Algorithm",
     "category": "section",
-    "text": "For each j compute discrete Fourier transform in x of (x_iυ_j) yielding f_k^n(υ_j),\nFor k  0\nCompute f^n+1_k(υ_j) = e^2iπ k υ ΔtL f_n^k(υ_j)\nCompute ρ_k^n+1 = Δ υ _j f^n+1_k(υ_j)\nCompute E^n+1_k = ρ^n+1_k L(2iπkϵ_0)\nFor k = 0 do nothing:f_n+1(υ_j) = f^n_k(υ_j) E^n+1_k = E^n_kPerform in2erse discrete Fourier transform of E^n+1_k and for each j of f^n+1_k (υ_j).import Splittings: advection!, Ampere, UniformMesh\nimport Splittings: @Strang, compute_rho, compute_e\nusing Plots, LinearAlgebra\npyplot()Splittings.advection!function push_t!( f, fᵀ, mesh1, mesh2, e,  dt)\n\n    advection!( f, fᵀ, mesh1, mesh2, e,  dt, Ampere(), 1 )\n\nendfunction push_v!(f, fᵀ, mesh1, mesh2, e, dt)\n\n    advection!( f, fᵀ, mesh1, mesh2, e, dt, Ampere(), 2)\n\nendfunction vm1d( n1, n2, x1min, x1max, x2min, x2max , tf, nt)\n\n    mesh1 = UniformMesh(x1min, x1max, n1, endpoint=false)\n    mesh2 = UniformMesh(x2min, x2max, n2, endpoint=false)\n\n    x = mesh1.points\n    v = mesh2.points\n    ϵ, kx = 0.001, 0.5\n\n    f = zeros(Complex{Float64},(n1,n2))\n    fᵀ= zeros(Complex{Float64},(n2,n1))\n\n    f .= (1.0.+ϵ*cos.(kx*x))/sqrt(2π) .* transpose(exp.(-0.5*v.*v))\n    transpose!(fᵀ,f)\n\n    e = zeros(Complex{Float64},n1)\n\n    ρ  = compute_rho(mesh2, f)\n    e .= compute_e(mesh1, ρ)\n\n    nrj = Float64[]\n\n    dt = tf / nt\n\n    for i in 1:nt\n\n	push!(nrj, 0.5*log(sum(real(e).^2)*mesh1.step))\n\n        @Strang(  push_v!(f, fᵀ, mesh1, mesh2, e, dt),\n                  push_t!(f, fᵀ, mesh1, mesh2, e, dt)\n               )\n\n    end\n    nrj\nendn1, n2 = 32, 64\nx1min, x1max =  0., 4π\nx2min, x2max = -6., 6.\ntf = 50\nnt = 500\n\nt = range(0,stop=tf,length=nt)\nnrj = vm1d(n1, n2, x1min, x1max, x2min, x2max, tf, nt)\nplot(t, nrj)\nplot!(t, -0.1533*t.-5.50)\nsavefig(\"va-plot.png\"); nothing(Image: )This page was generated using Literate.jl."
+    "text": "For each j compute discrete Fourier transform in x of (x_iυ_j) yielding f_k^n(υ_j),\nFor k  0\nCompute f^n+1_k(υ_j) = e^2iπ k υ ΔtL f_n^k(υ_j)\nCompute ρ_k^n+1 = Δ υ _j f^n+1_k(υ_j)\nCompute E^n+1_k = ρ^n+1_k L(2iπkϵ_0)\nFor k = 0 do nothing:f_n+1(υ_j) = f^n_k(υ_j) E^n+1_k = E^n_kPerform in2erse discrete Fourier transform of E^n+1_k and for each j of f^n+1_k (υ_j).import Splittings: advection!, Ampere, UniformMesh\nimport Splittings: @Strang, compute_rho, compute_e\nusing Plots, LinearAlgebra\npyplot()function push_t!( f, fᵀ, mesh1, mesh2, e,  dt)\n\n    advection!( f, fᵀ, mesh1, mesh2, e,  dt, Ampere(), 1 )\n\nendfunction push_v!(f, fᵀ, mesh1, mesh2, e, dt)\n\n    advection!( f, fᵀ, mesh1, mesh2, e, dt, Ampere(), 2)\n\nendfunction vm1d( n1, n2, x1min, x1max, x2min, x2max , tf, nt)\n\n    mesh1 = UniformMesh(x1min, x1max, n1, endpoint=false)\n    mesh2 = UniformMesh(x2min, x2max, n2, endpoint=false)\n\n    x = mesh1.points\n    v = mesh2.points\n    ϵ, kx = 0.001, 0.5\n\n    f = zeros(Complex{Float64},(n1,n2))\n    fᵀ= zeros(Complex{Float64},(n2,n1))\n\n    f .= (1.0.+ϵ*cos.(kx*x))/sqrt(2π) .* transpose(exp.(-0.5*v.*v))\n    transpose!(fᵀ,f)\n\n    e = zeros(Complex{Float64},n1)\n\n    ρ  = compute_rho(mesh2, f)\n    e .= compute_e(mesh1, ρ)\n\n    nrj = Float64[]\n\n    dt = tf / nt\n\n    for i in 1:nt\n\n	push!(nrj, 0.5*log(sum(real(e).^2)*mesh1.step))\n\n        @Strang(  push_v!(f, fᵀ, mesh1, mesh2, e, dt),\n                  push_t!(f, fᵀ, mesh1, mesh2, e, dt)\n               )\n\n    end\n    nrj\nendn1, n2 = 32, 64\nx1min, x1max =  0., 4π\nx2min, x2max = -6., 6.\ntf = 50\nnt = 500\n\nt = range(0,stop=tf,length=nt)\nnrj = vm1d(n1, n2, x1min, x1max, x2min, x2max, tf, nt)\nplot(t, nrj)\nplot!(t, -0.1533*t.-5.50)\nsavefig(\"va-plot.png\"); nothing(Image: )This page was generated using Literate.jl."
 },
 
 {
