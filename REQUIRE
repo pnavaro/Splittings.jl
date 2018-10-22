@@ -1,6 +1,7 @@
-julia 0.7
 Statistics
 FFTW
 LinearAlgebra
 Plots
 BenchmarkTools
+Random
+FINUFFT

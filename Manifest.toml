@@ -187,9 +187,9 @@ version = "0.5.5"
 
 [[Plots]]
 deps = ["Base64", "Contour", "Dates", "FixedPointNumbers", "GR", "JSON", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Printf", "Random", "RecipesBase", "Reexport", "Requires", "Showoff", "SparseArrays", "StaticArrays", "Statistics", "StatsBase", "Test", "UUIDs"]
-git-tree-sha1 = "437b77558cc7f24883bd4c4fe25a240304402ffd"
+git-tree-sha1 = "83f387a4989ab60dfb0bb3f52f3907a14acc1588"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "0.20.5"
+version = "0.20.6"
 
 [[Printf]]
 deps = ["Unicode"]

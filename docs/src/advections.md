@@ -8,3 +8,7 @@ CurrentModule = Splittings
 Modules = [Splittings]
 Order   = [:advection!]
 ```
+
+```@docs
+Splittings.advection!
+```

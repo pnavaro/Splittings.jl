@@ -186,7 +186,6 @@ function nat_y!(spline :: SplineNN)
 
     pttrs!(spline.ayd,spline.ayod,aym1f)
 
-    # resolution du syteme lineaire 2x2
     for i=1:n1p2
 
        gamma1 = (6.0/(delta2)^2)*( -aym1f[n2-1,i] + 2*aym1f[n2,i])

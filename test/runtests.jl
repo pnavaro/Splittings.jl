@@ -3,7 +3,7 @@ using IntervalSets
 using LinearAlgebra
 using Literate
 
-include("test_finufft.jl")
+#include("test_finufft.jl")
 include("test_splinepp.jl")
 include("test_splinenn.jl")
 include("test_geometry.jl")

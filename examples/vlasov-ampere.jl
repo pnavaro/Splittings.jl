@@ -34,10 +34,6 @@ using Plots, LinearAlgebra
 pyplot()
 
 #-
-#md #
-#md # ```@docs
-#md # Splittings.advection!
-#md # ```
 
 function push_t!( f, fᵀ, mesh1, mesh2, e,  dt)
 
