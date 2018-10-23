@@ -101,6 +101,7 @@ plot(t, nrj)
 plot!(t, -0.1533*t.-5.50)
 savefig("va-plot.png"); nothing 
 
+using Test                      #src
 @testset "Vlasov-Ampere" begin  #src
 @test length(nrj) > 0           #src
 end                             #src

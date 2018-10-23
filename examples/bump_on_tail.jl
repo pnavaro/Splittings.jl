@@ -76,6 +76,7 @@ dt = t[2]
 plot(t, nrj, label=L"\frac{1}{2} \log(∫e²dx)")
 savefig("bot-plot.png"); nothing # hide
 
+using Test                       #src
 @testset "Bump On Tail" begin    #src
 @test length(nrj) > 0            #src
 end                              #src

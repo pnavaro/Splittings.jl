@@ -139,6 +139,7 @@ savefig("vlasov-hmf-plot.png"); nothing # hide
 #
 #md # ![png](vlasov-hmf-plot.png)
 #
+using Test                   #src
 @testset "Vlasov-HMF" begin  #src
 @test length(T) > 0          #src
-@end                         #src
+end                          #src

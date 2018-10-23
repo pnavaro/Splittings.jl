@@ -87,9 +87,9 @@ version = "0.5.3"
 
 [[GR]]
 deps = ["Base64", "DelimitedFiles", "Pkg", "Random", "Serialization", "Sockets", "Test"]
-git-tree-sha1 = "0437921cbf8ee555ab7a2a3115c1d0907289e816"
+git-tree-sha1 = "18e3aa0f988f6e94c90394deaa76cb095bf87469"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.34.1"
+version = "0.35.0"
 
 [[InteractiveUtils]]
 deps = ["LinearAlgebra", "Markdown"]

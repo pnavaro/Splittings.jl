@@ -78,9 +78,10 @@ plot( t, nrj)
 plot!(t, -0.1533*t.-5.50)
 savefig("landau-plot.png"); nothing # hide
 
+using Test                       #src
 @testset "Vlasov-Poisson" begin  #src
 @test length(nrj) > 0            #src
-@end                             #src
+end                              #src
 
  
 #md # ![](landau-plot.png)
