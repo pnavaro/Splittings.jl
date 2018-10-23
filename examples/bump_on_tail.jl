@@ -73,7 +73,7 @@ dt = t[2]
 
 #------------------------------------------------------------------------------
 
-plot(t, nrj, label=L"\frac{1}{2} \log(∫e²delta1)")
+plot(t, nrj, label=L"\frac{1}{2} \log(∫e²dx)")
 savefig("bot-plot.png"); nothing # hide
 
 @testset "Bump On Tail" begin    #src

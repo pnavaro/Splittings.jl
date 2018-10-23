@@ -135,14 +135,14 @@ function advection!(f      :: Array{Float64,2},
     p = interp.p
 
     if (axis == 1)
-        for (j,v) in enumerate(v)
+        @simd for (j,v) in enumerate(v)
             alpha = v[j] * dt
-            f[:,j] .= interpolate(p, f[:,j], mesh1.step, alpha)
+            @inbounds f[:,j] .= interpolate(p, f[:,j], mesh1.step, alpha)
         end
     else
-        for (i,v1) in enumerate(v)
+        @simd for (i,v1) in enumerate(v)
             alpha = v[i] * dt
-            f[i,:] .= interpolate(p, f[i,:], mesh2.step, alpha)
+            @inbounds f[i,:] .= interpolate(p, f[i,:], mesh2.step, alpha)
         end
     end
 
@@ -177,7 +177,7 @@ function advection!(f::Array{Complex{Float64},2},
 
     fft!(f,1)
 
-    for j in 1:n2
+    @simd for j in 1:n2
        alpha = dt * v[j] / delta1
 
        # compute eigen2alues of cubic splines evaluated at displaced points
@@ -190,7 +190,7 @@ function advection!(f::Array{Complex{Float64},2},
        end
 
        # compute interpolating spline using fft and properties of circulant matrices
-       f[:,j] .*= eigalpha ./ eig_bspl
+       @inbounds f[:,j] .*= eigalpha ./ eig_bspl
 
     end
 

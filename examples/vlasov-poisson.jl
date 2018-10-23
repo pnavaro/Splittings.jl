@@ -8,7 +8,7 @@
 # ```math
 #  \frac{∂f}{∂t}+ v⋅∇_x f + E(t,x) ⋅ ∇_v f = 0, \\
 #  - Δϕ = 1 - ρ, E = - ∇ ϕ \\
-#  ρ(t,x)  =  ∫ f(t,x,v)delta2.
+#  ρ(t,x)  =  ∫ f(t,x,v) dv
 # ```
 # 
 #  - [Vlasov Equation - Wikipedia](https://en.wikipedia.org/wiki/Vlasov_equation)
@@ -49,7 +49,6 @@ function landau(tf, nt)
   mesh2 = UniformMesh(x2min, x2max, n2; endpoint=false)
   x = mesh1.points
   v = mesh2.points
-  delta1 = mesh1.step
 
   ϵ, kx = 0.001, 0.5
   f = zeros(Complex{Float64},(n1,n2))
