@@ -4,4 +4,3 @@ LinearAlgebra
 Plots
 BenchmarkTools
 Random
-FINUFFT

@@ -1,5 +1,5 @@
 
-export @Lie, @Strang, @TripleJump, @Order6, @Magic
+export @Lie, @Strang, @TripleJump, @Order6, @Magic, @SuperMagic
 
 """
 
@@ -158,5 +158,37 @@ macro Order6(push_t, push_v)
         dt =  0.0414649985182624full_dt
         $push_t
 	dt = full_dt
+    end)
+end
+
+macro SuperMagic(push_t, push_v)
+    return esc(quote
+
+        local ct = cos(dt)
+	local st = sin(dt)
+        local α  = (1 - ct)/st
+	local β  = (dt - st*ct)/(24*(ct^2-1))
+	local γ  = ((-2dt + 3st) * ct + dt - 2st)/(6*(ct-1)*(ct+1)^2)
+	local μ  = st / 2 
+	local ν  = - (2dt + 3st) * ct^2 / 192 - (3dt + 5st)*ct/192 - dt/192 + 7st/96
+        local full_dt = dt
+
+	dt = 1/full_dt
+	v  .= α .* v .+ β * v.^3
+	$push_t
+	dt = 1/full_dt
+	e  .= μ * e .+ ν * x.^3
+	$push_v
+	dt = 1/full_dt
+	v  .= γ * v.^3
+	$push_t
+	dt = 1/full_dt
+	e  .= μ * e .+ ν * x.^3
+	$push_v
+	dt = 1/full_dt
+	v  .= α .* v .+ β * v.^3
+	$push_t
+
+
     end)
 end
