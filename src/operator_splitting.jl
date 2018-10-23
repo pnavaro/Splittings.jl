@@ -173,22 +173,18 @@ macro SuperMagic(push_t, push_v)
 	local ν  = - (2dt + 3st) * ct^2 / 192 - (3dt + 5st)*ct/192 - dt/192 + 7st/96
         local full_dt = dt
 
-	dt = 1/full_dt
+	dt  = 1.0
 	v  .= α .* v .+ β * v.^3
 	$push_t
-	dt = 1/full_dt
 	e  .= μ * e .+ ν * x.^3
 	$push_v
-	dt = 1/full_dt
 	v  .= γ * v.^3
 	$push_t
-	dt = 1/full_dt
 	e  .= μ * e .+ ν * x.^3
 	$push_v
-	dt = 1/full_dt
 	v  .= α .* v .+ β * v.^3
 	$push_t
-
+        dt  = full_dt
 
     end)
 end
