@@ -135,12 +135,12 @@ function advection!(f      :: Array{Float64,2},
     p = interp.p
 
     if (axis == 1)
-        @simd for (j,v) in enumerate(v)
+        @simd for j in eachindex(v)
             alpha = v[j] * dt
             @inbounds f[:,j] .= interpolate(p, f[:,j], mesh1.step, alpha)
         end
     else
-        @simd for (i,v1) in enumerate(v)
+        @simd for i in eachindex(v)
             alpha = v[i] * dt
             @inbounds f[i,:] .= interpolate(p, f[i,:], mesh2.step, alpha)
         end
