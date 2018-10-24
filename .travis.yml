@@ -1,10 +1,8 @@
 language: julia
 
-matrix:
-  include:
-  - os: osx
-    julia: 1.0
-    osx_image: xcode10.0
+os: osx
+julia: 1.0
+osx_image: xcode10
 
 before_install:
   - brew update
