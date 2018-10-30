@@ -13,7 +13,7 @@ This package is no longer active. I am moving everything to [JuliaVlasov organiz
 
 ~~~
 julia> using Pkg
-julia> Pkg.clone("https://github.com/pnavaro/Splittings.jl.git")
+julia> Pkg.add("https://github.com/pnavaro/Splittings.jl.git")
 julia> using Splittings
 julia>
 ~~~
