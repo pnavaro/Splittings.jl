@@ -41,6 +41,4 @@ makedocs(modules=[Splittings],
 deploydocs(
     deps   = Deps.pip("mkdocs", "python-markdown-math"),
     repo   = "github.com/pnavaro/Splittings.jl.git",
-    julia  = "1.0",
-    osname = "osx"
  )
