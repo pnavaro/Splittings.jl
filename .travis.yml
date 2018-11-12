@@ -6,8 +6,7 @@ osx_image: xcode10
 
 before_install:
   - brew update
-  - brew install ffmpeg
-  - rm '/usr/local/include/c++' && brew install gcc@8
+  - brew install ffmpeg gcc@8
 
 notifications:
   email: false
