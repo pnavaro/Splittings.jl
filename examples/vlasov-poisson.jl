@@ -16,7 +16,6 @@
 # 
 
 using Plots, LinearAlgebra
-pyplot()
 import Splittings:UniformMesh, BSpline
 import Splittings:@Strang
 import Splittings

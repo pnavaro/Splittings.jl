@@ -11,7 +11,6 @@
 import Splittings: advection!, UniformMesh
 import Splittings: @Magic, CubicSpline
 using Plots
-pyplot()
 
 #------------------------------------------------------------------------------
 

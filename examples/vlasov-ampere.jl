@@ -31,7 +31,6 @@
 import Splittings: advection!, Ampere, UniformMesh
 import Splittings: @Strang, compute_rho, compute_e
 using Plots, LinearAlgebra
-pyplot()
 
 #-
 

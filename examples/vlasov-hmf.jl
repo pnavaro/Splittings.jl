@@ -6,7 +6,6 @@
 using LinearAlgebra, QuadGK, Roots, FFTW
 using Splittings
 using Plots
-pyplot()
 
 #------------------------------------------------------------------------------
 

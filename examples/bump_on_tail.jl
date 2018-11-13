@@ -10,8 +10,6 @@ import Splittings: CubicSpline, @Strang
 using Plots
 using LaTeXStrings
 
-pyplot()
-
 #------------------------------------------------------------------------------
 
 function push_t!( f, mesh1, v, dt )
