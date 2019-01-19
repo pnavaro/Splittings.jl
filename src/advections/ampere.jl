@@ -21,12 +21,12 @@ struct Ampere end
 """
 function advection!( f     :: Array{Complex{Float64},2}, 
                      fᵀ    :: Array{Complex{Float64},2},
-		         mesh1 :: UniformMesh, 
-		         mesh2 :: UniformMesh, 
-		         e     :: Vector{Complex{Float64}}, 
-		         dt    :: Float64,
-	               type  :: Ampere, 
-		         axis  :: Int64 )
+		             mesh1 :: UniformMesh, 
+		             mesh2 :: UniformMesh, 
+		             e     :: Vector{Complex{Float64}}, 
+		             dt    :: Float64,
+                     atype :: Ampere, 
+		             axis  :: Int64 )
 
     @assert ( axis == 1 || axis == 2 )
 
